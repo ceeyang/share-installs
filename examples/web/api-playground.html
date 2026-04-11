@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Share Installs — API Playground</title>
+  <meta name="description" content="Interactive API playground for the share-installs backend." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-sidebar: #0f1323;
+      --bg-card: rgba(17, 24, 39, 0.72);
+      --border: rgba(99, 102, 241, 0.12);
+      --accent: #6366f1;
+      --accent-light: #a78bfa;
+      --success: #34d399;
+      --error: #f87171;
+      --info: #60a5fa;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px;
+    }
+
+    body { font-family: var(--font-sans); background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: 260px; min-height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+      padding: 24px 0; flex-shrink: 0; overflow-y: auto;
+    }
+    .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .sidebar-logo { font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--text-primary), var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .sidebar-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .sidebar-group { margin-bottom: 8px; }
+    .sidebar-group-title { padding: 8px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer;
+      transition: background 0.15s, color 0.15s; font-size: 13px; color: var(--text-secondary); border-left: 3px solid transparent;
+    }
+    .sidebar-item:hover { background: rgba(99,102,241,.06); color: var(--text-primary); }
+    .sidebar-item.active { background: rgba(99,102,241,.1); color: var(--accent-light); border-left-color: var(--accent); }
+
+    .method-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; min-width: 36px; text-align: center; }
+    .method-get { background: rgba(96,165,250,.15); color: var(--info); }
+    .method-post { background: rgba(52,211,153,.15); color: var(--success); }
+    .method-delete { background: rgba(248,113,113,.15); color: var(--error); }
+
+    .main { flex: 1; padding: 32px 40px; overflow-y: auto; max-height: 100vh; }
+    .endpoint-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .endpoint-desc { color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+
+    .request-section { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(15,23,42,.5); border-bottom: 1px solid var(--border); }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+    .url-bar { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+    .url-method { font-family: var(--font-mono); font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 6px; flex-shrink: 0; }
+    .url-input { flex: 1; padding: 8px 12px; background: rgba(15,23,42,.6); border: 1px solid rgba(99,102,241,.15); border-radius: 6px; color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; outline: none; }
+    .url-input:focus { border-color: var(--accent); }
+    .request-body { padding: 16px 20px; }
+    .request-body textarea { width: 100%; min-height: 180px; padding: 14px; background: #0d1117; border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; line-height: 1.6; resize: vertical; outline: none; }
+    .request-body textarea:focus { border-color: var(--accent); }
+
+    .btn-send { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: linear-gradient(135deg, var(--accent), #8b5cf6); color: #fff; border: none; border-radius: 8px; font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 16px rgba(99,102,241,.25); }
+    .btn-send:hover { box-shadow: 0 6px 24px rgba(99,102,241,.4); transform: translateY(-1px); }
+    .btn-send:active { transform: scale(0.97); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+    .response-section { background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .response-meta { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: rgba(15,23,42,.5); }
+    .response-status { font-family: var(--font-mono); font-size: 14px; font-weight: 700; padding: 4px 12px; border-radius: 6px; }
+    .status-2xx { background: rgba(52,211,153,.15); color: var(--success); }
+    .status-4xx { background: rgba(248,113,113,.15); color: var(--error); }
+    .status-5xx { background: rgba(248,113,113,.2); color: var(--error); }
+    .response-time { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+    .response-body { padding: 16px 20px; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; max-height: 500px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+    .response-placeholder { padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+    .json-key { color: #93c5fd; } .json-str { color: #86efac; } .json-num { color: #fbbf24; } .json-bool { color: #f472b6; } .json-null { color: var(--text-muted); }
+
+    .config-bar { display: flex; align-items: center; gap: 12px; padding: 0 20px 20px; }
+    .config-bar label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .config-bar input { flex: 1; padding: 6px 10px; background: rgba(15,23,42,.6); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; outline: none; }
+    .config-bar input:focus { border-color: var(--accent); }
+
+    @media (max-width: 900px) { body { flex-direction: column; } .sidebar { width: 100%; min-height: auto; max-height: 200px; } .main { padding: 20px; max-height: none; } }
+  </style>
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">⚡ API Playground</div>
+      <div class="sidebar-sub">share-installs — only fingerprints</div>
+    </div>
+    <div class="config-bar">
+      <label>Base URL</label>
+      <input type="text" id="baseUrl" value="http://localhost:6066" />
+    </div>
+    <div class="config-bar">
+      <label>Auth</label>
+      <input type="text" id="authToken" placeholder="Bearer sk_live_... (optional)" />
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">System</div>
+      <div class="sidebar-item" data-endpoint="health" onclick="selectEndpoint('health')">
+        <span class="method-badge method-get">GET</span> /health
+      </div>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Core</div>
+      <div class="sidebar-item" data-endpoint="trackClick" onclick="selectEndpoint('trackClick')">
+        <span class="method-badge method-post">POST</span> /v1/clicks
+      </div>
+      <div class="sidebar-item" data-endpoint="resolve" onclick="selectEndpoint('resolve')">
+        <span class="method-badge method-post">POST</span> /v1/resolutions
+      </div>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-title">Admin (SaaS)</div>
+      <div class="sidebar-item" data-endpoint="createProject" onclick="selectEndpoint('createProject')">
+        <span class="method-badge method-post">POST</span> /v1/projects
+      </div>
+      <div class="sidebar-item" data-endpoint="listProjects" onclick="selectEndpoint('listProjects')">
+        <span class="method-badge method-get">GET</span> /v1/projects
+      </div>
+    </div>
+  </nav>
+
+  <main class="main" id="mainPanel">
+    <div style="text-align:center; padding:80px 0; color:var(--text-muted);">
+      <div style="font-size:48px; margin-bottom:16px;">⚡</div>
+      <div style="font-size:18px; font-weight:600; color:var(--text-secondary);">Select an endpoint</div>
+      <div style="margin-top:8px;">Choose an API endpoint from the sidebar.</div>
+    </div>
+  </main>
+
+  <script>
+    const ENDPOINTS = {
+      health: {
+        title: 'Health Check',
+        desc: 'Returns server status and deployment mode. No authentication required.',
+        method: 'GET', path: '/health', body: null,
+      },
+      trackClick: {
+        title: 'Track Click (Web SDK)',
+        desc: 'Called by the Web SDK on your landing page. Records browser fingerprint + your invite code. Returns an eventId.',
+        method: 'POST', path: '/v1/clicks',
+        body: {
+          inviteCode: 'ABC12345',
+          customData: { campaign: 'summer2026', discount: 20 },
+          fingerprint: {
+            canvas: 'a1b2c3d4',
+            webgl: '0011aabb',
+            audio: '8899eeff',
+            screen: { w: 1440, h: 900, dpr: 2, depth: 24 },
+            hardware: { cores: 8, memory: 16 },
+            languages: ['en-US', 'en'],
+            timezone: 'Asia/Shanghai',
+            touchPoints: 0,
+            ua: navigator.userAgent,
+          },
+          referrer: 'https://twitter.com/',
+        },
+      },
+      resolve: {
+        title: 'Resolve Invite (Mobile SDK)',
+        desc: 'Called by the iOS/Android SDK on first app launch. Sends device signals → backend returns matched invite code + customData.',
+        method: 'POST', path: '/v1/resolutions',
+        body: {
+          channel: 'ios',
+          fingerprint: {
+            osVersion: '17.2',
+            screen: { w: 390, h: 844, scale: 3 },
+            languages: ['en-US'],
+            timezone: 'Asia/Shanghai',
+            networkType: 'wifi',
+            diskBucket: '256GB',
+          },
+        },
+      },
+      createProject: {
+        title: 'Create Project (SaaS only)',
+        desc: 'Creates a new tenant project. Requires ADMIN_SECRET header. Only available when MULTI_TENANT=true.',
+        method: 'POST', path: '/v1/projects',
+        body: { name: 'My App' },
+      },
+      listProjects: {
+        title: 'List Projects (SaaS only)',
+        desc: 'Returns all projects. Requires ADMIN_SECRET header.',
+        method: 'GET', path: '/v1/projects', body: null,
+      },
+    };
+
+    let currentEndpoint = null;
+
+    function selectEndpoint(key) {
+      currentEndpoint = key;
+      const ep = ENDPOINTS[key];
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.toggle('active', el.dataset.endpoint === key));
+      const methodClasses = { GET: 'method-get', POST: 'method-post', DELETE: 'method-delete' };
+      const main = document.getElementById('mainPanel');
+      main.innerHTML = `
+        <div class="endpoint-title">${ep.title}</div>
+        <div class="endpoint-desc">${ep.desc}</div>
+        <div class="request-section">
+          <div class="section-header">
+            <div class="section-title">Request</div>
+            <button class="btn-send" id="btnSend" onclick="sendRequest()">▸ Send</button>
+          </div>
+          <div class="url-bar">
+            <div class="url-method ${methodClasses[ep.method]}">${ep.method}</div>
+            <input type="text" class="url-input" id="requestPath" value="${ep.path}" />
+          </div>
+          ${ep.body !== null ? `<div class="request-body"><textarea id="requestBody">${JSON.stringify(ep.body, null, 2)}</textarea></div>` : ''}
+        </div>
+        <div class="response-section" id="responseSection">
+          <div class="response-placeholder">Response will appear here after sending.</div>
+        </div>`;
+    }
+
+    async function sendRequest() {
+      if (!currentEndpoint) return;
+      const ep = ENDPOINTS[currentEndpoint];
+      const baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');
+      const path = document.getElementById('requestPath').value;
+      const url = baseUrl + path;
+      const auth = document.getElementById('authToken').value.trim();
+      const btn = document.getElementById('btnSend');
+      btn.disabled = true; btn.textContent = '⏳ Sending…';
+      const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-SDK-Platform': 'api-playground' };
+      if (auth) headers['Authorization'] = auth.startsWith('Bearer ') ? auth : `Bearer ${auth}`;
+      let body = undefined;
+      if (ep.body !== null) { const ta = document.getElementById('requestBody'); if (ta) body = ta.value; }
+      const startTime = performance.now();
+      try {
+        const res = await fetch(url, { method: ep.method, headers, body: body || undefined });
+        const elapsed = Math.round(performance.now() - startTime);
+        let data; try { data = await res.json(); } catch(_) { data = { _raw: await res.text() }; }
+        renderResponse(res.status, elapsed, data);
+      } catch (err) {
+        renderResponse(0, Math.round(performance.now() - startTime), { error: err.message });
+      } finally { btn.disabled = false; btn.textContent = '▸ Send'; }
+    }
+
+    function renderResponse(status, elapsed, data) {
+      const section = document.getElementById('responseSection');
+      const cls = status >= 500 ? 'status-5xx' : status >= 400 ? 'status-4xx' : 'status-2xx';
+      section.innerHTML = `
+        <div class="response-meta">
+          <div class="response-status ${cls}">${status || 'ERR'}</div>
+          <div class="response-time">${elapsed}ms</div>
+        </div>
+        <div class="response-body">${syntaxHighlight(JSON.stringify(data, null, 2))}</div>`;
+    }
+
+    function syntaxHighlight(json) {
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false)\b|\bnull\b|-?\d+(\.\d+)?([eE][+-]?\d+)?)/g, (m) => {
+        let c = 'json-num';
+        if (/^"/.test(m)) c = /:$/.test(m) ? 'json-key' : 'json-str';
+        else if (/true|false/.test(m)) c = 'json-bool';
+        else if (/null/.test(m)) c = 'json-null';
+        return `<span class="${c}">${m}</span>`;
+      });
+    }
+
+    selectEndpoint('health');
+  </script>
+</body>
+</html>

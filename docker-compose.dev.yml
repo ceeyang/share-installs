@@ -1,0 +1,19 @@
+# share-installs – Dev override (hot-reload)
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: development
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      CORS_ORIGINS: "*"
+    volumes:
+      # Mount source for hot-reload (ts-node-dev)
+      - ./backend/src:/app/src:ro
+      - ./backend/prisma:/app/prisma:ro
+    command: npm run dev

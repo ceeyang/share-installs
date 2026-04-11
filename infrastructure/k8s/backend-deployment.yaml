@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: share-installs-backend
+  namespace: share-installs
+  labels:
+    app: share-installs-backend
+    version: "1.0.0"
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: share-installs-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: share-installs-backend
+        version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: share-installs-backend-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: backend
+          image: YOUR_ECR_URL/share-installs/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: share-installs-backend-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: share-installs-backend-secrets
+                  key: redis-url
+            # Optional – leave unset for open access on private networks
+            - name: ADMIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: share-installs-backend-secrets
+                  key: admin-secret
+                  optional: true
+            - name: INVITE_LINK_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: invite-link-base-url
+            - name: IOS_APP_STORE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: ios-app-store-url
+            - name: ANDROID_PLAY_STORE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: android-play-store-url
+            - name: IOS_URI_SCHEME
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: ios-uri-scheme
+            - name: ANDROID_URI_SCHEME
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: android-uri-scheme
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: share-installs-backend-config
+                  key: cors-origins
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values: [share-installs-backend]
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: share-installs-backend
+  namespace: share-installs
+spec:
+  selector:
+    app: share-installs-backend
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: http
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: share-installs-backend-hpa
+  namespace: share-installs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: share-installs-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

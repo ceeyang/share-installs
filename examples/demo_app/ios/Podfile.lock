@@ -1,0 +1,21 @@
+PODS:
+  - Flutter (1.0.0)
+  - ShareInstalls (1.0.0)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - ShareInstalls (from `../../../sdk/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  ShareInstalls:
+    :path: "../../../sdk/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  ShareInstalls: 3ebc37ddbcbd39760e6def4e42f865d9cf31de29
+
+PODFILE CHECKSUM: 1bd97fbfe9a4b753aeb1a1b95cdaf08af1039230
+
+COCOAPODS: 1.16.2

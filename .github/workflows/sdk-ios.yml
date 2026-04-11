@@ -1,0 +1,83 @@
+name: iOS SDK CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sdk/ios/**'
+      - '.github/workflows/sdk-ios.yml'
+    tags:
+      - 'sdk-ios-v*'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'sdk/ios/**'
+      - '.github/workflows/sdk-ios.yml'
+
+jobs:
+  lint-and-test:
+    name: Lint & Test
+    runs-on: macos-14  # Apple Silicon, Xcode 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Resolve Swift Package dependencies
+        working-directory: sdk/ios
+        run: swift package resolve
+
+      - name: Build SDK
+        working-directory: sdk/ios
+        run: |
+          swift build \
+            -c release \
+            --arch arm64 \
+            --arch x86_64
+
+      - name: Run unit tests
+        working-directory: sdk/ios
+        run: |
+          swift test \
+            --parallel \
+            2>&1 | tee test-output.txt
+          # Fail if any test failed
+          grep -qv "FAILED" test-output.txt || exit 1
+
+  release-tag:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: startsWith(github.ref, 'refs/tags/sdk-ios-v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#sdk-ios-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "iOS SDK v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## iOS SDK v${{ steps.version.outputs.VERSION }}
+
+            ### Swift Package Manager
+
+            Add to your `Package.swift`:
+            ```swift
+            .package(
+                url: "https://github.com/${{ github.repository }}.git",
+                from: "${{ steps.version.outputs.VERSION }}"
+            )
+            ```
+
+            Or add via Xcode: **File → Add Package Dependencies** and enter the repo URL.
+          draft: false
+          prerelease: false

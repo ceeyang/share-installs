@@ -1,0 +1,156 @@
+// share-installs – Prisma Schema
+//
+// 两种部署模式：
+//   自部署 (MULTI_TENANT=false): 用户自己部署，传入自有域名，无需 API key。
+//   SaaS   (MULTI_TENANT=true):  使用我们的托管服务，需要 API key，数据按项目隔离。
+//
+// 核心职责：
+//   1. Web SDK  → POST /v1/clicks      收集浏览器指纹
+//   2. 移动 SDK  → POST /v1/resolutions 匹配指纹，返回 inviteCode
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---- Enums ----
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+  UNKNOWN
+}
+
+// ---- Multi-tenant models (only used when MULTI_TENANT=true) ----
+
+/// A tenant project. In multi-tenant mode each API consumer has one project.
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  apiKeys     ApiKey[]
+  clickEvents ClickEvent[]
+  conversions Conversion[]
+
+  @@map("projects")
+}
+
+/// API key belonging to a project. Stored as a SHA-256 hash; plaintext shown once.
+model ApiKey {
+  id        String    @id @default(cuid())
+  projectId String    @map("project_id")
+  name      String
+  /// SHA-256 hash of the raw key – never store plaintext.
+  keyHash   String    @unique @map("key_hash")
+  /// First 12 chars of the raw key for display (e.g. "sk_live_abcd").
+  prefix    String
+  createdAt DateTime  @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  project   Project   @relation(fields: [projectId], references: [id])
+
+  @@index([prefix])
+  @@map("api_keys")
+}
+
+// ---- Core models ----
+
+/// Records a click event when a user visits the invite landing page.
+/// The device fingerprint stored here is matched against mobile SDK signals
+/// to perform deferred deep linking.
+///
+/// inviteCode is owned by the caller's system — we store it as-is and return
+/// it to the mobile SDK on a successful match.
+model ClickEvent {
+  id          String         @id @default(cuid())
+  /// Project scope (null in self-hosted mode).
+  projectId   String?        @map("project_id")
+
+  // --- Invite identifier (managed by the caller's system) ---
+  /// The invite code passed in by the caller. Stored verbatim; never validated.
+  inviteCode  String         @map("invite_code")
+  /// Arbitrary JSON data passed at click time; returned to the mobile SDK on match.
+  customData  Json?          @map("custom_data")
+
+  // --- Fingerprint hash (used for fast exact-match lookup) ---
+  /// SHA-256 hash of normalized device signals.
+  fingerprint String
+
+  // --- Network ---
+  ipAddress   String?        @map("ip_address")
+
+  // --- Browser / UA ---
+  userAgent   String?        @map("user_agent")
+  /// JSON-encoded string array, e.g. ["zh-CN","zh","en"].
+  languages   String?
+  timezone    String?
+  referrer    String?
+
+  // --- Screen ---
+  screenWidth  Int?          @map("screen_width")
+  screenHeight Int?          @map("screen_height")
+  pixelRatio   Float?        @map("pixel_ratio")
+  colorDepth   Int?          @map("color_depth")
+
+  // --- Hardware ---
+  touchPoints         Int?   @map("touch_points")
+  hardwareConcurrency Int?   @map("hardware_concurrency")
+  /// Approximate device memory in GB (0.25 | 0.5 | 1 | 2 | 4 | 8).
+  deviceMemory        Float? @map("device_memory")
+
+  // --- Browser fingerprint hashes (web-side only) ---
+  canvasHash  String?        @map("canvas_hash")
+  webglHash   String?        @map("webgl_hash")
+  audioHash   String?        @map("audio_hash")
+
+  // --- Network info ---
+  connectionType String?     @map("connection_type")
+
+  // --- Derived ---
+  platform    DevicePlatform @default(UNKNOWN)
+  osVersion   String?        @map("os_version")
+
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  project     Project?       @relation(fields: [projectId], references: [id])
+  conversions Conversion[]
+
+  @@index([fingerprint])
+  @@index([inviteCode])
+  @@index([createdAt])
+  @@index([projectId])
+  @@map("click_events")
+}
+
+/// Records a successful conversion: a mobile install attributed to a click event.
+model Conversion {
+  id           String         @id @default(cuid())
+  projectId    String?        @map("project_id")
+  /// The invite code that was matched.
+  inviteCode   String         @map("invite_code")
+  clickEventId String?        @map("click_event_id")
+  platform     DevicePlatform
+  /// How the invite was resolved: "clipboard" | "exact" | "fuzzy".
+  matchChannel String?        @map("match_channel")
+  /// Floating-point confidence score of the fingerprint match (0.0–1.0).
+  confidence   Float?
+  /// Raw JSON snapshot of the native SDK signals used in matching.
+  nativeSignals Json?         @map("native_signals")
+  installedAt  DateTime?      @map("installed_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  project      Project?       @relation(fields: [projectId], references: [id])
+  clickEvent   ClickEvent?    @relation(fields: [clickEventId], references: [id])
+
+  @@index([clickEventId])
+  @@index([inviteCode])
+  @@index([projectId])
+  @@map("conversions")
+}

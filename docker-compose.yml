@@ -1,0 +1,90 @@
+# share-installs – Docker Compose
+#
+# Quick start (test/prod-like):
+#   docker compose up --build
+#
+# Development (hot-reload):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# Services:
+#   backend  :3000  – REST API
+#   db       :5432  – PostgreSQL 16
+#   redis    :6379  – Redis 7
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: production
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/share_installs
+      REDIS_URL: redis://redis:6379
+      REDIS_KEY_PREFIX: "si:"
+      MULTI_TENANT: ${MULTI_TENANT:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      ADMIN_SECRET: ${ADMIN_SECRET:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      FINGERPRINT_MATCH_THRESHOLD: ${FINGERPRINT_MATCH_THRESHOLD:-0.75}
+      FINGERPRINT_MATCH_TTL_HOURS: ${FINGERPRINT_MATCH_TTL_HOURS:-72}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - share-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: share_installs
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d share_installs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - share-net
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - share-net
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  share-net:
+    driver: bridge
