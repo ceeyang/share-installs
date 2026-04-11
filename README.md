@@ -98,14 +98,11 @@ Environment variables can be set directly in `docker-compose.yml` or via a `.env
 
 ```env
 # .env (project root, loaded by docker compose automatically)
-INVITE_LINK_BASE_URL=https://yourapp.com
-IOS_APP_STORE_URL=https://apps.apple.com/app/id123456789
-ANDROID_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=com.yourapp
-IOS_URI_SCHEME=yourapp
-ANDROID_URI_SCHEME=yourapp
-ADMIN_SECRET=                  # leave empty for open access
+ADMIN_SECRET=your-secret-here   # protects /v1/projects endpoints; leave empty for open access
 CORS_ORIGINS=https://yourapp.com
 ```
+
+All other variables have sensible defaults. See [Environment Variables Reference](#environment-variables-reference) for the full list.
 
 ### 2. Development Mode (Hot-reload)
 
