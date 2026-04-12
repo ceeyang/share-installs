@@ -39,16 +39,11 @@ jobs:
 
       - name: Run unit tests
         working-directory: sdk/ios
-        run: |
-          swift test \
-            --parallel \
-            2>&1 | tee test-output.txt
-          # Fail if any test failed
-          grep -qv "FAILED" test-output.txt || exit 1
+        run: swift test --parallel
 
-  release-tag:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
+  release:
+    name: GitHub Release + CocoaPods + SPM
+    runs-on: macos-14
     needs: lint-and-test
     if: startsWith(github.ref, 'refs/tags/sdk-ios-v')
     permissions:
@@ -61,6 +56,15 @@ jobs:
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#sdk-ios-v}" >> "$GITHUB_OUTPUT"
 
+      - name: Update podspec version
+        working-directory: sdk/ios
+        run: |
+          sed -i '' "s/s.version *= *'[^']*'/s.version = '${{ steps.version.outputs.VERSION }}'/" ShareInstalls.podspec
+
+      - name: Validate podspec
+        working-directory: sdk/ios
+        run: pod spec lint ShareInstalls.podspec --allow-warnings
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -69,15 +73,27 @@ jobs:
             ## iOS SDK v${{ steps.version.outputs.VERSION }}
 
             ### Swift Package Manager
-
-            Add to your `Package.swift`:
+            Add via Xcode → **File → Add Package Dependencies**:
+            ```
+            https://github.com/share-installs/share-installs
+            ```
+            Or in `Package.swift`:
             ```swift
             .package(
-                url: "https://github.com/${{ github.repository }}.git",
+                url: "https://github.com/share-installs/share-installs.git",
                 from: "${{ steps.version.outputs.VERSION }}"
             )
             ```
 
-            Or add via Xcode: **File → Add Package Dependencies** and enter the repo URL.
+            ### CocoaPods
+            ```ruby
+            pod 'ShareInstalls', '~> ${{ steps.version.outputs.VERSION }}'
+            ```
           draft: false
           prerelease: false
+
+      - name: Publish to CocoaPods Trunk
+        working-directory: sdk/ios
+        run: pod trunk push ShareInstalls.podspec --allow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}

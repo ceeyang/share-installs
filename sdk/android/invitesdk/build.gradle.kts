@@ -1,8 +1,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android") version "1.9.22"
-    id("maven-publish")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
 android {
@@ -15,7 +15,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "SDK_VERSION", "\"1.0.0\"")
+        buildConfigField("String", "SDK_VERSION", "\"${System.getenv("SDK_VERSION") ?: "1.0.0"}\"")
     }
 
     buildTypes {
@@ -51,21 +51,13 @@ android {
 }
 
 dependencies {
-    // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-    // Kotlinx Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-
-    // OkHttp for networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-    // Android
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-process:2.7.0")
 
-    // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("io.mockk:mockk:1.13.8")
@@ -74,37 +66,49 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.share-installs"
-            artifactId = "sdk-android"
-            version = System.getenv("SDK_VERSION") ?: "1.0.0"
+// Maven Central publishing via vanniktech plugin
+// Reads coordinates from gradle.properties or environment variables
+mavenPublishing {
+    coordinates(
+        groupId = "io.github.share-installs",
+        artifactId = "sdk-android",
+        version = System.getenv("SDK_VERSION") ?: "1.0.0"
+    )
 
-            afterEvaluate {
-                from(components["release"])
+    pom {
+        name.set("share-installs Android SDK")
+        description.set("Android SDK for share-installs – deferred deep link invite attribution")
+        url.set("https://github.com/share-installs/share-installs")
+        inceptionYear.set("2026")
+
+        licenses {
+            license {
+                name.set("Apache License 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0")
             }
+        }
 
-            pom {
-                name.set("share-installs Android SDK")
-                description.set("Android SDK for share-installs – deferred deep link invite attribution")
-                url.set("https://github.com/share-installs/share-installs")
-
-                licenses {
-                    license {
-                        name.set("Apache License 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:github.com/share-installs/share-installs.git")
-                    url.set("https://github.com/share-installs/share-installs")
-                }
+        developers {
+            developer {
+                id.set("share-installs")
+                name.set("share-installs")
+                url.set("https://github.com/share-installs")
             }
+        }
+
+        scm {
+            url.set("https://github.com/share-installs/share-installs")
+            connection.set("scm:git:github.com/share-installs/share-installs.git")
+            developerConnection.set("scm:git:ssh://github.com/share-installs/share-installs.git")
         }
     }
 
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+}
+
+// GitHub Packages — secondary mirror (used by sdk-android.yml)
+publishing {
     repositories {
         maven {
             name = "GitHubPackages"

@@ -18,12 +18,12 @@ Pod::Spec.new do |s|
     - Swift 5.9+, iOS 15+
   DESC
 
-  s.homepage         = 'https://github.com/yourorg/share-installs'
-  s.license          = { :type => 'Apache-2.0', :file => '../../LICENSE' }
-  s.author           = { 'share-installs' => 'hello@yourorg.com' }
+  s.homepage         = 'https://github.com/share-installs/share-installs'
+  s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
+  s.author           = { 'share-installs' => 'hello@share-installs.dev' }
   s.source           = {
-    :git => 'https://github.com/yourorg/share-installs.git',
-    :tag => "ios/v#{s.version}"
+    :git => 'https://github.com/share-installs/share-installs.git',
+    :tag => "sdk-ios-v#{s.version}"
   }
 
   s.ios.deployment_target = '15.0'
