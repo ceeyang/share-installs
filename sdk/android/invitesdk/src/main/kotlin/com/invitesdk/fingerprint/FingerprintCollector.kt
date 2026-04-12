@@ -159,12 +159,16 @@ internal class FingerprintCollector(private val context: Context) {
 
     /** Returns the maximum number of simultaneous touch points supported by the screen. */
     private fun getTouchPoints(): Int {
-        return context.packageManager
-            .getSystemAvailableFeatures()
-            .firstOrNull { it.name == "android.hardware.touchscreen.multitouch.jazzhand" }
-            ?.let { 5 }
-            ?: if (context.packageManager.hasSystemFeature("android.hardware.touchscreen.multitouch")) 2
-            else if (context.packageManager.hasSystemFeature("android.hardware.touchscreen")) 1
-            else 0
+        val pm = context.packageManager ?: return 0
+        return try {
+            pm.getSystemAvailableFeatures()
+                ?.firstOrNull { it.name == "android.hardware.touchscreen.multitouch.jazzhand" }
+                ?.let { 5 }
+                ?: if (pm.hasSystemFeature("android.hardware.touchscreen.multitouch")) 2
+                else if (pm.hasSystemFeature("android.hardware.touchscreen")) 1
+                else 0
+        } catch (_: Exception) {
+            0
+        }
     }
 }
