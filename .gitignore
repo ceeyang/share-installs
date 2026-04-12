@@ -219,6 +219,9 @@ xcuserdata/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,visualstudiocode,vuejs,xcode
 
+# Landing page (maintained in a separate repository)
+landing/
+
 # AI agent collaboration files (internal use only)
 .agent/
 .claude/
