@@ -71,6 +71,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Make gradlew executable
+        working-directory: sdk/android
+        run: chmod +x gradlew
+
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF_NAME#sdk-android-v}" >> "$GITHUB_OUTPUT"
