@@ -370,7 +370,7 @@ See [`docs/integration/ios.md`](docs/integration/ios.md) for full setup.
 
 Add dependency:
 ```kotlin
-implementation("com.share-installs:share-installs-sdk-android:1.0.0")
+implementation("com.share-installs:share-installs-sdk-android:0.0.1")
 ```
 
 Initialize in `Application.onCreate()`:

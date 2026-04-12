@@ -367,7 +367,7 @@ if let result = try await ShareInstallsSDK.shared.resolveDeferred() {
 
 添加依赖：
 ```kotlin
-implementation("com.share-installs:sdk-android:1.0.0")
+implementation("com.share-installs:sdk-android:0.0.1")
 ```
 
 在 `Application.onCreate()` 中初始化：
