@@ -29,8 +29,8 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
   s.swift_versions        = ['5.9']
 
-  # All source files under Sources/InviteSDK/
-  s.source_files = 'Sources/InviteSDK/**/*.swift'
+  # Paths are relative to the git repo root (monorepo layout: sdk/ios/ subdir)
+  s.source_files = 'sdk/ios/Sources/InviteSDK/**/*.swift'
 
   # No external dependencies – uses only system frameworks
   s.frameworks = 'Foundation', 'UIKit'
@@ -40,6 +40,6 @@ Pod::Spec.new do |s|
 
   # Exclude test targets from pod installation
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'Tests/InviteSDKTests/**/*.swift'
+    ts.source_files = 'sdk/ios/Tests/InviteSDKTests/**/*.swift'
   end
 end
