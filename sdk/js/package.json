@@ -46,7 +46,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/share-installs/share-installs.git",
+    "url": "https://github.com/ceeyang/share-installs.git",
     "directory": "sdk/js"
   },
   "devDependencies": {

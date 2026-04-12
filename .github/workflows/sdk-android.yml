@@ -111,7 +111,7 @@ jobs:
             ```
             Add to your `settings.gradle.kts`:
             ```kotlin
-            maven("https://maven.pkg.github.com/share-installs/share-installs") {
+            maven("https://maven.pkg.github.com/ceeyang/share-installs") {
                 credentials {
                     username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
                     password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")

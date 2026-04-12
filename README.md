@@ -60,7 +60,7 @@ The fastest way to run the full backend locally.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/share-installs/share-installs.git
+git clone https://github.com/ceeyang/share-installs.git
 cd share-installs
 
 # 2. (Optional) configure environment variables
@@ -342,7 +342,7 @@ await sdk.trackClick(inviteCode, {
 
 **Swift Package Manager** (Xcode → Add Package Dependencies):
 ```
-https://github.com/share-installs/share-installs
+https://github.com/ceeyang/share-installs
 ```
 
 Initialize in `AppDelegate` or `@main App`:

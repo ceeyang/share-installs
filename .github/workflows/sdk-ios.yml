@@ -75,12 +75,12 @@ jobs:
             ### Swift Package Manager
             Add via Xcode → **File → Add Package Dependencies**:
             ```
-            https://github.com/share-installs/share-installs
+            https://github.com/ceeyang/share-installs
             ```
             Or in `Package.swift`:
             ```swift
             .package(
-                url: "https://github.com/share-installs/share-installs.git",
+                url: "https://github.com/ceeyang/share-installs.git",
                 from: "${{ steps.version.outputs.VERSION }}"
             )
             ```

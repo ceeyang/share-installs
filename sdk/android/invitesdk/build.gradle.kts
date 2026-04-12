@@ -78,7 +78,7 @@ mavenPublishing {
     pom {
         name.set("share-installs Android SDK")
         description.set("Android SDK for share-installs – deferred deep link invite attribution")
-        url.set("https://github.com/share-installs/share-installs")
+        url.set("https://github.com/ceeyang/share-installs")
         inceptionYear.set("2026")
 
         licenses {
@@ -97,9 +97,9 @@ mavenPublishing {
         }
 
         scm {
-            url.set("https://github.com/share-installs/share-installs")
-            connection.set("scm:git:github.com/share-installs/share-installs.git")
-            developerConnection.set("scm:git:ssh://github.com/share-installs/share-installs.git")
+            url.set("https://github.com/ceeyang/share-installs")
+            connection.set("scm:git:github.com/ceeyang/share-installs.git")
+            developerConnection.set("scm:git:ssh://github.com/ceeyang/share-installs.git")
         }
     }
 
@@ -112,7 +112,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/share-installs/share-installs")
+            url = uri("https://maven.pkg.github.com/ceeyang/share-installs")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

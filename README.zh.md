@@ -60,7 +60,7 @@ share-installs/
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/share-installs/share-installs.git
+git clone https://github.com/ceeyang/share-installs.git
 cd share-installs
 
 # 2.（可选）配置环境变量，所有变量都有本地测试默认值
@@ -339,7 +339,7 @@ await sdk.trackClick(inviteCode, {
 
 **Swift Package Manager**（Xcode → Add Package Dependencies）：
 ```
-https://github.com/share-installs/share-installs
+https://github.com/ceeyang/share-installs
 ```
 
 在 `AppDelegate` 或 `@main App` 中初始化：
