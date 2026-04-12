@@ -106,16 +106,29 @@ internal class FingerprintCollector(private val context: Context) {
         }
     }
 
-    /** Returns "wifi", "cellular", or "none". Requires ACCESS_NETWORK_STATE. */
+    /** Returns "wifi", "cellular", "ethernet", "other", or "none". Requires ACCESS_NETWORK_STATE. */
     private fun getNetworkType(): String {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             ?: return "none"
+
+        // activeNetwork + getNetworkCapabilities require API 23+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            @Suppress("DEPRECATION")
+            val info = cm.activeNetworkInfo ?: return "none"
+            @Suppress("DEPRECATION")
+            return when (info.type) {
+                ConnectivityManager.TYPE_WIFI     -> "wifi"
+                ConnectivityManager.TYPE_MOBILE   -> "cellular"
+                ConnectivityManager.TYPE_ETHERNET -> "ethernet"
+                else -> "other"
+            }
+        }
 
         val network = cm.activeNetwork ?: return "none"
         val caps = cm.getNetworkCapabilities(network) ?: return "none"
 
         return when {
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+            caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)     -> "wifi"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
             caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
             else -> "other"

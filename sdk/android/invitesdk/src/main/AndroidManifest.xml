@@ -2,8 +2,7 @@
 <!--
   ~ Copyright 2024 share-installs Authors.
   -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.invitesdk">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Required for network-based deferred deep link attribution -->
     <uses-permission android:name="android.permission.INTERNET" />
