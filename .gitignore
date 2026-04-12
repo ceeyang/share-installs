@@ -218,3 +218,13 @@ xcuserdata/
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,visualstudiocode,vuejs,xcode
+
+# AI agent collaboration files (internal use only)
+.agent/
+.claude/
+AI_COLLAB_STATUS.md
+AI_WORK_LOG.md
+CLAUDE.md
+GEMINI.md
+GEMINI.md.cp
+COLLABORATION_PROTOCOL.md
