@@ -32,14 +32,17 @@ jobs:
       - name: Build SDK
         working-directory: sdk/ios
         run: |
-          swift build \
-            -c release \
-            --arch arm64 \
-            --arch x86_64
+          xcodebuild build \
+            -scheme InviteSDK \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -configuration Release
 
       - name: Run unit tests
         working-directory: sdk/ios
-        run: swift test --parallel
+        run: |
+          xcodebuild test \
+            -scheme InviteSDK \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest'
 
   release:
     name: GitHub Release + CocoaPods + SPM
