@@ -43,14 +43,12 @@ android {
         buildConfig = true
     }
 
-    /*
     publishing {
         singleVariant("release") {
             withSourcesJar()
             withJavadocJar()
         }
     }
-    */
 }
 
 dependencies {
@@ -71,7 +69,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
 
-/*
 // Maven Central publishing via vanniktech plugin
 // Reads coordinates from gradle.properties or environment variables
 mavenPublishing {
@@ -126,4 +123,3 @@ publishing {
         }
     }
 }
-*/

@@ -14,6 +14,7 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import com.invitesdk.BuildConfig
+import kotlin.math.roundToInt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Locale
@@ -69,9 +70,11 @@ internal class FingerprintCollector(private val context: Context) {
             osVersion = Build.VERSION.RELEASE ?: "unknown",
             apiLevel = Build.VERSION.SDK_INT,
             screen = ScreenInfo(
-                // Convert physical pixels → logical dp to match web CSS px (window.screen.width/height)
-                w = metrics?.let { if (it.density > 0) (it.widthPixels / it.density).toInt() else it.widthPixels } ?: 0,
-                h = metrics?.let { if (it.density > 0) (it.heightPixels / it.density).toInt() else it.heightPixels } ?: 0,
+                // Convert physical pixels → logical dp to match web CSS px (window.screen.width/height).
+                // Use roundToInt() to match Chrome's Math.round() behavior; .toInt() truncates and
+                // produces values that are 1px off, causing the exact-match fingerprint hash to miss.
+                w = metrics?.let { if (it.density > 0) (it.widthPixels / it.density).roundToInt() else it.widthPixels } ?: 0,
+                h = metrics?.let { if (it.density > 0) (it.heightPixels / it.density).roundToInt() else it.heightPixels } ?: 0,
                 density = metrics?.density ?: 0f,
             ),
             languages = getLanguages(),
