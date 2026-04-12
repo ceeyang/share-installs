@@ -3,7 +3,7 @@
 import Foundation
 
 /// The resolved invite information returned on successful deferred deep link resolution.
-public struct ResolvedInvite: Sendable {
+public struct ResolvedInvite: @unchecked Sendable {
     /// The raw invite code string.
     public let code: String
     /// Custom metadata set by the inviter when creating the invite.

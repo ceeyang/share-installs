@@ -28,6 +28,9 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '15.0'
   s.swift_versions        = ['5.9']
+  # Match the SPM target name so consumers use `import InviteSDK` with both
+  # CocoaPods and SPM without changing their import statements.
+  s.module_name           = 'InviteSDK'
 
   # Paths are relative to the git repo root (monorepo layout: sdk/ios/ subdir)
   s.source_files = 'sdk/ios/Sources/InviteSDK/**/*.swift'
