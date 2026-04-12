@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>share-installs — Deferred Deep Link Attribution</title>
-  <meta name="description" content="Open-source, self-hosted invite & deferred deep link attribution. When a user clicks your invite link and installs the app, the invite code resolves automatically on first launch." />
+  <title>share-installs — 延迟深度链接邀请归因</title>
+  <meta name="description" content="开源、自托管的邀请码 & 延迟深度链接归因系统。用户点击邀请链接并安装 App 后，首次启动时邀请码自动识别回填。" />
   <meta property="og:title" content="share-installs" />
-  <meta property="og:description" content="Open-source deferred deep link attribution. Self-hosted, no vendor lock-in." />
+  <meta property="og:description" content="开源延迟深度链接归因，自托管，无供应商锁定。" />
   <meta property="og:type" content="website" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +25,7 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       color: var(--text);
       background: var(--bg);
       line-height: 1.6;
@@ -252,110 +252,110 @@
 <nav>
   <a class="nav-logo" href="#">share-installs</a>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#quickstart">Quick Start</a>
+    <a href="#features">功能特性</a>
+    <a href="#quickstart">快速开始</a>
     <a href="https://github.com/share-installs/share-installs" target="_blank">GitHub</a>
-    <a class="lang-switch" href="index.zh.html">中文</a>
-    <a class="nav-btn" href="https://github.com/share-installs/share-installs" target="_blank">Get Started →</a>
+    <a class="lang-switch" href="index.html">English</a>
+    <a class="nav-btn" href="https://github.com/share-installs/share-installs" target="_blank">开始使用 →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="badge">Open Source · Self-Hosted · Apache 2.0</div>
-  <h1>Invite attribution that <span>just works</span></h1>
-  <p>When a user clicks your invite link and installs the app, the invite code resolves automatically on first launch — no clipboard tricks, no login required.</p>
+  <div class="badge">开源 · 自托管 · Apache 2.0</div>
+  <h1>邀请归因，<span>自动完成</span></h1>
+  <p>用户点击邀请链接并安装 App 后，首次启动时邀请码自动识别并回填——无需剪贴板授权，无需登录。</p>
   <div class="hero-actions">
-    <a class="btn-primary" href="https://github.com/share-installs/share-installs" target="_blank">View on GitHub</a>
-    <a class="btn-secondary" href="#quickstart">Quick Start</a>
+    <a class="btn-primary" href="https://github.com/share-installs/share-installs" target="_blank">在 GitHub 查看</a>
+    <a class="btn-secondary" href="#quickstart">快速开始</a>
   </div>
 </section>
 
 <!-- FLOW -->
 <section class="flow">
-  <h2>How it works</h2>
+  <h2>工作原理</h2>
   <div class="flow-steps">
     <div class="flow-step">
       <div class="step-icon">🔗</div>
-      <strong>Share link</strong>
-      <p>User A shares an invite link</p>
+      <strong>分享链接</strong>
+      <p>用户 A 分享邀请链接</p>
     </div>
     <div class="flow-step">
       <div class="step-icon">🌐</div>
-      <strong>Click</strong>
-      <p>User B visits your landing page</p>
+      <strong>点击</strong>
+      <p>用户 B 访问落地页</p>
     </div>
     <div class="flow-step">
       <div class="step-icon">📡</div>
-      <strong>Fingerprint</strong>
-      <p>JS SDK captures browser signals</p>
+      <strong>指纹采集</strong>
+      <p>JS SDK 上报浏览器信号</p>
     </div>
     <div class="flow-step">
       <div class="step-icon">📲</div>
-      <strong>Install</strong>
-      <p>User B installs & opens the app</p>
+      <strong>安装</strong>
+      <p>用户 B 安装并打开 App</p>
     </div>
     <div class="flow-step">
       <div class="step-icon">✅</div>
-      <strong>Match</strong>
-      <p>Invite code resolved automatically</p>
+      <strong>匹配</strong>
+      <p>邀请码自动识别回填</p>
     </div>
   </div>
 </section>
 
 <!-- FEATURES -->
 <section class="features" id="features">
-  <div class="section-label">Why share-installs</div>
-  <h2 class="section-title">Everything you need, nothing you don't</h2>
+  <div class="section-label">为什么选择 share-installs</div>
+  <h2 class="section-title">你需要的都有，不需要的一概没有</h2>
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">🏠</div>
-      <h3>Fully Self-Hosted</h3>
-      <p>Your data never leaves your infrastructure. Deploy with a single Docker command. No vendor lock-in, no monthly fees.</p>
+      <h3>完全自托管</h3>
+      <p>数据永不离开你的基础设施。一条 Docker 命令即可部署。无供应商锁定，无月费。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🔬</div>
-      <h3>Smart Fingerprinting</h3>
-      <p>Multi-signal matching across timezone, screen, IP subnet, language and hardware. Confidence scoring with configurable threshold.</p>
+      <h3>智能指纹匹配</h3>
+      <p>综合时区、屏幕、IP 子网、语言、硬件等多维信号进行匹配，置信度评分，阈值可配置。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">📦</div>
-      <h3>Native SDKs</h3>
-      <p>First-class Swift SDK for iOS, Kotlin SDK for Android, and a TypeScript Web SDK. All open source and ready to ship.</p>
+      <h3>原生 SDK</h3>
+      <p>提供 iOS Swift SDK、Android Kotlin SDK 和 TypeScript Web SDK，全部开源，开箱即用。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🎯</div>
-      <h3>Your Invite Codes</h3>
-      <p>Bring your own invite codes. We store and return them verbatim. Generation, validation, and usage limits are yours to own.</p>
+      <h3>邀请码由你掌控</h3>
+      <p>自带邀请码即可接入。我们原样存储并在匹配成功时返回。生成、校验、使用次数限制均由你的系统决定。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">⚡</div>
-      <h3>Three-Channel Resolution</h3>
-      <p>Exact hash match via Redis → Fuzzy scoring via PostgreSQL → Clipboard fallback for Android. Maximises match rate.</p>
+      <h3>三通道解析</h3>
+      <p>Redis 精确哈希匹配 → PostgreSQL 模糊评分匹配 → Android 剪贴板兜底，最大化匹配成功率。</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🔒</div>
-      <h3>Multi-Tenant Ready</h3>
-      <p>Run as a shared service with per-project API keys, or deploy in single-tenant mode with zero authentication overhead.</p>
+      <h3>多租户支持</h3>
+      <p>可作为共享服务运行（每项目独立 API key），也可单租户模式部署，零鉴权开销。</p>
     </div>
   </div>
 </section>
 
 <!-- SDK -->
 <section class="sdk-section">
-  <div class="section-label">SDKs</div>
-  <h2 class="section-title">Integrate in minutes</h2>
+  <div class="section-label">SDK</div>
+  <h2 class="section-title">几分钟内完成集成</h2>
   <div class="sdk-grid">
     <div class="sdk-card">
       <h3>🌐 JavaScript / Web</h3>
       <code>npm install @share-installs/js-sdk</code>
     </div>
     <div class="sdk-card">
-      <h3>🍎 iOS (Swift)</h3>
+      <h3>🍎 iOS（Swift）</h3>
       <code>Swift Package Manager</code>
     </div>
     <div class="sdk-card">
-      <h3>🤖 Android (Kotlin)</h3>
+      <h3>🤖 Android（Kotlin）</h3>
       <code>implementation("com.share-installs:sdk-android:1.0.0")</code>
     </div>
   </div>
@@ -363,40 +363,40 @@
 
 <!-- QUICKSTART -->
 <section class="quickstart" id="quickstart">
-  <div class="section-label">Quick Start</div>
-  <h2 class="section-title">Up and running in 60 seconds</h2>
+  <div class="section-label">快速开始</div>
+  <h2 class="section-title">60 秒内启动运行</h2>
 
-  <div class="code-block"><span class="comment"># Clone and start all services</span>
+  <div class="code-block"><span class="comment"># 克隆并启动所有服务</span>
 <span class="cmd">git clone</span> https://github.com/share-installs/share-installs.git
 <span class="cmd">cd</span> share-installs
 <span class="cmd">docker compose up</span> --build</div>
 
-  <div class="code-block"><span class="comment"># Verify the backend is running</span>
+  <div class="code-block"><span class="comment"># 验证后端正常运行</span>
 <span class="cmd">curl</span> http://localhost:3000/health
 <span class="comment">→ {"status":"ok","version":"1.0.0"}</span></div>
 
   <div style="text-align:center; margin-top: 1rem;">
-    <a class="btn-primary" href="https://github.com/share-installs/share-installs#quick-start--docker" target="_blank">Full documentation →</a>
+    <a class="btn-primary" href="https://github.com/share-installs/share-installs/blob/main/README.zh.md" target="_blank">查看完整文档 →</a>
   </div>
 </section>
 
 <!-- CTA -->
 <section class="cta">
-  <h2>Open source and free forever</h2>
-  <p>Self-host it, fork it, or contribute. Licensed under Apache 2.0.</p>
+  <h2>开源，永久免费</h2>
+  <p>自部署、Fork、或直接参与贡献。Apache 2.0 许可证。</p>
   <div class="hero-actions">
-    <a class="btn-primary" href="https://github.com/share-installs/share-installs" target="_blank">Star on GitHub ⭐</a>
-    <a class="btn-secondary" href="https://github.com/share-installs/share-installs/issues" target="_blank">Open an Issue</a>
+    <a class="btn-primary" href="https://github.com/share-installs/share-installs" target="_blank">在 GitHub 上 Star ⭐</a>
+    <a class="btn-secondary" href="https://github.com/share-installs/share-installs/issues" target="_blank">提交 Issue</a>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
   <p>
-    Built with ❤️ ·
+    用心构建 ❤️ ·
     <a href="https://github.com/share-installs/share-installs" target="_blank">GitHub</a> ·
-    <a href="https://github.com/share-installs/share-installs/blob/main/README.md" target="_blank">Docs</a> ·
-    Apache 2.0 License
+    <a href="https://github.com/share-installs/share-installs/blob/main/README.zh.md" target="_blank">中文文档</a> ·
+    Apache 2.0 许可证
   </p>
 </footer>
 
