@@ -85,7 +85,9 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
   // Development-only static assets
   if (config.NODE_ENV !== 'production') {
     const examplesPath = path.resolve(__dirname, '../../examples');
+    const sdkJsDistPath = path.resolve(__dirname, '../../sdk/js/dist');
     app.use('/examples', express.static(examplesPath));
+    app.use('/sdk/js/dist', express.static(sdkJsDistPath));
     logger.info(`Examples:  http://localhost:${config.PORT}/examples/web/fingerprint-demo.html`);
   }
 
