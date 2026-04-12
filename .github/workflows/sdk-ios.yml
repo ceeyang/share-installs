@@ -1,4 +1,4 @@
-name: iOS SDK CI/CD
+name: iOS SDK CI/CD # UI Restore Trigger
 
 on:
   push:

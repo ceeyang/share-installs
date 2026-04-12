@@ -1,4 +1,4 @@
-name: Android SDK CI/CD
+name: Android SDK CI/CD # UI Restore Trigger
 
 on:
   push:
