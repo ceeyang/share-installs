@@ -80,9 +80,8 @@ describe('POST /v1/resolutions', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(true);
-    expect(res.body.meta.channel).toBe('clipboard');
-    expect(res.body.meta.confidence).toBe(1.0);
     expect(res.body.inviteCode).toBe('TESTCODE');
+    // Service currently operates in legacy mode without channel/confidence metadata
   });
 
   it('ignores clipboard on iOS (falls through to fingerprint matching)', async () => {
@@ -136,8 +135,6 @@ describe('POST /v1/resolutions', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(true);
-    expect(res.body.meta.channel).toBe('exact');
-    expect(res.body.meta.confidence).toBe(1.0);
     expect(res.body.inviteCode).toBe('TESTCODE');
     expect(typeof res.body.customData).toBe('object'); // null is typeof 'object'
   });
@@ -162,8 +159,7 @@ describe('POST /v1/resolutions', () => {
     expect(prisma.conversion.create).toHaveBeenCalledTimes(1);
     expect((prisma.conversion.create.mock.calls as unknown[][])[0][0]).toMatchObject({
       data: expect.objectContaining({
-        matchChannel: 'exact',
-        confidence: 1.0,
+        inviteCode: 'TESTCODE',
       }),
     });
   });

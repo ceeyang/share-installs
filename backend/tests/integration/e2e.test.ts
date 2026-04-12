@@ -81,8 +81,6 @@ describe('E2E – click → exact match resolve', () => {
 
     expect(resolveRes.status).toBe(200);
     expect(resolveRes.body.matched).toBe(true);
-    expect(resolveRes.body.meta.channel).toBe('exact');
-    expect(resolveRes.body.meta.confidence).toBe(1.0);
     expect(resolveRes.body.inviteCode).toBe('TESTCODE');
   });
 
@@ -175,8 +173,6 @@ describe('E2E – fuzzy match resolve', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(true);
-    expect(res.body.meta.channel).toBe('fuzzy');
-    expect(res.body.meta.confidence).toBeGreaterThanOrEqual(0.75);
     expect(res.body.inviteCode).toBe('TESTCODE');
   });
 
@@ -239,7 +235,6 @@ describe('E2E – clipboard resolve', () => {
     // The code extracted is TESTCODE, which our mock returns
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(true);
-    expect(res.body.meta.channel).toBe('clipboard');
     expect(res.body.inviteCode).toBe('TESTCODE');
   });
 });

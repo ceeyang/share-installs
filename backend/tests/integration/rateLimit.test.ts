@@ -20,7 +20,7 @@ const validResolveBody = {
 describe('Rate limit headers', () => {
   it('includes standard RateLimit headers on every response', async () => {
     const {agent} = buildApp();
-    const res = await agent.get('/health');
+    const res = await agent.get('/health').set('X-Forwarded-For', '192.168.50.1');
 
     expect(res.headers['ratelimit-limit']).toBeDefined();
     expect(res.headers['ratelimit-remaining']).toBeDefined();
@@ -30,8 +30,9 @@ describe('Rate limit headers', () => {
 
   it('decrements remaining count on successive requests', async () => {
     const {agent} = buildApp();
-    const first = await agent.get('/health');
-    const second = await agent.get('/health');
+    const testIp = '192.168.50.2';
+    const first = await agent.get('/health').set('X-Forwarded-For', testIp);
+    const second = await agent.get('/health').set('X-Forwarded-For', testIp);
 
     const remaining1 = parseInt(first.headers['ratelimit-remaining'] as string, 10);
     const remaining2 = parseInt(second.headers['ratelimit-remaining'] as string, 10);
@@ -46,17 +47,22 @@ describe('Resolve endpoint rate limit (max 10 per minute)', () => {
     const redis = makeMockRedis();
     const {agent} = buildApp(prisma, redis);
 
+    const testIp = '192.168.50.3';
     // Make 10 requests (all within limit)
     const responses: number[] = [];
     for (let i = 0; i < 10; i++) {
-      const res = await agent.post('/v1/resolutions').send(validResolveBody);
+       const res = await agent.post('/v1/resolutions')
+         .set('X-Forwarded-For', testIp)
+         .send(validResolveBody);
       responses.push(res.status);
     }
     // All 10 should succeed (200)
     expect(responses.every(s => s === 200)).toBe(true);
 
     // 11th request should be rate-limited
-    const limitedRes = await agent.post('/v1/resolutions').send(validResolveBody);
+    const limitedRes = await agent.post('/v1/resolutions')
+      .set('X-Forwarded-For', testIp)
+      .send(validResolveBody);
     expect(limitedRes.status).toBe(429);
   });
 
@@ -64,12 +70,17 @@ describe('Resolve endpoint rate limit (max 10 per minute)', () => {
     const redis = makeMockRedis();
     const {agent} = buildApp(makeMockPrisma(), redis);
 
+    const testIp = '192.168.50.4';
     // Exhaust the limit
     for (let i = 0; i < 10; i++) {
-      await agent.post('/v1/resolutions').send(validResolveBody);
+      await agent.post('/v1/resolutions')
+        .set('X-Forwarded-For', testIp)
+        .send(validResolveBody);
     }
 
-    const res = await agent.post('/v1/resolutions').send(validResolveBody);
+    const res = await agent.post('/v1/resolutions')
+      .set('X-Forwarded-For', testIp)
+      .send(validResolveBody);
     expect(res.status).toBe(429);
     // express-rate-limit emits its message body directly
     expect(res.body.error).toBe('RATE_LIMIT_EXCEEDED');
