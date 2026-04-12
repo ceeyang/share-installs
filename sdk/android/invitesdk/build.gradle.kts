@@ -14,7 +14,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        val sdkVersion = System.getenv("SDK_VERSION") ?: "0.0.1"
+        val sdkVersion = System.getenv("SDK_VERSION") ?: "0.0.2"
         buildConfigField("String", "SDK_VERSION", "\"$sdkVersion\"")
     }
 
@@ -71,7 +71,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.share-installs",
         artifactId = "sdk-android",
-        version = System.getenv("SDK_VERSION") ?: "0.0.1"
+        version = System.getenv("SDK_VERSION") ?: "0.0.2"
     )
 
     pom {
