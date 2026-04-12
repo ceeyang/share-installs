@@ -7,7 +7,6 @@ let package = Package(
     name: "InviteSDK",
     platforms: [
         .iOS(.v15),
-        .macOS(.v12),
     ],
     products: [
         .library(
