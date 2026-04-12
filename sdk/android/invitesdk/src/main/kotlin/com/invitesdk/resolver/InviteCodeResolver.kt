@@ -92,7 +92,12 @@ internal class InviteCodeResolver(
 
             InviteLogger.d("Resolving deferred invite (clipboard=${clipboardCode != null})...")
 
-            val response: ResolveResponse = apiClient.post("/v1/resolutions", request)
+            val response: ResolveResponse = apiClient.post(
+                "/v1/resolutions",
+                request,
+                ResolveRequest.serializer(),
+                ResolveResponse.serializer(),
+            )
 
             if (!response.matched || response.inviteCode == null) {
                 InviteLogger.i("No deferred invite found for this device.")

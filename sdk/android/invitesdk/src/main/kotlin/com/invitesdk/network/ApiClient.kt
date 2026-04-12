@@ -7,7 +7,8 @@ package com.invitesdk.network
 import com.invitesdk.BuildConfig
 import com.invitesdk.core.InviteLogger
 import com.invitesdk.core.ShareInstallsConfiguration
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -76,9 +77,14 @@ internal class ApiClient(private val configuration: ShareInstallsConfiguration) 
      * Must be called from a background thread (use coroutines with Dispatchers.IO).
      */
     @Throws(ShareInstallsNetworkException::class)
-    inline fun <reified B, reified R> post(path: String, body: B): R {
+    fun <B, R> post(
+        path: String,
+        body: B,
+        bodySerializer: SerializationStrategy<B>,
+        responseSerializer: DeserializationStrategy<R>,
+    ): R {
         val url = "${configuration.normalizedBaseUrl}$path"
-        val requestBody = json.encodeToString(body).toRequestBody(mediaType)
+        val requestBody = json.encodeToString(bodySerializer, body).toRequestBody(mediaType)
 
         InviteLogger.d("POST $url")
 
@@ -103,7 +109,7 @@ internal class ApiClient(private val configuration: ShareInstallsConfiguration) 
         }
 
         return try {
-            json.decodeFromString(responseBody)
+            json.decodeFromString(responseSerializer, responseBody)
         } catch (e: Exception) {
             throw ShareInstallsNetworkException.DecodingError("Failed to decode response: ${e.message}", e)
         }

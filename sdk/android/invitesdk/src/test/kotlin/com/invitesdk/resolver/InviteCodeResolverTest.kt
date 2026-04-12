@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.invitesdk.fingerprint.FingerprintCollector
 import com.invitesdk.network.ApiClient
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -48,7 +49,14 @@ class InviteCodeResolverTest {
     @Test
     fun `resolveDeferred success returns ResolvedInvite`() = runTest {
         // Mock successful API response
-        coEvery { apiClient.post<Any, InviteCodeResolver.ResolveResponse>(any(), any()) } returns InviteCodeResolver.ResolveResponse(
+        every {
+            apiClient.post(
+                any<String>(),
+                any<InviteCodeResolver.ResolveRequest>(),
+                any<SerializationStrategy<InviteCodeResolver.ResolveRequest>>(),
+                any<DeserializationStrategy<InviteCodeResolver.ResolveResponse>>(),
+            )
+        } returns InviteCodeResolver.ResolveResponse(
             matched = true,
             inviteCode = "WELCOME100",
             customData = emptyMap(),
@@ -67,7 +75,14 @@ class InviteCodeResolverTest {
 
     @Test
     fun `resolveDeferred returns null when not matched`() = runTest {
-        coEvery { apiClient.post<Any, InviteCodeResolver.ResolveResponse>(any(), any()) } returns InviteCodeResolver.ResolveResponse(
+        every {
+            apiClient.post(
+                any<String>(),
+                any<InviteCodeResolver.ResolveRequest>(),
+                any<SerializationStrategy<InviteCodeResolver.ResolveRequest>>(),
+                any<DeserializationStrategy<InviteCodeResolver.ResolveResponse>>(),
+            )
+        } returns InviteCodeResolver.ResolveResponse(
             matched = false,
             inviteCode = null,
             customData = null,
