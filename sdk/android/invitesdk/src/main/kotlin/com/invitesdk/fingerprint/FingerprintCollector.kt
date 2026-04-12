@@ -66,7 +66,7 @@ internal class FingerprintCollector(private val context: Context) {
         val metrics = getDisplayMetrics()
         return Signals(
             androidId = getAndroidId(),
-            osVersion = Build.VERSION.RELEASE,
+            osVersion = Build.VERSION.RELEASE ?: "unknown",
             apiLevel = Build.VERSION.SDK_INT,
             screen = ScreenInfo(
                 // Convert physical pixels → logical dp to match web CSS px (window.screen.width/height)
@@ -75,13 +75,13 @@ internal class FingerprintCollector(private val context: Context) {
                 density = metrics?.density ?: 0f,
             ),
             languages = getLanguages(),
-            timezone = TimeZone.getDefault().id,
+            timezone = try { TimeZone.getDefault().id } catch (_: Exception) { "UTC" },
             networkType = getNetworkType(),
-            brand = Build.BRAND,
-            model = Build.MODEL,
-            buildFingerprint = Build.FINGERPRINT,
+            brand = Build.BRAND ?: "unknown",
+            model = Build.MODEL ?: "unknown",
+            buildFingerprint = Build.FINGERPRINT ?: "unknown",
             diskBucket = getDiskBucket(),
-            hardwareConcurrency = Runtime.getRuntime().availableProcessors(),
+            hardwareConcurrency = try { Runtime.getRuntime().availableProcessors() } catch (_: Exception) { 1 },
             touchPoints = getTouchPoints(),
         )
     }

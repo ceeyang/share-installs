@@ -13,7 +13,7 @@ describe('GET /health', () => {
     expect(res.body.status).toBe('ok');
     expect(typeof res.body.timestamp).toBe('string');
     expect(res.body.version).toBeDefined();
-    expect(res.body.mode).toBe('single-tenant');
+    expect(res.body.mode).toBe('self-hosted');
   });
 
   it('sets X-Request-Id on every response', async () => {

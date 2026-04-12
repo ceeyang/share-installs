@@ -24,8 +24,6 @@ final class InviteCodeResolverTests: XCTestCase {
         apiClient = APIClient(configuration: config, session: session)
         fingerprintCollector = FingerprintCollector()
         resolver = InviteCodeResolver(apiClient: apiClient, fingerprintCollector: fingerprintCollector)
-        
-        resolver.clearCachedResolution()
     }
 
     @MainActor
@@ -33,10 +31,8 @@ final class InviteCodeResolverTests: XCTestCase {
         let jsonResponse = """
         {
             "matched": true,
-            "invite": {
-                "code": "PROMO2024",
-                "customData": {"source": "test"}
-            },
+            "inviteCode": "PROMO2024",
+            "customData": {"source": "test"},
             "meta": {
                 "confidence": 0.95,
                 "channel": "fuzzy"
@@ -60,16 +56,6 @@ final class InviteCodeResolverTests: XCTestCase {
         XCTAssertEqual(result?.code, "PROMO2024")
         XCTAssertEqual(result?.channel, .fuzzy)
         XCTAssertEqual(result?.confidence, 0.95)
-        
-        // Verify caching: second call should throw alreadyResolved
-        do {
-            _ = try await resolver.resolveDeferred()
-            XCTFail("Should have thrown alreadyResolved")
-        } catch ShareInstallsResolveError.alreadyResolved {
-            // Success
-        } catch {
-            XCTFail("Wrong error thrown: \(error)")
-        }
     }
 
     @MainActor

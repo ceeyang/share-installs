@@ -16,13 +16,29 @@ enum KeychainUUID {
     private static let service = "com.shareinstalls.sdk"
     private static let account = "device_uuid"
 
+    /// For testing purposes only: allows injecting a stable UUID.
+    static var testOverride: String?
+
+    /// Memory fallback for environments where Keychain is unavailable (e.g. tests, missing entitlements).
+    private static var sessionFallback: String?
+
     /// Returns the persistent device UUID, generating one if needed.
     static func getOrCreate() -> String {
+        if let override = testOverride {
+            return override
+        }
         if let existing = read() {
             return existing
         }
+        if let fallback = sessionFallback {
+            return fallback
+        }
+        
         let uuid = UUID().uuidString
         save(uuid)
+        
+        // If save failed, sessionFallback might still be nil. Store it for the session.
+        sessionFallback = uuid
         return uuid
     }
 

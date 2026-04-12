@@ -209,16 +209,8 @@ export function computeSimilarityScore(
 
   let score = 0;
   let totalWeight = 0;
-  const breakdown: Record<string, {available: boolean; match: boolean; weight: number}> = {};
 
-  const keys = [
-    'ip', 'screen', 'timezone', 'languages', 'osVersion', 'pixelRatio',
-    'hardwareConcurrency', 'deviceMemory', 'touchPoints', 'canvas', 'webgl', 'audio'
-  ];
-
-  for (let i = 0; i < checks.length; i++) {
-    const check = checks[i];
-    breakdown[keys[i]] = check;
+  for (const check of checks) {
     if (check.available) {
       totalWeight += check.weight;
       if (check.match) {
@@ -227,27 +219,7 @@ export function computeSimilarityScore(
     }
   }
 
-  const finalScore = totalWeight > 0 ? score / totalWeight : 0;
-  
-  // Try dynamic import safely (since config.ts has logger, but we can just use console.log conditionally)
-  // To avoid circular dependency or import issues, we just console.log the breakdown if the score is somewhat close but fails
-  if (finalScore >= 0.5 && finalScore < 0.8) {
-    console.log(`[Fingerprint Debug] Score: ${finalScore.toFixed(3)} (${score}/${totalWeight})`, JSON.stringify({
-      a: {
-        ip: a.ipAddress, screen: `${a.screenWidth}x${a.screenHeight}`,
-        tz: a.timezone, lang: a.languages, os: a.osVersion,
-        dpr: a.pixelRatio
-      },
-      b: {
-        ip: b.ipAddress, screen: `${b.screenWidth}x${b.screenHeight}`,
-        tz: b.timezone, lang: b.languages, os: b.osVersion,
-        scale: b.pixelRatio
-      },
-      breakdown
-    }, null, 2));
-  }
-
-  return finalScore;
+  return totalWeight > 0 ? score / totalWeight : 0;
 }
 
 // ---- Private helpers ----

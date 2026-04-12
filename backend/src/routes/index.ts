@@ -59,30 +59,30 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   // ---- V1 API ----
   const v1 = Router();
 
+  // --- Project management (super-admin only) ---
+  v1.post('/projects', adminAuth, ...projectController.create);
+  v1.get('/projects', adminAuth, ...projectController.list);
+  v1.post('/projects/:projectId/api-keys', adminAuth, ...projectController.createKey);
+  v1.get('/projects/:projectId/api-keys', adminAuth, ...projectController.listKeys);
+  v1.delete('/projects/:projectId/api-keys/:keyId', adminAuth, ...projectController.revokeKey);
+
   if (config.MULTI_TENANT) {
     // SaaS mode: all core endpoints require a valid API key.
-    // Project/key management requires super-admin secret.
-
-    // --- Project management (super-admin only) ---
-    v1.post('/projects', adminAuth, ...projectController.create);
-    v1.get('/projects', adminAuth, ...projectController.list);
-    v1.post('/projects/:projectId/api-keys', adminAuth, ...projectController.createKey);
-    v1.get('/projects/:projectId/api-keys', adminAuth, ...projectController.listKeys);
-    v1.delete('/projects/:projectId/api-keys/:keyId', adminAuth, ...projectController.revokeKey);
-
-    // --- Core endpoints (require API key) ---
     v1.post('/clicks',      requireApiKey, ...resolveController.collect);
     v1.post('/resolutions', requireApiKey, resolveRateLimiter, ...resolveController.resolve);
-
-    // --- Debug (non-production only, still requires API key) ---
-    v1.get('/debug/clicks/:inviteCode', requireApiKey, ...resolveController.debugClicks);
   } else {
     // Self-hosted mode: no authentication required.
     v1.post('/clicks',      ...resolveController.collect);
     v1.post('/resolutions', resolveRateLimiter, ...resolveController.resolve);
+  }
 
-    // --- Debug (non-production only) ---
-    v1.get('/debug/clicks/:inviteCode', ...resolveController.debugClicks);
+  // --- Debug (non-production only) ---
+  if (config.NODE_ENV !== 'production') {
+    if (config.MULTI_TENANT) {
+      v1.get('/debug/clicks/:inviteCode', requireApiKey, ...resolveController.debugClicks);
+    } else {
+      v1.get('/debug/clicks/:inviteCode', ...resolveController.debugClicks);
+    }
   }
 
   router.use('/v1', v1);

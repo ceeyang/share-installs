@@ -37,9 +37,9 @@ describe('404 – unknown routes', () => {
 });
 
 describe('Validation errors – 400', () => {
-  it('returns 400 with details array for invalid invite creation', async () => {
+  it('returns 400 with details array for invalid project creation', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/invites').send({code: 'X'});  // too short
+    const res = await agent.post('/v1/projects').send({name: ''});  // name required
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe(400);
@@ -61,36 +61,19 @@ describe('Validation errors – 400', () => {
 });
 
 describe('AppError propagation', () => {
-  it('propagates 404 AppError from service (invite not found)', async () => {
+  it('propagates 404 AppError from service (project not found)', async () => {
     const prisma = makeMockPrisma();
-    // No invite found → controller throws AppError(404)
-    prisma.invite.findFirst.mockResolvedValue(null as never);
+    prisma.project.findUnique.mockResolvedValueOnce(null);
     const {agent} = buildApp(prisma);
 
-    const res = await agent.post('/v1/clicks').send({
-      inviteCode: 'NOEXIST',
-      fingerprint: {timezone: 'UTC'},
-    });
+    // POST /v1/projects/:id/api-keys explicitly checks for project existence
+    const res = await agent.post('/v1/projects/proj_nonexistent/api-keys').send({name: 'new-key'});
 
     expect(res.status).toBe(404);
     expect(res.body.error.status).toBe('NOT_FOUND');
   });
-
-  it('propagates 409 AppError from service (duplicate code)', async () => {
-    const prisma = makeMockPrisma();
-    // findFirst returns an existing invite → code collision → 409
-    prisma.invite.findFirst.mockResolvedValueOnce({
-      id: 'inv_existing',
-      code: 'DUPCODE1',
-    } as never);
-    const {agent} = buildApp(prisma);
-
-    const res = await agent.post('/v1/invites').send({code: 'DUPCODE1'});
-
-    expect(res.status).toBe(409);
-    expect(res.body.error.status).toBe('ALREADY_EXISTS');
-  });
 });
+
 
 describe('Prisma error mapping', () => {
   it('maps Prisma P2002 (unique constraint) to 409', async () => {
@@ -99,27 +82,26 @@ describe('Prisma error mapping', () => {
       name: 'PrismaClientKnownRequestError',
       code: 'P2002',
     });
-    prisma.invite.create.mockRejectedValueOnce(prismaError);
+    prisma.project.create.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/invites').send({inviterId: 'user1'});
+    const res = await agent.post('/v1/projects').send({name: 'Broken Project'});
 
     expect(res.status).toBe(409);
     expect(res.body.error.status).toBe('ALREADY_EXISTS');
   });
 
   it('maps Prisma P2025 (record not found) to 404', async () => {
-    // revokeInvite calls findFirst (returns invite) then invite.update.
-    // Mock invite.update to throw P2025 to exercise the error-handler mapping.
     const prisma = makeMockPrisma();
     const prismaError = Object.assign(new Error('Record not found'), {
       name: 'PrismaClientKnownRequestError',
       code: 'P2025',
     });
-    prisma.invite.update.mockRejectedValueOnce(prismaError);
+    // simulate error during project retrieval in createKey
+    prisma.project.findUnique.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
-    const res = await agent.delete('/v1/invites/inv_test1');
+    const res = await agent.post('/v1/projects/proj_missing/api-keys').send({name: 'key'});
 
     expect(res.status).toBe(404);
     expect(res.body.error.status).toBe('NOT_FOUND');
@@ -129,10 +111,10 @@ describe('Prisma error mapping', () => {
 describe('Unhandled errors – 500', () => {
   it('returns 500 for unexpected errors from service layer', async () => {
     const prisma = makeMockPrisma();
-    prisma.invite.findMany.mockRejectedValueOnce(new Error('DB connection lost'));
+    prisma.project.findMany.mockRejectedValueOnce(new Error('DB connection lost'));
     const {agent} = buildApp(prisma);
 
-    const res = await agent.get('/v1/invites');
+    const res = await agent.get('/v1/projects');
 
     expect(res.status).toBe(500);
     expect(res.body.error).toMatchObject({
@@ -150,7 +132,7 @@ describe('Error response structure consistency', () => {
 
     const results = [
       await agent.get('/v1/unknown'),                                            // 404
-      await agent.post('/v1/invites').send({code: 'X'}),                        // 400
+      await agent.post('/v1/projects').send({name: ''}),                        // 400
       await agent.post('/v1/clicks').send({fingerprint: {}}),                   // 400 (missing inviteCode)
       await agent.post('/v1/resolutions').send({channel: 'bad', fingerprint: {}}), // 400
     ];

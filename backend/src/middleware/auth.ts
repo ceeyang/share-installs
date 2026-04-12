@@ -58,13 +58,29 @@ function extractBearerToken(req: Request): string | null {
  * Returns 401 if the secret is configured but the header doesn't match.
  */
 export function adminAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!config.ADMIN_SECRET) {
+  const adminSecret = config.ADMIN_SECRET;
+  
+  if (!adminSecret) {
     next();
     return;
   }
 
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    console.warn('Admin auth attempt failed: missing or malformed header');
+    res.status(401).json({
+      error: {
+        code: 401,
+        status: 'UNAUTHENTICATED',
+        message: 'Admin secret required',
+      },
+    });
+    return;
+  }
+
   const token = extractBearerToken(req);
-  if (!token || !timingSafeCompare(token, config.ADMIN_SECRET)) {
+  if (!token || !timingSafeCompare(token, adminSecret)) {
+    console.warn('Admin auth attempt failed: invalid secret');
     res.status(401).json({
       error: {
         code: 401,

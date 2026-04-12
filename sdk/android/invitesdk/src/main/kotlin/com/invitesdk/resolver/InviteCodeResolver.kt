@@ -50,14 +50,14 @@ internal class InviteCodeResolver(
     // ---- Request / Response DTOs ----
 
     @Serializable
-    private data class ResolveRequest(
+    internal data class ResolveRequest(
         val channel: String,
         val clipboardCode: String? = null,
         val fingerprint: FingerprintCollector.Signals,
     )
 
     @Serializable
-    private data class ResolveResponse(
+    internal data class ResolveResponse(
         val matched: Boolean,
         @SerialName("inviteCode") val inviteCode: String? = null,
         val customData: Map<String, JsonElement>? = null,

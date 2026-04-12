@@ -88,6 +88,14 @@ export class ProjectController {
   listKeys = [
     param('projectId').isString().trim().notEmpty(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          error: {code: 400, status: 'INVALID_ARGUMENT', message: 'Validation failed.'},
+          details: errors.array(),
+        });
+        return;
+      }
       try {
         const keys = await this.apiKeyService.listApiKeys(req.params.projectId);
         res.json({apiKeys: keys});
@@ -102,6 +110,14 @@ export class ProjectController {
     param('projectId').isString().trim().notEmpty(),
     param('keyId').isString().trim().notEmpty(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          error: {code: 400, status: 'INVALID_ARGUMENT', message: 'Validation failed.'},
+          details: errors.array(),
+        });
+        return;
+      }
       try {
         await this.apiKeyService.revokeApiKey(req.params.keyId, req.params.projectId);
         res.json({});

@@ -1,11 +1,11 @@
 /**
  * Integration tests – POST /v1/clicks
  *
- * Tests the full click-collection flow: validation → invite lookup →
- * fingerprint storage → Redis cache.
+ * Tests the full click-collection flow: validation → fingerprint storage → Redis cache.
+ * Invite codes are now treated as opaque strings and not checked against a DB model.
  */
 
-import {buildApp, makeMockPrisma, makeInviteData} from './helpers';
+import {buildApp} from './helpers';
 
 const validBody = {
   inviteCode: 'TESTCODE',
@@ -38,8 +38,7 @@ describe('POST /v1/clicks', () => {
     const {agent, redis} = buildApp();
     await agent.post('/v1/clicks').send(validBody);
 
-    // setex is called first for invite cache (si:invite:...) then for the
-    // fingerprint cache (si:click:...). Find the fingerprint-specific call.
+    // Find the fingerprint-specific call (si:click:...)
     const fingerprintCall = (redis.setex.mock.calls as [string, number, string][])
       .find(([key]) => key.includes(':click:'));
     expect(fingerprintCall).toBeDefined();
@@ -47,7 +46,7 @@ describe('POST /v1/clicks', () => {
     expect(key).toMatch(/^si:click:/);
     expect(JSON.parse(value)).toMatchObject({
       clickEventId: expect.any(String),
-      inviteId: expect.any(String),
+      inviteCode: 'TESTCODE',
     });
   });
 
@@ -64,24 +63,6 @@ describe('POST /v1/clicks', () => {
     const res = await agent.post('/v1/clicks').send({inviteCode: 'TESTCODE'});
 
     expect(res.status).toBe(400);
-  });
-
-  it('returns 404 when the invite does not exist', async () => {
-    const prisma = makeMockPrisma();
-    prisma.invite.findFirst.mockResolvedValueOnce(null as never);
-    const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/clicks').send(validBody);
-
-    expect(res.status).toBe(404);
-  });
-
-  it('returns 410 for an expired invite', async () => {
-    const past = new Date(Date.now() - 1_000);
-    const prisma = makeMockPrisma(makeInviteData({expiresAt: past}));
-    const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/clicks').send(validBody);
-
-    expect(res.status).toBe(410);
   });
 
   it('accepts a webgl hash coerced from a number (legacy client)', async () => {
@@ -104,6 +85,16 @@ describe('POST /v1/clicks', () => {
     const res = await agent.post('/v1/clicks').send({
       ...validBody,
       referrer: 'https://example.com/feed',
+    });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('accepts optional customData', async () => {
+    const {agent} = buildApp();
+    const res = await agent.post('/v1/clicks').send({
+      ...validBody,
+      customData: {foo: 'bar'},
     });
 
     expect(res.status).toBe(200);

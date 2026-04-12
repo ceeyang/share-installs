@@ -21,13 +21,13 @@ final class NetworkMock: URLProtocol {
 
         do {
             let (response, data) = try handler(request)
-            client?.urlProtocol(this, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             if let data = data {
-                client?.urlProtocol(this, didLoad: data)
+                client?.urlProtocol(self, didLoad: data)
             }
-            client?.urlProtocolDidFinishLoading(this)
+            client?.urlProtocolDidFinishLoading(self)
         } catch {
-            client?.urlProtocol(this, didFailWithError: error)
+            client?.urlProtocol(self, didFailWithError: error)
         }
     }
 

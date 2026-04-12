@@ -7,7 +7,7 @@
  *   3. No match (returns matched: false)
  */
 
-import {buildApp, makeMockPrisma, makeInviteData, makeMockRedis} from './helpers';
+import {buildApp, makeMockPrisma, makeMockRedis} from './helpers';
 
 const iosBody = {
   channel: 'ios',
@@ -57,13 +57,13 @@ describe('POST /v1/resolutions', () => {
 
   it('returns matched:false when no fingerprint match exists', async () => {
     // Default mock: redis.get returns null → no exact match
-    // redis.zrangebyscore returns [] → no fuzzy match candidates
+    // Fuzzy matching candidates also empty by default
     const {agent} = buildApp();
     const res = await agent.post('/v1/resolutions').send(iosBody);
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(false);
-    expect(res.body.invite).toBeUndefined();
+    expect(res.body.inviteCode).toBeUndefined();
   });
 
   // ---- Clipboard channel (Android) ----
@@ -82,7 +82,7 @@ describe('POST /v1/resolutions', () => {
     expect(res.body.matched).toBe(true);
     expect(res.body.meta.channel).toBe('clipboard');
     expect(res.body.meta.confidence).toBe(1.0);
-    expect(res.body.invite.code).toBe('TESTCODE');
+    expect(res.body.inviteCode).toBe('TESTCODE');
   });
 
   it('ignores clipboard on iOS (falls through to fingerprint matching)', async () => {
@@ -119,14 +119,14 @@ describe('POST /v1/resolutions', () => {
     // Simulate a cached fingerprint entry in Redis
     const cached = JSON.stringify({
       clickEventId: 'click_1',
-      inviteId: 'inv_test1',
+      inviteCode: 'TESTCODE',
     });
     redis.get.mockResolvedValueOnce(cached);
 
     // markClickResolved needs clickEvent.update + conversion.create
     prisma.clickEvent.update.mockResolvedValueOnce({
       id: 'click_1',
-      inviteId: 'inv_test1',
+      inviteCode: 'TESTCODE',
       resolved: true,
       resolvedAt: new Date(),
     } as never);
@@ -138,8 +138,8 @@ describe('POST /v1/resolutions', () => {
     expect(res.body.matched).toBe(true);
     expect(res.body.meta.channel).toBe('exact');
     expect(res.body.meta.confidence).toBe(1.0);
-    expect(res.body.invite.code).toBe('TESTCODE');
-    expect(typeof res.body.invite.customData).toBe('object'); // null is typeof 'object'
+    expect(res.body.inviteCode).toBe('TESTCODE');
+    expect(typeof res.body.customData).toBe('object'); // null is typeof 'object'
   });
 
   it('records a Conversion row on exact match', async () => {
@@ -147,11 +147,11 @@ describe('POST /v1/resolutions', () => {
     const redis = makeMockRedis();
 
     redis.get.mockResolvedValueOnce(
-      JSON.stringify({clickEventId: 'click_1', inviteId: 'inv_test1'}),
+      JSON.stringify({clickEventId: 'click_1', inviteCode: 'TESTCODE'}),
     );
     prisma.clickEvent.update.mockResolvedValueOnce({
       id: 'click_1',
-      inviteId: 'inv_test1',
+      inviteCode: 'TESTCODE',
       resolved: true,
       resolvedAt: new Date(),
     } as never);
@@ -173,11 +173,11 @@ describe('POST /v1/resolutions', () => {
     const redis = makeMockRedis();
 
     redis.get.mockResolvedValueOnce(
-      JSON.stringify({clickEventId: 'click_1', inviteId: 'inv_test1'}),
+      JSON.stringify({clickEventId: 'click_1', inviteCode: 'TESTCODE'}),
     );
     prisma.clickEvent.update.mockResolvedValueOnce({
       id: 'click_1',
-      inviteId: 'inv_test1',
+      inviteCode: 'TESTCODE',
       resolved: true,
       resolvedAt: new Date(),
     } as never);

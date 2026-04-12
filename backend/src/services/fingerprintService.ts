@@ -3,17 +3,17 @@
  *
  * Resolution strategy (in order):
  *
- *   1. Clipboard channel (Android only, confidence = 1.0):
- *      The landing page writes "SHAREINSTALLS:{inviteCode}" to the clipboard.
- *      The Android SDK reads it on first launch and passes it here.
- *
- *   2. Exact hash match (fast path, Redis):
+ *   1. Exact hash match (fast path, Redis):
  *      On web click, a SHA-256 hash of stable signals is stored in Redis keyed by
  *      that hash. If the native SDK produces the same hash, it's an instant match.
  *
- *   3. Fuzzy similarity match (fallback, DB scan):
+ *   2. Fuzzy similarity match (fallback, DB scan):
  *      Recent unresolved ClickEvents are scored against the native signals using
  *      a weighted multi-signal algorithm. The best match above the threshold wins.
+ *
+ *   3. Clipboard channel (Android only, confidence = 1.0):
+ *      The landing page writes "SHAREINSTALLS:{inviteCode}" to the clipboard.
+ *      The Android SDK reads it on first launch and passes it here.
  */
 
 import type {Redis} from 'ioredis';
@@ -133,7 +133,12 @@ export class FingerprintService {
     // ---- Channel 1: Exact hash match (Redis fast path) ----
     const exactResult = await this.tryExactMatch(fingerprint, projectId);
     if (exactResult) {
-      await this.recordConversion(exactResult.clickEventId, platform, signals, 'exact', 1.0, projectId);
+      await this.recordConversion(exactResult.clickEventId, exactResult.inviteCode, platform, signals, 'exact', 1.0, projectId);
+      
+      // Delete the cache entry after match to prevent re-use
+      const redisKey = `${config.REDIS_KEY_PREFIX}click:${fingerprint}`;
+      await this.redis.del(redisKey);
+
       logger.info({fingerprint, inviteCode: exactResult.inviteCode}, 'Exact fingerprint match');
       return {...exactResult, confidence: 1.0, channel: 'exact'};
     }
@@ -143,6 +148,7 @@ export class FingerprintService {
     if (fuzzyResult) {
       await this.recordConversion(
         fuzzyResult.clickEventId,
+        fuzzyResult.inviteCode,
         platform,
         signals,
         'fuzzy',
@@ -288,6 +294,7 @@ export class FingerprintService {
 
   private async recordConversion(
     clickEventId: string | null,
+    inviteCode: string,
     platform: string,
     sdkSignals: FingerprintSignals,
     channel: string,
@@ -296,15 +303,9 @@ export class FingerprintService {
   ): Promise<void> {
     if (!clickEventId) return;
 
-    const clickEvent = await this.prisma.clickEvent.findUnique({
-      where: {id: clickEventId},
-      select: {inviteCode: true},
-    });
-    if (!clickEvent) return;
-
     await this.prisma.conversion.create({
       data: {
-        inviteCode: clickEvent.inviteCode,
+        inviteCode,
         clickEventId,
         projectId: projectId ?? null,
         platform: this.toDevicePlatform(platform),

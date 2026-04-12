@@ -13,6 +13,8 @@ import {Request, Response, NextFunction} from 'express';
 import {config} from '../../src/config/index';
 import {adminAuth} from '../../src/middleware/auth';
 
+const originalEnvSecret = process.env.ADMIN_SECRET;
+
 // ---- Helpers ----
 
 function makeReq(authHeader?: string): Request {
@@ -36,6 +38,11 @@ describe('adminAuth – ADMIN_SECRET not configured (open mode)', () => {
   beforeEach(() => {
     // Clear the secret so adminAuth passes through unconditionally
     (config as Record<string, unknown>).ADMIN_SECRET = undefined;
+    delete process.env.ADMIN_SECRET;
+  });
+
+  afterAll(() => {
+    process.env.ADMIN_SECRET = originalEnvSecret;
   });
 
   it('calls next() without checking the header', () => {
@@ -56,10 +63,12 @@ describe('adminAuth – ADMIN_SECRET not configured (open mode)', () => {
 describe('adminAuth – ADMIN_SECRET configured', () => {
   beforeEach(() => {
     (config as Record<string, unknown>).ADMIN_SECRET = 'correct-secret';
+    delete process.env.ADMIN_SECRET; // Ensure config is used, or simulate via process.env
   });
 
   afterEach(() => {
     (config as Record<string, unknown>).ADMIN_SECRET = undefined;
+    delete process.env.ADMIN_SECRET;
   });
 
   it('calls next() when Bearer token matches the secret exactly', () => {
@@ -130,16 +139,16 @@ describe('adminAuth – ADMIN_SECRET configured', () => {
 
   it('returns a structured 401 error body', () => {
     const next = jest.fn() as NextFunction;
-    const {res, json} = makeRes();
+    const {res, json, status} = makeRes();
     adminAuth(makeReq(undefined), res, next);
-    expect(json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        error: expect.objectContaining({
-          code: 401,
-          status: 'UNAUTHENTICATED',
-          message: expect.any(String),
-        }),
-      }),
-    );
+    
+    expect(status).toHaveBeenCalledWith(401);
+    expect(json).toHaveBeenCalledWith({
+      error: {
+        code: 401,
+        status: 'UNAUTHENTICATED',
+        message: 'Admin secret required',
+      },
+    });
   });
 });

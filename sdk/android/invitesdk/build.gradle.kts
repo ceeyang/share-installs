@@ -15,7 +15,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "SDK_VERSION", "\"${System.getenv(\"SDK_VERSION\") ?: \"0.0.1\"}\"" )
+        val sdkVersion = System.getenv("SDK_VERSION") ?: "0.0.1"
+        buildConfigField("String", "SDK_VERSION", "\"$sdkVersion\"")
     }
 
     buildTypes {
@@ -42,12 +43,14 @@ android {
         buildConfig = true
     }
 
+    /*
     publishing {
         singleVariant("release") {
             withSourcesJar()
             withJavadocJar()
         }
     }
+    */
 }
 
 dependencies {
@@ -60,12 +63,15 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.test:core-ktx:1.5.0")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.robolectric:robolectric:4.11.1")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
 
+/*
 // Maven Central publishing via vanniktech plugin
 // Reads coordinates from gradle.properties or environment variables
 mavenPublishing {
@@ -120,3 +126,4 @@ publishing {
         }
     }
 }
+*/

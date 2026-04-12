@@ -7,7 +7,6 @@
  */
 
 import supertest from 'supertest';
-import type {InviteStatus} from '@prisma/client';
 import {createApp} from '../../src/app';
 
 // ---- Mock factories ----
@@ -17,7 +16,7 @@ export function makeMockRedis() {
   const zsets: Record<string, Array<{score: number; member: string}>> = {};
 
   return {
-    // Key-value ops (invite cache, fingerprint cache)
+    // Key-value ops (fingerprint cache)
     get: jest.fn(async (key: string) => kv[key] ?? null),
     setex: jest.fn(async (key: string, _ttl: number, value: string) => {
       kv[key] = value;
@@ -58,27 +57,19 @@ export function makeMockRedis() {
   };
 }
 
-export function makeInviteData(overrides: Partial<Record<string, unknown>> = {}) {
+export function makeClickData(overrides: any = {}) {
   return {
-    id: 'inv_test1',
-    code: 'TESTCODE',
-    projectId: null,
-    inviterId: null,
-    customData: null,
-    maxUses: null,
-    useCount: 0,
-    expiresAt: null,
-    status: 'ACTIVE' as InviteStatus,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    inviteCode: 'TESTCODE',
+    fingerprint: 'deadbeef01234567',
+    platform: 'WEB',
     ...overrides,
   };
 }
 
-export function makeMockPrisma(inviteData = makeInviteData()) {
+export function makeMockPrisma() {
   const baseClickEvent = {
     id: 'click_1',
-    inviteId: inviteData.id,
+    inviteCode: 'TESTCODE',
     projectId: null,
     fingerprint: 'deadbeef01234567',
     ipAddress: '127.0.0.1',
@@ -99,37 +90,21 @@ export function makeMockPrisma(inviteData = makeInviteData()) {
     connectionType: null,
     platform: 'WEB',
     osVersion: null,
+    customData: null,
     resolved: false,
     resolvedAt: null,
     createdAt: new Date(),
-    invite: inviteData,
   };
 
   return {
-    invite: {
-      // Return the test invite when queried by its own code or by non-code criteria
-      // (e.g. by ID). Return null for any other code so that generateUniqueCode()
-      // can find an available slot without exhausting retries.
-      findFirst: jest.fn(async (args?: {where?: {code?: string}}) => {
-        const code = args?.where?.code;
-        if (code === undefined || code === inviteData.code) return inviteData;
+    clickEvent: {
+      create: jest.fn(async ({data}: {data: any}) => ({...baseClickEvent, ...data})),
+      findMany: jest.fn(async () => [] as typeof baseClickEvent[]),
+      findFirst: jest.fn(async () => null),
+      findUnique: jest.fn(async ({where}: {where: {id: string}}) => {
+        if (where.id === baseClickEvent.id) return baseClickEvent;
         return null;
       }),
-      findMany: jest.fn(async () => [inviteData]),
-      count: jest.fn(async () => 1),
-      create: jest.fn(async ({data}: {data: Record<string, unknown>}) => ({
-        ...makeInviteData(),
-        ...data,
-      })),
-      update: jest.fn(async ({data}: {data: Record<string, unknown>}) => ({
-        ...inviteData,
-        ...data,
-      })),
-      updateMany: jest.fn(async () => ({count: 1})),
-    },
-    clickEvent: {
-      create: jest.fn(async () => ({...baseClickEvent})),
-      findMany: jest.fn(async () => [] as typeof baseClickEvent[]),
       update: jest.fn(async ({data}: {data: Record<string, unknown>}) => ({
         ...baseClickEvent,
         ...data,
@@ -142,12 +117,12 @@ export function makeMockPrisma(inviteData = makeInviteData()) {
       findFirst: jest.fn(async () => null),
     },
     project: {
-      create: jest.fn(async ({data}: {data: Record<string, unknown>}) => ({
-        id: 'proj_1',
-        ...data,
-      })),
-      findMany: jest.fn(async () => []),
-      count: jest.fn(async () => 0),
+      create: jest.fn().mockResolvedValue({id: 'proj_test1'}),
+      findMany: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
+      findUnique: jest.fn().mockResolvedValue({id: 'proj_test1'}),
+      findFirst: jest.fn().mockResolvedValue({id: 'proj_test1'}),
+      update: jest.fn().mockResolvedValue({id: 'proj_test1'}),
     },
     $transaction: jest.fn(async (fns: Array<Promise<unknown>>) => Promise.all(fns)),
     $connect: jest.fn(async () => undefined),
@@ -166,7 +141,7 @@ export function buildApp(
   redis: MockRedis = makeMockRedis(),
 ) {
   const app = createApp(
-    prisma as unknown as import('@prisma/client').PrismaClient,
+    prisma as unknown as any, // Cast to avoid complex Prisma generic mismatches in tests
     redis as unknown as import('ioredis').Redis,
   );
   return {app, prisma, redis, agent: supertest(app)};

@@ -30,6 +30,8 @@ class FingerprintCollectorTest {
         // Basic type verification
         assert(signals.apiLevel > 0)
         assert(signals.languages.isNotEmpty())
+        assert(signals.hardwareConcurrency > 0)
+        assert(signals.touchPoints >= 0)
     }
 
     @Test
