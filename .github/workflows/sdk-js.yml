@@ -102,17 +102,17 @@ jobs:
 
             ### npm
             ```bash
-            npm install @share-installs/js-sdk
+            npm install @ceeyang/share-installs
             ```
 
             ### CDN (jsDelivr) — 推荐
             ```html
-            <script src="https://cdn.jsdelivr.net/npm/@share-installs/js-sdk@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@ceeyang/share-installs@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
             ```
 
             ### CDN (unpkg)
             ```html
-            <script src="https://unpkg.com/@share-installs/js-sdk@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
+            <script src="https://unpkg.com/@ceeyang/share-installs@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
             ```
 
             ### 直接下载
@@ -120,7 +120,7 @@ jobs:
 
             ### 使用示例
             ```html
-            <script src="https://cdn.jsdelivr.net/npm/@share-installs/js-sdk@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@ceeyang/share-installs@${{ steps.version.outputs.VERSION }}/dist/umd/share-installs-sdk.min.js"></script>
             <script>
               const sdk = new ShareInstalls.ShareInstallsSDK({
                 apiBaseUrl: 'https://your-api.com'
