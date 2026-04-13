@@ -98,7 +98,7 @@ jobs:
       # Also publish to GitHub Packages as a mirror
       - name: Publish to GitHub Packages
         working-directory: sdk/android
-        run: ./gradlew :invitesdk:publishReleasePublicationToGitHubPackagesRepository
+        run: ./gradlew :invitesdk:publishMavenPublicationToGitHubPackagesRepository
         env:
           SDK_VERSION: ${{ steps.version.outputs.VERSION }}
           GITHUB_ACTOR: ${{ github.actor }}

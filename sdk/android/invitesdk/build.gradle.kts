@@ -68,6 +68,14 @@ dependencies {
 // Maven Central publishing via vanniktech plugin
 // Reads coordinates from gradle.properties or environment variables
 mavenPublishing {
+    configure(
+        com.vanniktech.maven.publish.AndroidSingleVariantLibrary(
+            variant = "release",
+            sourcesJar = true,
+            publishJavadocJar = true,
+        )
+    )
+
     coordinates(
         groupId = "io.github.share-installs",
         artifactId = "sdk-android",
