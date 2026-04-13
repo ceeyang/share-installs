@@ -1,6 +1,7 @@
 # SaaS Platform Design — share-installs Cloud
 
 **Date**: 2026-04-13  
+**Updated**: 2026-04-13  
 **Status**: Approved  
 **Author**: Claude + ceeyang
 
@@ -11,13 +12,109 @@
 将 share-installs 从纯开源工具扩展为**开源 + 云托管双轨**产品：
 
 - **自部署**：代码完全开源（Apache 2.0），任何人免费 self-host，无 API Key，无限制
-- **云托管**：平台运营者托管服务，用户自助注册、创建 App、获取 API Key，按有效安装量计费
+- **云托管**：平台运营者托管服务，用户自助注册、创建 App、获取 API Key，按月订阅计费
 
 本 Spec 仅涵盖**云托管侧的新增内容**，不修改现有 SDK API 的核心逻辑。
 
 ---
 
-## 2. 系统架构
+## 2. 订阅计划
+
+### 2.1 三档方案
+
+| | Free | Pro | Unlimited |
+|--|------|-----|-----------|
+| **月费** | $0 | $19/月 | $99/月 |
+| **有效安装量/月** | ≤ 500 | ≤ 10,000 | 无限制 |
+| **有效安装量/天** | ≤ 20 | 不限 | 不限 |
+| **App 数量** | 1 | 5 | 无限制 |
+| **API Key 数量/App** | 2 | 10 | 无限制 |
+| **数据保留** | 7 天 | 90 天 | 1 年 |
+| **适合场景** | 开发测试 | 上线产品 | 大规模商业 |
+
+> **Free 同时受日限和月限约束**：月内某天超过 20 次有效安装，当天后续请求返回 429，次日重置。月累计超过 500 次，当月剩余时间全部 429，次月重置。
+
+### 2.2 限流设计
+
+限流基于 **有效安装（Conversion）** 计数，点击（Click）不计入限额。
+
+**计数存储**：Redis，Key 设计：
+
+```
+si:quota:{appId}:daily:{YYYY-MM-DD}   → 当日安装数，TTL 48h
+si:quota:{appId}:monthly:{YYYY-MM}    → 当月安装数，TTL 35d
+```
+
+**执行时机**：在 `fingerprintService.recordConversion()` 写入 DB **之前**检查配额，超额返回错误，SDK 收到 `402 Payment Required`。
+
+**配额响应**：
+
+```json
+HTTP 402
+{
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "Monthly install quota exceeded. Upgrade to Pro.",
+    "plan": "free",
+    "limit": 500,
+    "used": 500,
+    "resetAt": "2026-05-01T00:00:00Z"
+  }
+}
+```
+
+> 注：402 对 SDK 来说是静默失败（不影响用户体验），App 不返回邀请码，视为未匹配。
+
+### 2.3 计划数据模型
+
+```prisma
+enum Plan {
+  FREE
+  PRO
+  UNLIMITED
+}
+
+model User {
+  // ...现有字段...
+  plan           Plan      @default(FREE)
+  planExpiresAt  DateTime? @map("plan_expires_at")  // null = 永久（Unlimited）
+  // 月订阅场景：每次付款成功后更新为下月同日
+}
+```
+
+计划附在 **User** 上（一个用户下所有 App 共享同一套配额），未来可升级为 App 级别独立计划。
+
+### 2.4 配额常量（可配置）
+
+```typescript
+export const PLAN_LIMITS = {
+  FREE: {
+    dailyInstalls: 20,
+    monthlyInstalls: 500,
+    maxApps: 1,
+    maxKeysPerApp: 2,
+    dataRetentionDays: 7,
+  },
+  PRO: {
+    dailyInstalls: Infinity,
+    monthlyInstalls: 10_000,
+    maxApps: 5,
+    maxKeysPerApp: 10,
+    dataRetentionDays: 90,
+  },
+  UNLIMITED: {
+    dailyInstalls: Infinity,
+    monthlyInstalls: Infinity,
+    maxApps: Infinity,
+    maxKeysPerApp: Infinity,
+    dataRetentionDays: 365,
+  },
+} as const;
+```
+
+---
+
+## 3. 系统架构
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -205,6 +302,26 @@ GET /dashboard/apps/:appId/stats?from=ISO8601&to=ISO8601
   }
 ```
 
+### 5.5 配额状态
+
+```
+GET /dashboard/me/quota
+→ {
+    plan: "free" | "pro" | "unlimited",
+    planExpiresAt: string | null,
+    monthly: {
+      limit: number,          // 500 / 10000 / null
+      used: number,
+      resetAt: string         // 下月1日 00:00 UTC
+    },
+    daily: {
+      limit: number | null,   // 20 / null / null
+      used: number,
+      resetAt: string         // 明日 00:00 UTC
+    }
+  }
+```
+
 ---
 
 ## 6. 前端管理界面
@@ -239,10 +356,10 @@ GET /dashboard/apps/:appId/stats?from=ISO8601&to=ISO8601
 ### Module 1 — 数据库 Migration
 **文件**: `backend/prisma/`  
 **内容**:
-- 新增 `User` 表
+- 新增 `User` 表（含 `plan`、`planExpiresAt` 字段）
 - `projects` → `apps` 重命名（保留 `project_id` 列名）
-- Prisma schema 更新
-- 生成 migration 文件
+- 新增 `Plan` enum（FREE / PRO / UNLIMITED）
+- Prisma schema 更新，生成 migration 文件
 
 **依赖**: 无  
 **输出**: 可运行的 `prisma migrate dev`
@@ -255,7 +372,7 @@ GET /dashboard/apps/:appId/stats?from=ISO8601&to=ISO8601
 - `GET /auth/github` → redirect to GitHub
 - `GET /auth/github/callback` → code 换 token → upsert User → set JWT cookie
 - `GET /auth/logout` → clear cookie
-- `requireSession` 中间件
+- `requireSession` 中间件（注入 `req.userId`）
 - JWT 签发/验证工具函数
 
 **依赖**: Module 1（User 表）  
@@ -269,33 +386,48 @@ FRONTEND_URL=https://dashboard.yourdomain.com
 
 ---
 
-### Module 3 — Dashboard API
+### Module 3 — 配额执行（Quota Guard）
+**文件**: `backend/src/services/quotaService.ts`  
+**内容**:
+- `checkAndIncrementQuota(appId, userId)` — 检查日/月限额，超额返回错误
+- Redis 计数器读写（`si:quota:{appId}:daily:*` / `si:quota:{appId}:monthly:*`）
+- `PLAN_LIMITS` 常量定义
+- 集成到 `fingerprintService.recordConversion()` 调用前
+
+**依赖**: Module 1（plan 字段）  
+**注意**: 此模块影响核心 SDK 流程，需单独测试
+
+---
+
+### Module 4 — Dashboard API
 **文件**: `backend/src/controllers/dashboardController.ts`  
 **内容**:
-- `/dashboard/me`
-- `/dashboard/apps` CRUD
-- `/dashboard/apps/:id/keys` CRUD
-- `/dashboard/apps/:id/stats`
+- `GET /dashboard/me`
+- `GET /dashboard/me/quota` — 配额状态
+- `/dashboard/apps` CRUD（含 App 数量上限校验）
+- `/dashboard/apps/:id/keys` CRUD（含 Key 数量上限校验）
+- `GET /dashboard/apps/:id/stats`
 
-**依赖**: Module 1 + Module 2  
+**依赖**: Module 1 + Module 2 + Module 3  
 **注意**: 所有查询必须过滤 `userId`，防止越权访问
 
 ---
 
-### Module 4 — 前端管理界面
+### Module 5 — 前端管理界面
 **文件**: `dashboard/`（独立目录）  
 **内容**:
 - GitHub 登录页
 - App 列表 + 创建
-- API Key 管理
-- 用量图表（Chart.js 或 lightweight 替代）
+- API Key 管理（明文仅显示一次）
+- 用量看板：已用 / 上限进度条、日系列图表
+- 计划标识 + 升级入口（升级逻辑本期不实现，仅展示）
 
-**依赖**: Module 3 API 可用  
+**依赖**: Module 4 API 可用  
 **部署**: Cloudflare Pages，`VITE_API_BASE_URL` 指向后端
 
 ---
 
-### Module 5 — 路由注册 + 集成
+### Module 6 — 路由注册 + 集成
 **文件**: `backend/src/routes/index.ts`  
 **内容**:
 - 注册 `/auth/*` 路由
@@ -303,7 +435,7 @@ FRONTEND_URL=https://dashboard.yourdomain.com
 - CORS 配置：允许 Cloudflare Pages 域名
 - 更新 `MULTI_TENANT` 模式说明
 
-**依赖**: Module 2 + Module 3
+**依赖**: Module 2 + Module 4
 
 ---
 
@@ -398,8 +530,11 @@ api.yourdomain.com {
 
 | 模块 | 推荐分配 | 备注 |
 |------|---------|------|
-| Module 1（DB Migration） | Gemini 或 Claude | 纯 Prisma，无业务逻辑 |
+| Module 1（DB Migration） | Gemini | 纯 Prisma，无业务逻辑 |
 | Module 2（GitHub OAuth） | Claude | 涉及安全细节，需精确 |
-| Module 3（Dashboard API） | Gemini | CRUD 为主，参照现有 controller 风格 |
-| Module 4（前端） | Gemini | 独立目录，不影响后端 |
-| Module 5（路由集成） | Claude | 需了解现有路由结构 |
+| Module 3（Quota Guard） | Claude | 影响核心 SDK 流程，需精确 |
+| Module 4（Dashboard API） | Gemini | CRUD 为主，参照现有 controller 风格 |
+| Module 5（前端） | Gemini | 独立目录，不影响后端 |
+| Module 6（路由集成） | Claude | 需了解现有路由结构 |
+
+**开发顺序**：Module 1 → Module 2 + Module 3（可并行）→ Module 4 → Module 5 + Module 6（可并行）
