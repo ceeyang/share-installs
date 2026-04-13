@@ -270,15 +270,37 @@ DELETE /dashboard/apps/:appId
 
 ```
 GET /dashboard/apps/:appId/keys
-→ ApiKeyInfo[]（不含 keyHash，只含 id/name/prefix/createdAt/revokedAt）
+→ ApiKeyInfo[]（id/name/prefix/createdAt/revokedAt）
+
+GET /dashboard/apps/:appId/keys/:keyId/reveal
+→ { key: "sk_live_xxx" }  ← 解密后返回，可多次调用
 
 POST /dashboard/apps/:appId/keys
 Body: { name: string }
-→ { id, name, prefix, key: "sk_live_xxx" }  ← 明文只返回一次
+→ { id, name, prefix, key: "sk_live_xxx" }
 
 DELETE /dashboard/apps/:appId/keys/:keyId
 → 204（设置 revokedAt，软删除）
 ```
+
+**存储方式**：API Key 同时存储 Hash（用于鉴权查找）和 AES-256-GCM 加密值（用于展示）。
+
+```prisma
+model ApiKey {
+  id           String    @id @default(cuid())
+  appId        String    @map("app_id")      // 对应 App.id
+  name         String
+  keyHash      String    @unique @map("key_hash")      // SHA-256，用于鉴权
+  keyEncrypted String    @map("key_encrypted")          // AES-256-GCM，用于展示
+  prefix       String                                   // 前12字符，用于 DB 索引
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime? @map("revoked_at")
+
+  @@index([prefix])
+}
+```
+
+加密使用服务器端 `ENCRYPTION_KEY` 环境变量（32字节随机 hex），密钥和 DB 需同时泄露才能还原明文。
 
 ### 5.4 用量统计
 
@@ -447,14 +469,13 @@ DATABASE_URL=
 REDIS_URL=
 MULTI_TENANT=true
 ADMIN_SECRET=
-JWT_SECRET=              # 新增：用于 Dashboard session
 FINGERPRINT_MATCH_TTL_HOURS=72
 
-# GitHub OAuth（新增）
+# 新增
+JWT_SECRET=              # Dashboard session 签名，32字节随机字符串
+ENCRYPTION_KEY=          # API Key 加密存储，32字节随机 hex（openssl rand -hex 32）
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-
-# CORS（新增）
 FRONTEND_URL=https://dashboard.yourdomain.com
 ```
 
