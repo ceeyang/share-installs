@@ -45,6 +45,15 @@ const configSchema = z.object({
   // Leave empty for fully open access (suitable for private networks).
   ADMIN_SECRET: z.string().optional(),
 
+  // SaaS Auth & Encryption
+  JWT_SECRET: z.string().optional(),
+  ENCRYPTION_KEY: z.string().optional(),
+
+  // GitHub OAuth
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
+  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+
   // Fingerprint matching
   FINGERPRINT_MATCH_TTL_HOURS: z.coerce.number().default(72),
   FINGERPRINT_MATCH_THRESHOLD: z.coerce.number().default(0.75),

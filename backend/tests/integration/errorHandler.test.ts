@@ -63,7 +63,7 @@ describe('Validation errors – 400', () => {
 describe('AppError propagation', () => {
   it('propagates 404 AppError from service (project not found)', async () => {
     const prisma = makeMockPrisma();
-    prisma.project.findUnique.mockResolvedValueOnce(null);
+    prisma.app.findUnique.mockResolvedValueOnce(null);
     const {agent} = buildApp(prisma);
 
     // POST /v1/projects/:id/api-keys explicitly checks for project existence
@@ -82,10 +82,10 @@ describe('Prisma error mapping', () => {
       name: 'PrismaClientKnownRequestError',
       code: 'P2002',
     });
-    prisma.project.create.mockRejectedValueOnce(prismaError);
+    prisma.app.create.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/projects').send({name: 'Broken Project'});
+    const res = await agent.post('/v1/projects').send({name: 'Broken Project', userId: 'user_1'});
 
     expect(res.status).toBe(409);
     expect(res.body.error.status).toBe('ALREADY_EXISTS');
@@ -97,8 +97,8 @@ describe('Prisma error mapping', () => {
       name: 'PrismaClientKnownRequestError',
       code: 'P2025',
     });
-    // simulate error during project retrieval in createKey
-    prisma.project.findUnique.mockRejectedValueOnce(prismaError);
+    // simulate error during app retrieval in createKey
+    prisma.app.findUnique.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
     const res = await agent.post('/v1/projects/proj_missing/api-keys').send({name: 'key'});
@@ -111,7 +111,7 @@ describe('Prisma error mapping', () => {
 describe('Unhandled errors – 500', () => {
   it('returns 500 for unexpected errors from service layer', async () => {
     const prisma = makeMockPrisma();
-    prisma.project.findMany.mockRejectedValueOnce(new Error('DB connection lost'));
+    prisma.app.findMany.mockRejectedValueOnce(new Error('DB connection lost'));
     const {agent} = buildApp(prisma);
 
     const res = await agent.get('/v1/projects');

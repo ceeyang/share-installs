@@ -125,7 +125,7 @@ export function createRequireApiKey(prisma: PrismaClient) {
     try {
       const apiKey = await prisma.apiKey.findFirst({
         where: {prefix, keyHash: hash, revokedAt: null},
-        select: {projectId: true},
+        select: {appId: true},
       });
 
       if (!apiKey) {
@@ -139,7 +139,7 @@ export function createRequireApiKey(prisma: PrismaClient) {
         return;
       }
 
-      req.projectId = apiKey.projectId;
+      req.projectId = apiKey.appId;
       next();
     } catch (err) {
       next(err);

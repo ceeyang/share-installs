@@ -19,6 +19,9 @@ import {ResolveController} from '../controllers/resolveController';
 import {ProjectController} from '../controllers/projectController';
 import {FingerprintService} from '../services/fingerprintService';
 import {ApiKeyService} from '../services/apiKeyService';
+import {QuotaService} from '../services/quotaService';
+import {createGitHubAuthRouter} from '../auth/github';
+import {createRequireSession} from '../auth/session';
 import {
   adminAuth,
   createRequireApiKey,
@@ -30,7 +33,8 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   const router = Router();
 
   // ---- Services ----
-  const fingerprintService = new FingerprintService(prisma, redis);
+  const quotaService = config.MULTI_TENANT ? new QuotaService(prisma, redis) : undefined;
+  const fingerprintService = new FingerprintService(prisma, redis, quotaService);
   const apiKeyService = new ApiKeyService(prisma);
 
   // ---- Controllers ----
@@ -39,6 +43,8 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
 
   // ---- Auth helpers ----
   const requireApiKey = createRequireApiKey(prisma);
+  const jwtSecret = config.JWT_SECRET ?? '';
+  const requireSession = createRequireSession(jwtSecret);
 
   // ---- Rate limiters ----
   const {apiRateLimiter, resolveRateLimiter} = createRateLimiters(redis);
@@ -86,6 +92,22 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   }
 
   router.use('/v1', v1);
+
+  // ---- Auth routes (/auth/*) ----
+  if (config.GITHUB_CLIENT_ID && config.GITHUB_CLIENT_SECRET && config.JWT_SECRET) {
+    router.use('/auth', createGitHubAuthRouter(prisma, jwtSecret));
+  }
+
+  // ---- Dashboard routes (/dashboard/*) ----
+  // All dashboard routes require a valid session cookie.
+  // Route handlers are implemented by Module 4 (dashboardController).
+  // Until then, returns 501 so the middleware chain is verified.
+  const dashboard = Router();
+  dashboard.use(requireSession);
+  dashboard.all('*', (_req, res) => {
+    res.status(501).json({error: {message: 'Dashboard API not yet implemented.'}});
+  });
+  router.use('/dashboard', dashboard);
 
   return router;
 }

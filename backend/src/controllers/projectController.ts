@@ -1,25 +1,29 @@
 /**
- * @fileoverview Project and API key management controller.
+ * @fileoverview App and API key management controller (admin/back-office).
  *
  * Only active when MULTI_TENANT=true. Endpoints:
- *   POST   /v1/projects                              Create project
- *   GET    /v1/projects                              List projects
+ *   POST   /v1/projects                              Create app
+ *   GET    /v1/projects                              List apps (all users)
  *   POST   /v1/projects/:projectId/api-keys          Create API key
  *   GET    /v1/projects/:projectId/api-keys          List API keys
  *   DELETE /v1/projects/:projectId/api-keys/:keyId   Revoke API key
+ *
+ * Note: User-facing app/key management is handled by dashboardController (Module 4).
  */
 
 import {Request, Response, NextFunction} from 'express';
 import {body, param, validationResult} from 'express-validator';
 import {ApiKeyService} from '../services/apiKeyService';
 import {AppError} from '../middleware/errorHandler';
+import {config} from '../config/index';
 
 export class ProjectController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
-  /** POST /v1/projects */
+  /** POST /v1/projects — requires { name, userId } in body */
   create = [
     body('name').isString().trim().notEmpty(),
+    body('userId').isString().trim().notEmpty(),
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -30,20 +34,23 @@ export class ProjectController {
         return;
       }
       try {
-        const project = await this.apiKeyService.createProject(req.body.name as string);
-        res.status(201).json({project});
+        const app = await this.apiKeyService.createApp(
+          req.body.userId as string,
+          req.body.name as string,
+        );
+        res.status(201).json({project: app});
       } catch (err) {
         next(err);
       }
     },
   ];
 
-  /** GET /v1/projects */
+  /** GET /v1/projects — lists all apps (admin view) */
   list = [
     async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const projects = await this.apiKeyService.listProjects();
-        res.json({projects});
+        const apps = await this.apiKeyService.listAllApps();
+        res.json({projects: apps});
       } catch (err) {
         next(err);
       }
@@ -65,16 +72,19 @@ export class ProjectController {
       }
       try {
         const {projectId} = req.params;
-        const project = await this.apiKeyService.getProject(projectId);
-        if (!project) throw new AppError(404, 'Project not found.');
+        const app = await this.apiKeyService.getAppById(projectId);
+        if (!app) throw new AppError(404, 'Project not found.');
 
-        const created = await this.apiKeyService.createApiKey(projectId, req.body.name as string);
+        const created = await this.apiKeyService.createApiKey(
+          projectId,
+          req.body.name as string,
+          config.ENCRYPTION_KEY,
+        );
         res.status(201).json({
           id: created.id,
-          projectId: created.projectId,
+          appId: created.appId,
           name: created.name,
           prefix: created.prefix,
-          // rawKey is returned once; client must store it securely.
           key: created.rawKey,
           createdAt: created.createdAt,
         });
@@ -120,7 +130,7 @@ export class ProjectController {
       }
       try {
         await this.apiKeyService.revokeApiKey(req.params.keyId, req.params.projectId);
-        res.json({});
+        res.status(204).send();
       } catch (err) {
         next(err);
       }

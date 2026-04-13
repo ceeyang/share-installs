@@ -18,6 +18,7 @@
 
 import type {Redis} from 'ioredis';
 import {PrismaClient, DevicePlatform, Prisma} from '@prisma/client';
+import {QuotaService} from './quotaService';
 import {
   computeFingerprint,
   computeSimilarityScore,
@@ -60,7 +61,18 @@ export class FingerprintService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly redis: Redis,
+    private readonly quotaService?: QuotaService,
   ) {}
+
+  /**
+   * Enforces quota before recording a conversion.
+   * Only runs in MULTI_TENANT mode when a QuotaService is injected.
+   * Throws QuotaExceededError if the app is over its plan limit.
+   */
+  private async checkQuota(appId?: string): Promise<void> {
+    if (!config.MULTI_TENANT || !this.quotaService || !appId) return;
+    await this.quotaService.checkAndIncrement(appId);
+  }
 
   /**
    * Records a web click event and caches signals in Redis for later resolution.
@@ -74,32 +86,31 @@ export class FingerprintService {
     const fingerprint = computeFingerprint(signals);
     const platform = this.detectWebPlatform(signals.userAgent ?? '');
 
-    const clickEvent = await this.prisma.clickEvent.create({
-      data: {
-        inviteCode,
-        customData: customData ? (customData as Prisma.InputJsonValue) : Prisma.JsonNull,
-        projectId: projectId ?? null,
-        fingerprint,
-        ipAddress: signals.ipAddress,
-        userAgent: signals.userAgent,
-        languages: signals.languages ? JSON.stringify(signals.languages) : null,
-        timezone: signals.timezone,
-        referrer,
-        screenWidth: signals.screenWidth,
-        screenHeight: signals.screenHeight,
-        pixelRatio: signals.pixelRatio,
-        colorDepth: signals.colorDepth,
-        touchPoints: signals.touchPoints,
-        hardwareConcurrency: signals.hardwareConcurrency,
-        deviceMemory: signals.deviceMemory,
-        canvasHash: signals.canvasHash,
-        webglHash: signals.webglHash,
-        audioHash: signals.audioHash,
-        connectionType: signals.connectionType,
-        platform,
-        osVersion: signals.osVersion,
-      },
-    });
+    const clickData: Prisma.ClickEventUncheckedCreateInput = {
+      inviteCode,
+      customData: customData ? (customData as Prisma.InputJsonValue) : Prisma.JsonNull,
+      appId: projectId ?? null,
+      fingerprint,
+      ipAddress: signals.ipAddress,
+      userAgent: signals.userAgent,
+      languages: signals.languages ? JSON.stringify(signals.languages) : null,
+      timezone: signals.timezone,
+      referrer,
+      screenWidth: signals.screenWidth,
+      screenHeight: signals.screenHeight,
+      pixelRatio: signals.pixelRatio,
+      colorDepth: signals.colorDepth,
+      touchPoints: signals.touchPoints,
+      hardwareConcurrency: signals.hardwareConcurrency,
+      deviceMemory: signals.deviceMemory,
+      canvasHash: signals.canvasHash,
+      webglHash: signals.webglHash,
+      audioHash: signals.audioHash,
+      connectionType: signals.connectionType,
+      platform,
+      osVersion: signals.osVersion,
+    };
+    const clickEvent = await this.prisma.clickEvent.create({data: clickData});
 
     // Cache for fast exact-match lookup
     const redisKey = `${config.REDIS_KEY_PREFIX}click:${fingerprint}`;
@@ -133,6 +144,7 @@ export class FingerprintService {
     // ---- Channel 1: Exact hash match (Redis fast path) ----
     const exactResult = await this.tryExactMatch(fingerprint, projectId);
     if (exactResult) {
+      await this.checkQuota(projectId);
       await this.recordConversion(exactResult.clickEventId, exactResult.inviteCode, platform, signals, 'exact', 1.0, projectId);
       
       // Delete the cache entry after match to prevent re-use
@@ -146,6 +158,7 @@ export class FingerprintService {
     // ---- Channel 2: Fuzzy similarity match ----
     const fuzzyResult = await this.tryFuzzyMatch(signals, projectId);
     if (fuzzyResult) {
+      await this.checkQuota(projectId);
       await this.recordConversion(
         fuzzyResult.clickEventId,
         fuzzyResult.inviteCode,
@@ -169,11 +182,12 @@ export class FingerprintService {
         const clickEvent = await this.prisma.clickEvent.findFirst({
           where: {
             inviteCode: clipboardResult.inviteCode,
-            ...(projectId ? {projectId} : {}),
+            ...(projectId ? {appId: projectId} : {}),
           },
           orderBy: {createdAt: 'desc'},
           select: {id: true, customData: true},
         });
+        await this.checkQuota(projectId);
         logger.info({inviteCode: clipboardResult.inviteCode}, 'Clipboard fallback match');
         return {
           clickEventId: clickEvent?.id ?? null,
@@ -216,7 +230,7 @@ export class FingerprintService {
     // In multi-tenant mode verify the click belongs to this project
     if (projectId) {
       const clickEvent = await this.prisma.clickEvent.findFirst({
-        where: {id: cached.clickEventId, projectId},
+        where: {id: cached.clickEventId, appId: projectId},
         select: {id: true},
       });
       if (!clickEvent) return null;
@@ -245,7 +259,7 @@ export class FingerprintService {
     const clickEvents = await this.prisma.clickEvent.findMany({
       where: {
         id: {in: recentIds},
-        ...(projectId ? {projectId} : {}),
+        ...(projectId ? {appId: projectId} : {}),
       },
       orderBy: {createdAt: 'desc'},
     });
@@ -303,18 +317,17 @@ export class FingerprintService {
   ): Promise<void> {
     if (!clickEventId) return;
 
-    await this.prisma.conversion.create({
-      data: {
-        inviteCode,
-        clickEventId,
-        projectId: projectId ?? null,
-        platform: this.toDevicePlatform(platform),
-        matchChannel: channel,
-        confidence,
-        nativeSignals: sdkSignals as object,
-        installedAt: new Date(),
-      },
-    });
+    const convData: Prisma.ConversionUncheckedCreateInput = {
+      inviteCode,
+      clickEventId,
+      appId: projectId ?? null,
+      platform: this.toDevicePlatform(platform),
+      matchChannel: channel,
+      confidence,
+      nativeSignals: sdkSignals as object,
+      installedAt: new Date(),
+    };
+    await this.prisma.conversion.create({data: convData});
   }
 
   /**

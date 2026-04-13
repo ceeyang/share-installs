@@ -16,6 +16,7 @@
 
 import {Request, Response, NextFunction} from 'express';
 import {logger} from '../utils/logger';
+import {QuotaExceededError} from '../services/quotaService';
 
 /** Map of HTTP status codes to Google API status names. */
 const HTTP_STATUS_MAP: Record<number, string> = {
@@ -57,6 +58,20 @@ export function errorHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction,
 ): void {
+  if (err instanceof QuotaExceededError) {
+    res.status(402).json({
+      error: {
+        code: 'QUOTA_EXCEEDED',
+        message: `${err.period === 'daily' ? 'Daily' : 'Monthly'} install quota exceeded. Upgrade your plan.`,
+        plan: err.plan.toLowerCase(),
+        limit: err.limit,
+        used: err.used,
+        resetAt: err.resetAt.toISOString(),
+      },
+    });
+    return;
+  }
+
   if (err instanceof AppError) {
     res.status(err.statusCode).json(buildErrorBody(err.statusCode, err.status, err.message));
     return;

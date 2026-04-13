@@ -115,14 +115,19 @@ export function makeMockPrisma() {
     },
     apiKey: {
       findFirst: jest.fn(async () => null),
+      create: jest.fn(async () => ({id: 'key_1', appId: 'app_test1', name: 'test', keyHash: 'h', keyEncrypted: 'e', prefix: 'sk_live_abcd', createdAt: new Date(), revokedAt: null})),
+      findMany: jest.fn(async () => []),
+      updateMany: jest.fn(async () => ({count: 1})),
     },
-    project: {
-      create: jest.fn().mockResolvedValue({id: 'proj_test1'}),
+    app: {
+      create: jest.fn().mockResolvedValue({id: 'app_test1', userId: 'user_1', name: 'Test App', createdAt: new Date(), updatedAt: new Date()}),
       findMany: jest.fn().mockResolvedValue([]),
-      count: jest.fn().mockResolvedValue(0),
-      findUnique: jest.fn().mockResolvedValue({id: 'proj_test1'}),
-      findFirst: jest.fn().mockResolvedValue({id: 'proj_test1'}),
-      update: jest.fn().mockResolvedValue({id: 'proj_test1'}),
+      findUnique: jest.fn().mockResolvedValue({id: 'app_test1', userId: 'user_1', name: 'Test App', createdAt: new Date(), updatedAt: new Date()}),
+      findFirst: jest.fn().mockResolvedValue({id: 'app_test1', userId: 'user_1', name: 'Test App', createdAt: new Date(), updatedAt: new Date()}),
+    },
+    user: {
+      upsert: jest.fn().mockResolvedValue({id: 'user_1', githubId: '123', githubLogin: 'test', plan: 'FREE', createdAt: new Date(), updatedAt: new Date()}),
+      findUnique: jest.fn().mockResolvedValue(null),
     },
     $transaction: jest.fn(async (fns: Array<Promise<unknown>>) => Promise.all(fns)),
     $connect: jest.fn(async () => undefined),

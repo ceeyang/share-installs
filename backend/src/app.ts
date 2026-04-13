@@ -7,6 +7,7 @@
 import path from 'path';
 import {v4 as uuidv4} from 'uuid';
 import express, {Application} from 'express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
@@ -34,15 +35,20 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-SDK-Platform', 'X-SDK-Version', 'X-Request-Id'],
     exposedHeaders: ['X-Request-Id'],
+    credentials: true, // Required for cross-origin cookie sessions (dashboard SPA → API)
   };
 
   if (allowedOrigins.includes('*') || config.NODE_ENV !== 'production') {
     // Development / wildcard: allow all origins
     corsOptions.origin = true;
   } else {
-    // Production with restricted origins
+    // Production: include FRONTEND_URL automatically alongside explicit CORS_ORIGINS
+    const productionOrigins = [...allowedOrigins];
+    if (config.FRONTEND_URL && !productionOrigins.includes(config.FRONTEND_URL)) {
+      productionOrigins.push(config.FRONTEND_URL);
+    }
     corsOptions.origin = (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || productionOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -57,6 +63,9 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
   // Request body parsing
   app.use(express.json({limit: '1mb'}));
   app.use(express.urlencoded({extended: true}));
+
+  // Parse cookies (used for dashboard session JWT)
+  app.use(cookieParser());
 
   // Structured HTTP logging with Request-ID propagation.
   // The ID is taken from the incoming X-Request-Id header (so callers can
