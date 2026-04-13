@@ -99,6 +99,7 @@ export function computeFingerprint(signals: FingerprintSignals): string {
     Math.min(signals.screenWidth ?? 0, signals.screenHeight ?? 0).toString(),
     Math.max(signals.screenWidth ?? 0, signals.screenHeight ?? 0).toString(),
     signals.pixelRatio?.toFixed(2) ?? '',
+    normalizeOsVersion(signals.osVersion),
   ];
 
   return crypto.createHash('sha256').update(parts.join('|')).digest('hex');
@@ -127,18 +128,24 @@ export function computeSimilarityScore(
   a: FingerprintSignals,
   b: FingerprintSignals,
 ): number {
+  // Hard veto: OS version mismatch means different devices.
+  // Within the attribution window (hours) no real user updates their OS.
+  const osA = normalizeOsVersion(a.osVersion);
+  const osB = normalizeOsVersion(b.osVersion);
+  if (osA && osB && osA !== osB) return 0;
+
   const checks: ScoringCheck[] = [
-    // ---- IP address (/24 subnet) — highest single signal ----
+    // ---- IP address (/24 subnet) — auxiliary signal; users switch WiFi↔cellular ----
     {
-      weight: 40,
+      weight: 20,
       available: !!(a.ipAddress && b.ipAddress),
       match: isSameSubnet(a.ipAddress, b.ipAddress),
     },
-    // ---- Screen resolution (orientation-independent, ±2px tolerance) ----
+    // ---- Screen resolution — most stable device-specific signal ----
     // Android SDK uses integer division which can differ by 1px from browser's
     // window.screen.width rounding. Allow ±2px on each dimension.
     {
-      weight: 20,
+      weight: 25,
       available: !!(a.screenWidth && b.screenWidth && a.screenHeight && b.screenHeight),
       match: (
         Math.abs(Math.min(a.screenWidth!, a.screenHeight!) - Math.min(b.screenWidth!, b.screenHeight!)) <= 2 &&
@@ -159,7 +166,7 @@ export function computeSimilarityScore(
     },
     // ---- OS version ----
     {
-      weight: 8,
+      weight: 20,
       available: !!(a.osVersion && b.osVersion),
       match: normalizeOsVersion(a.osVersion) === normalizeOsVersion(b.osVersion),
     },

@@ -97,9 +97,23 @@ export class ResolveController {
 
         const ua = typeof fingerprint.ua === 'string' ? fingerprint.ua : (req.headers['user-agent'] ?? '');
         let osVersion: string | undefined;
-        if (ua.includes('iPhone OS')) {
-            const match = ua.match(/iPhone OS (\d+_\d+)/);
-            if (match) osVersion = match[1].replace('_', '.');
+        if (ua.includes('iPhone OS') || ua.includes('iPad OS')) {
+            const iphoneOsMatch = ua.match(/iPhone OS (\d+)[_.](\d+)/);
+            const safariVersionMatch = ua.match(/Version\/(\d+)\.(\d+)/);
+            if (iphoneOsMatch && safariVersionMatch) {
+                // On real devices iPhone OS major == Safari Version major (both report public iOS version).
+                // On simulators iPhone OS reports the internal kernel version (e.g. 18.7) while
+                // Safari Version reports the public iOS version (e.g. 26.3). Use the larger one.
+                const iphoneMajor = parseInt(iphoneOsMatch[1], 10);
+                const safariMajor = parseInt(safariVersionMatch[1], 10);
+                osVersion = safariMajor > iphoneMajor
+                    ? `${safariVersionMatch[1]}.${safariVersionMatch[2]}`
+                    : `${iphoneOsMatch[1]}.${iphoneOsMatch[2]}`;
+            } else if (iphoneOsMatch) {
+                osVersion = `${iphoneOsMatch[1]}.${iphoneOsMatch[2]}`;
+            } else if (safariVersionMatch) {
+                osVersion = `${safariVersionMatch[1]}.${safariVersionMatch[2]}`;
+            }
         } else if (ua.includes('Android')) {
             const match = ua.match(/Android (\d+(\.\d+)?)/);
             if (match) osVersion = match[1];

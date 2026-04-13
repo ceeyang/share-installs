@@ -38,7 +38,9 @@ class DemoHomePage extends StatefulWidget {
 class _DemoHomePageState extends State<DemoHomePage> {
   static const _channel = MethodChannel('com.shareinstalls/sdk');
 
-  final _apiUrlController = TextEditingController(text: 'http://localhost:6066');
+  final _apiUrlController = TextEditingController(
+    text: 'http://192.168.8.189:6066',
+  );
   final _apiKeyController = TextEditingController();
 
   bool _isConfigured = false;
@@ -55,7 +57,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
 
   void _addLog(String level, String message) {
     setState(() {
-      _logs.insert(0, _LogEntry(level: level, message: message, time: DateTime.now()));
+      _logs.insert(
+        0,
+        _LogEntry(level: level, message: message, time: DateTime.now()),
+      );
     });
   }
 
@@ -66,7 +71,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
     try {
       final result = await _channel.invokeMethod('configure', {
         'apiBaseUrl': _apiUrlController.text.trim(),
-        'apiKey': _apiKeyController.text.trim().isEmpty ? null : _apiKeyController.text.trim(),
+        'apiKey': _apiKeyController.text.trim().isEmpty
+            ? null
+            : _apiKeyController.text.trim(),
         'debug': true,
       });
       setState(() => _isConfigured = true);
@@ -95,7 +102,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
         final map = Map<String, dynamic>.from(result as Map);
         final prettyJson = const JsonEncoder.withIndent('  ').convert(map);
         setState(() => _resolveResult = prettyJson);
-        _addLog('success', 'Invite resolved: code=${map['code']}, confidence=${map['confidence']}, channel=${map['channel']}');
+        _addLog(
+          'success',
+          'Invite resolved: code=${map['code']}, confidence=${map['confidence']}, channel=${map['channel']}',
+        );
       } else {
         setState(() => _resolveResult = '{ "matched": false }');
         _addLog('warn', 'No matching invite found');
@@ -122,7 +132,10 @@ class _DemoHomePageState extends State<DemoHomePage> {
       final result = await _channel.invokeMethod('getSDKInfo');
       if (result != null) {
         final map = Map<String, dynamic>.from(result as Map);
-        _addLog('info', 'SDK Info: version=${map['version']}, platform=${map['platform']}, configured=${map['configured']}');
+        _addLog(
+          'info',
+          'SDK Info: version=${map['version']}, platform=${map['platform']}, configured=${map['configured']}',
+        );
       }
     } on PlatformException catch (e) {
       _addLog('error', 'Get info failed: ${e.message}');
@@ -191,11 +204,32 @@ class _DemoHomePageState extends State<DemoHomePage> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: _archNode('🌐', 'Web SDK', 'Fingerprint', const Color(0xFF6366F1))),
+                Expanded(
+                  child: _archNode(
+                    '🌐',
+                    'Web SDK',
+                    'Fingerprint',
+                    const Color(0xFF6366F1),
+                  ),
+                ),
                 const Icon(Icons.arrow_forward, size: 16, color: Colors.grey),
-                Expanded(child: _archNode('⚡', 'Backend', 'Match', const Color(0xFF10B981))),
+                Expanded(
+                  child: _archNode(
+                    '⚡',
+                    'Backend',
+                    'Match',
+                    const Color(0xFF10B981),
+                  ),
+                ),
                 const Icon(Icons.arrow_forward, size: 16, color: Colors.grey),
-                Expanded(child: _archNode('📱', 'This App', 'Resolve', const Color(0xFFF59E0B))),
+                Expanded(
+                  child: _archNode(
+                    '📱',
+                    'This App',
+                    'Resolve',
+                    const Color(0xFFF59E0B),
+                  ),
+                ),
               ],
             ),
           ],
@@ -217,8 +251,18 @@ class _DemoHomePageState extends State<DemoHomePage> {
         children: [
           Text(icon, style: const TextStyle(fontSize: 20)),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
-          Text(subtitle, style: TextStyle(fontSize: 10, color: color.withOpacity(0.7))),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 10, color: color.withOpacity(0.7)),
+          ),
         ],
       ),
     );
@@ -234,17 +278,32 @@ class _DemoHomePageState extends State<DemoHomePage> {
             Row(
               children: [
                 Container(
-                  width: 28, height: 28,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)]),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Center(child: Text('1', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold))),
+                  child: const Center(
+                    child: Text(
+                      '1',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text('Configuration', style: theme.textTheme.titleMedium),
                 const Spacer(),
-                _statusBadge(_isConfigured ? 'Configured' : 'Not configured', _isConfigured),
+                _statusBadge(
+                  _isConfigured ? 'Configured' : 'Not configured',
+                  _isConfigured,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -292,12 +351,24 @@ class _DemoHomePageState extends State<DemoHomePage> {
             Row(
               children: [
                 Container(
-                  width: 28, height: 28,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)]),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF10B981), Color(0xFF059669)],
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Center(child: Text('2', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold))),
+                  child: const Center(
+                    child: Text(
+                      '2',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text('Actions', style: theme.textTheme.titleMedium),
@@ -308,7 +379,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: (!_isConfigured || _isLoading) ? null : _resolveDeferred,
+                    onPressed: (!_isConfigured || _isLoading)
+                        ? null
+                        : _resolveDeferred,
                     icon: const Icon(Icons.search),
                     label: const Text('Resolve'),
                     style: FilledButton.styleFrom(
@@ -341,14 +414,22 @@ class _DemoHomePageState extends State<DemoHomePage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
+                const Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF10B981),
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Text('Resolution Result', style: theme.textTheme.titleMedium),
                 const Spacer(),
                 IconButton(
                   onPressed: () {
-                    Clipboard.setData(ClipboardData(text: _resolveResult ?? ''));
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied to clipboard')));
+                    Clipboard.setData(
+                      ClipboardData(text: _resolveResult ?? ''),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Copied to clipboard')),
+                    );
                   },
                   icon: const Icon(Icons.copy, size: 18),
                   tooltip: 'Copy JSON',
@@ -389,7 +470,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
               children: [
                 const Icon(Icons.terminal, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
-                Text('Console', style: theme.textTheme.labelMedium?.copyWith(color: Colors.grey)),
+                Text(
+                  'Console',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.grey,
+                  ),
+                ),
                 const Spacer(),
                 TextButton(
                   onPressed: () => setState(() => _logs.clear()),
@@ -402,7 +488,12 @@ class _DemoHomePageState extends State<DemoHomePage> {
           SizedBox(
             height: 200,
             child: _logs.isEmpty
-                ? const Center(child: Text('No logs yet', style: TextStyle(color: Colors.grey)))
+                ? const Center(
+                    child: Text(
+                      'No logs yet',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  )
                 : ListView.builder(
                     padding: const EdgeInsets.all(12),
                     itemCount: _logs.length,
@@ -411,16 +502,26 @@ class _DemoHomePageState extends State<DemoHomePage> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text.rich(
-                          TextSpan(children: [
-                            TextSpan(
-                              text: '[${log.timeStr}] ',
-                              style: const TextStyle(color: Colors.grey, fontFamily: 'monospace', fontSize: 11),
-                            ),
-                            TextSpan(
-                              text: log.message,
-                              style: TextStyle(color: log.color, fontFamily: 'monospace', fontSize: 11),
-                            ),
-                          ]),
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '[${log.timeStr}] ',
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontFamily: 'monospace',
+                                  fontSize: 11,
+                                ),
+                              ),
+                              TextSpan(
+                                text: log.message,
+                                style: TextStyle(
+                                  color: log.color,
+                                  fontFamily: 'monospace',
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -441,9 +542,23 @@ class _DemoHomePageState extends State<DemoHomePage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: active ? Colors.green : Colors.grey)),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active ? Colors.green : Colors.grey,
+            ),
+          ),
           const SizedBox(width: 6),
-          Text(text, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: active ? Colors.green : Colors.grey)),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: active ? Colors.green : Colors.grey,
+            ),
+          ),
         ],
       ),
     );
@@ -457,7 +572,8 @@ class _LogEntry {
 
   _LogEntry({required this.level, required this.message, required this.time});
 
-  String get timeStr => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
+  String get timeStr =>
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
 
   Color get color => switch (level) {
     'success' => const Color(0xFF34D399),

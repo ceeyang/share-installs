@@ -1,41 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MyApp — You're Invited!</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background: #f8fafc; color: #0f172a; padding: 40px 20px; text-align: center; }
-    .card { background: white; max-width: 400px; margin: 0 auto; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-    h1 { margin-top: 0; font-size: 24px; }
-    p { color: #64748b; margin-bottom: 30px; line-height: 1.5; }
-    .btn { display: inline-block; background: #6366f1; color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; width: 100%; }
-    .btn:active { transform: scale(0.97); }
-    #log { margin-top: 20px; font-size: 13px; color: #10b981; font-family: monospace; display: none; }
-    
-    .config-box { margin-bottom: 24px; border: 1px dashed #cbd5e1; padding: 16px; border-radius: 12px; text-align: left; background: #f8fafc; }
-    .config-box label { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; font-weight: 600; }
-    .config-box input { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 12px; outline: none; font-family: monospace; font-size: 13px; }
-    .config-box input:focus { border-color: #6366f1; }
+    body {
+      font-family: -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 40px 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    p {
+      color: #64748b;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    #log {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #10b981;
+      font-family: monospace;
+      display: none;
+    }
+
+    .config-box {
+      margin-bottom: 24px;
+      border: 1px dashed #cbd5e1;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: left;
+      background: #f8fafc;
+    }
+
+    .config-box label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .config-box input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      outline: none;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .config-box input:focus {
+      border-color: #6366f1;
+    }
   </style>
 
   <!-- 1. Include the share-installs Web SDK -->
   <script src="../../sdk/js/dist/umd/share-installs-sdk.min.js"></script>
 </head>
+
 <body>
-  
+
   <div class="card">
     <h1>🎁 You are invited!</h1>
     <p>Your friend sent you an invite to <strong>MyApp</strong>. Download the app to claim your reward!</p>
-    
+
     <!-- Testing Configuration -->
     <div class="config-box">
       <label>API Base URL</label>
-      <input type="text" id="apiUrlCtx" value="http://localhost:6066" />
-      
+      <input type="text" id="apiUrlCtx" value="http://192.168.8.189:6066" />
+
       <label>API Key (Optional, for SaaS)</label>
       <input type="text" id="apiKeyCtx" placeholder="sk_live_..." />
-      
+
       <label>Invite Code</label>
       <input type="text" id="inviteCodeCtx" value="ABC12345" style="margin-bottom: 0;" />
     </div>
@@ -51,7 +127,7 @@
     async function onDownloadApp() {
       const btn = document.getElementById('downloadBtn');
       const log = document.getElementById('log');
-      
+
       const apiBaseUrl = document.getElementById('apiUrlCtx').value.trim();
       const apiKey = document.getElementById('apiKeyCtx').value.trim() || undefined;
       const inviteCode = document.getElementById('inviteCodeCtx').value.trim();
@@ -68,7 +144,7 @@
         // 2. Setup the one-line SDK integration
         console.log("Calling ShareInstalls SDK...");
         log.style.display = 'none';
-        
+
         // This automatically collects the fingerprint and reports the click!
         const result = await ShareInstalls.trackClick({
           apiBaseUrl: apiBaseUrl,
@@ -85,7 +161,7 @@
         // 3. Redirect to the App Store / Play Store
         // if (ShareInstalls.isIOS()) location.href = 'https://apps.apple.com/app/id123';
         // else location.href = 'market://details?id=com.app';
-        
+
       } catch (err) {
         console.error('Track click failed:', err);
         log.innerHTML = `❌ Error: ${err.message || 'Network failed'}`;
@@ -98,4 +174,5 @@
     }
   </script>
 </body>
+
 </html>
