@@ -119,12 +119,12 @@ export function createGitHubAuthRouter(prisma: PrismaClient, jwtSecret: string):
       });
 
       const token = signJwt({sub: user.id, githubLogin: user.githubLogin}, jwtSecret);
-      const isProd = config.NODE_ENV === 'production';
+      const isHttps = config.FRONTEND_URL.startsWith('https://');
 
       res.cookie('session', token, {
         httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
+        secure: isHttps,
+        sameSite: isHttps ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         path: '/',
       });
