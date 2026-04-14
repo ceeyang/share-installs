@@ -7,18 +7,50 @@
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 #
 # Services:
-#   dashboard :8080  – Vue SPA (nginx, proxies /auth + /dashboard to backend)
-#   backend   :6066  – REST API
-#   db        :5432  – PostgreSQL 16
-#   redis     :6379  – Redis 7
+#   traefik   :80/:443  – 反向代理 + 自动 HTTPS (Let's Encrypt)
+#   dashboard :内部      – Vue SPA (nginx, proxies /auth + /dashboard to backend)
+#   backend   :6066     – REST API
+#   db        :5432     – PostgreSQL 16
+#   redis     :6379     – Redis 7
 
 services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme-data:/acme
+    restart: unless-stopped
+    networks:
+      - share-net
+
   dashboard:
     build:
       context: ./dashboard
-    ports:
-      - "80:80"
-      - "${DASHBOARD_PORT:-8080}:80"
+    labels:
+      - "traefik.enable=true"
+      # HTTP → HTTPS 重定向
+      - "traefik.http.routers.dashboard-http.rule=Host(`app.share-installs.com`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=web"
+      - "traefik.http.routers.dashboard-http.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      # HTTPS 路由
+      - "traefik.http.routers.dashboard-https.rule=Host(`app.share-installs.com`)"
+      - "traefik.http.routers.dashboard-https.entrypoints=websecure"
+      - "traefik.http.routers.dashboard-https.tls=true"
+      - "traefik.http.routers.dashboard-https.tls.certresolver=letsencrypt"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=80"
     depends_on:
       backend:
         condition: service_healthy
@@ -103,6 +135,7 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  acme-data:
 
 networks:
   share-net:
