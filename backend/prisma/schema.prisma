@@ -28,33 +28,59 @@ enum DevicePlatform {
 
 // ---- Multi-tenant models (only used when MULTI_TENANT=true) ----
 
-/// A tenant project. In multi-tenant mode each API consumer has one project.
-model Project {
-  id          String    @id @default(cuid())
-  name        String
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+enum Plan {
+  FREE
+  PRO
+  UNLIMITED
+}
 
+model User {
+  id            String    @id @default(cuid())
+  githubId      String    @unique @map("github_id")
+  githubLogin   String    @map("github_login")
+  email         String?
+  avatarUrl     String?   @map("avatar_url")
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime? @map("plan_expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  apps App[]
+
+  @@map("users")
+}
+
+/// A tenant app. In multi-tenant mode each API consumer has multiple apps.
+model App {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User         @relation(fields: [userId], references: [id])
   apiKeys     ApiKey[]
   clickEvents ClickEvent[]
   conversions Conversion[]
 
-  @@map("projects")
+  @@map("apps")
 }
 
-/// API key belonging to a project. Stored as a SHA-256 hash; plaintext shown once.
+/// API key belonging to an app. Stored as a SHA-256 hash; plaintext shown once.
 model ApiKey {
-  id        String    @id @default(cuid())
-  projectId String    @map("project_id")
-  name      String
+  id           String    @id @default(cuid())
+  appId        String    @map("project_id")
+  name         String
   /// SHA-256 hash of the raw key – never store plaintext.
-  keyHash   String    @unique @map("key_hash")
+  keyHash      String    @unique @map("key_hash")
+  /// AES-256-GCM encrypted key for display.
+  keyEncrypted String    @map("key_encrypted")
   /// First 12 chars of the raw key for display (e.g. "sk_live_abcd").
-  prefix    String
-  createdAt DateTime  @default(now()) @map("created_at")
-  revokedAt DateTime? @map("revoked_at")
+  prefix       String
+  createdAt    DateTime  @default(now()) @map("created_at")
+  revokedAt    DateTime? @map("revoked_at")
 
-  project   Project   @relation(fields: [projectId], references: [id])
+  app App @relation(fields: [appId], references: [id])
 
   @@index([prefix])
   @@map("api_keys")
@@ -69,35 +95,35 @@ model ApiKey {
 /// inviteCode is owned by the caller's system — we store it as-is and return
 /// it to the mobile SDK on a successful match.
 model ClickEvent {
-  id          String         @id @default(cuid())
-  /// Project scope (null in self-hosted mode).
-  projectId   String?        @map("project_id")
+  id    String  @id @default(cuid())
+  /// App scope (null in self-hosted mode).
+  appId String? @map("project_id")
 
   // --- Invite identifier (managed by the caller's system) ---
   /// The invite code passed in by the caller. Stored verbatim; never validated.
-  inviteCode  String         @map("invite_code")
+  inviteCode String @map("invite_code")
   /// Arbitrary JSON data passed at click time; returned to the mobile SDK on match.
-  customData  Json?          @map("custom_data")
+  customData Json?  @map("custom_data")
 
   // --- Fingerprint hash (used for fast exact-match lookup) ---
   /// SHA-256 hash of normalized device signals.
   fingerprint String
 
   // --- Network ---
-  ipAddress   String?        @map("ip_address")
+  ipAddress String? @map("ip_address")
 
   // --- Browser / UA ---
-  userAgent   String?        @map("user_agent")
+  userAgent String? @map("user_agent")
   /// JSON-encoded string array, e.g. ["zh-CN","zh","en"].
-  languages   String?
-  timezone    String?
-  referrer    String?
+  languages String?
+  timezone  String?
+  referrer  String?
 
   // --- Screen ---
-  screenWidth  Int?          @map("screen_width")
-  screenHeight Int?          @map("screen_height")
-  pixelRatio   Float?        @map("pixel_ratio")
-  colorDepth   Int?          @map("color_depth")
+  screenWidth  Int?   @map("screen_width")
+  screenHeight Int?   @map("screen_height")
+  pixelRatio   Float? @map("pixel_ratio")
+  colorDepth   Int?   @map("color_depth")
 
   // --- Hardware ---
   touchPoints         Int?   @map("touch_points")
@@ -106,51 +132,51 @@ model ClickEvent {
   deviceMemory        Float? @map("device_memory")
 
   // --- Browser fingerprint hashes (web-side only) ---
-  canvasHash  String?        @map("canvas_hash")
-  webglHash   String?        @map("webgl_hash")
-  audioHash   String?        @map("audio_hash")
+  canvasHash String? @map("canvas_hash")
+  webglHash  String? @map("webgl_hash")
+  audioHash  String? @map("audio_hash")
 
   // --- Network info ---
-  connectionType String?     @map("connection_type")
+  connectionType String? @map("connection_type")
 
   // --- Derived ---
-  platform    DevicePlatform @default(UNKNOWN)
-  osVersion   String?        @map("os_version")
+  platform  DevicePlatform @default(UNKNOWN)
+  osVersion String?        @map("os_version")
 
-  createdAt   DateTime       @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  project     Project?       @relation(fields: [projectId], references: [id])
+  app         App?         @relation(fields: [appId], references: [id])
   conversions Conversion[]
 
   @@index([fingerprint])
   @@index([inviteCode])
   @@index([createdAt])
-  @@index([projectId])
+  @@index([appId])
   @@map("click_events")
 }
 
 /// Records a successful conversion: a mobile install attributed to a click event.
 model Conversion {
-  id           String         @id @default(cuid())
-  projectId    String?        @map("project_id")
+  id            String         @id @default(cuid())
+  appId         String?        @map("project_id")
   /// The invite code that was matched.
-  inviteCode   String         @map("invite_code")
-  clickEventId String?        @map("click_event_id")
-  platform     DevicePlatform
+  inviteCode    String         @map("invite_code")
+  clickEventId  String?        @map("click_event_id")
+  platform      DevicePlatform
   /// How the invite was resolved: "clipboard" | "exact" | "fuzzy".
-  matchChannel String?        @map("match_channel")
+  matchChannel  String?        @map("match_channel")
   /// Floating-point confidence score of the fingerprint match (0.0–1.0).
-  confidence   Float?
+  confidence    Float?
   /// Raw JSON snapshot of the native SDK signals used in matching.
-  nativeSignals Json?         @map("native_signals")
-  installedAt  DateTime?      @map("installed_at")
-  createdAt    DateTime       @default(now()) @map("created_at")
+  nativeSignals Json?          @map("native_signals")
+  installedAt   DateTime?      @map("installed_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
 
-  project      Project?       @relation(fields: [projectId], references: [id])
-  clickEvent   ClickEvent?    @relation(fields: [clickEventId], references: [id])
+  app        App?        @relation(fields: [appId], references: [id])
+  clickEvent ClickEvent? @relation(fields: [clickEventId], references: [id])
 
   @@index([clickEventId])
   @@index([inviteCode])
-  @@index([projectId])
+  @@index([appId])
   @@map("conversions")
 }

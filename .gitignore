@@ -396,6 +396,7 @@ playground.xcworkspace
 # .swiftpm
 
 .build/
+sdk/ios/.build
 
 # CocoaPods
 # We recommend against adding the Pods directory to your .gitignore. However
@@ -632,3 +633,4 @@ CLAUDE.md
 GEMINI.md
 GEMINI.md.cp
 COLLABORATION_PROTOCOL.md
+

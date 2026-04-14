@@ -61,6 +61,9 @@ const configSchema = z.object({
   // Rate limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
+  // /v1/resolutions 专用限流（每分钟，按付费方案设置）
+  // FREE: 10  PRO: 60  UNLIMITED: 600
+  RATE_LIMIT_RESOLVE_MAX: z.coerce.number().default(10),
 
   // CORS (comma-separated origins, or * for all)
   CORS_ORIGINS: z.string().default('*'),

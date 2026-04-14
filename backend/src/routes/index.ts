@@ -22,11 +22,12 @@ import {ApiKeyService} from '../services/apiKeyService';
 import {QuotaService} from '../services/quotaService';
 import {createGitHubAuthRouter} from '../auth/github';
 import {createRequireSession} from '../auth/session';
+import * as dashboardController from '../controllers/dashboardController';
 import {
   adminAuth,
   createRequireApiKey,
 } from '../middleware/auth';
-import {createRateLimiters} from '../middleware/rateLimit';
+import {createRateLimiters, createPlanRateLimiter} from '../middleware/rateLimit';
 import {config} from '../config/index';
 
 export function createRouter(prisma: PrismaClient, redis: Redis): Router {
@@ -48,6 +49,9 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
 
   // ---- Rate limiters ----
   const {apiRateLimiter, resolveRateLimiter} = createRateLimiters(redis);
+  // SaaS: per-plan limiter (keyed by appId, limit based on user's plan).
+  // Self-hosted: falls back to static resolveRateLimiter.
+  const planRateLimiter = createPlanRateLimiter(redis);
 
   // ---- Global rate limiter ----
   router.use(apiRateLimiter);
@@ -75,7 +79,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   if (config.MULTI_TENANT) {
     // SaaS mode: all core endpoints require a valid API key.
     v1.post('/clicks',      requireApiKey, ...resolveController.collect);
-    v1.post('/resolutions', requireApiKey, resolveRateLimiter, ...resolveController.resolve);
+    v1.post('/resolutions', requireApiKey, planRateLimiter, ...resolveController.resolve);
   } else {
     // Self-hosted mode: no authentication required.
     v1.post('/clicks',      ...resolveController.collect);
@@ -94,9 +98,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   router.use('/v1', v1);
 
   // ---- Auth routes (/auth/*) ----
-  if (config.GITHUB_CLIENT_ID && config.GITHUB_CLIENT_SECRET && config.JWT_SECRET) {
-    router.use('/auth', createGitHubAuthRouter(prisma, jwtSecret));
-  }
+  router.use('/auth', createGitHubAuthRouter(prisma, config.JWT_SECRET || ''));
 
   // ---- Dashboard routes (/dashboard/*) ----
   // All dashboard routes require a valid session cookie.
@@ -104,9 +106,25 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   // Until then, returns 501 so the middleware chain is verified.
   const dashboard = Router();
   dashboard.use(requireSession);
-  dashboard.all('*', (_req, res) => {
-    res.status(501).json({error: {message: 'Dashboard API not yet implemented.'}});
-  });
+  
+  // User profile & Quota
+  dashboard.get('/me', dashboardController.getMe);
+  dashboard.get('/quota', dashboardController.getQuota);
+
+  // App management
+  dashboard.get('/apps', dashboardController.listApps);
+  dashboard.post('/apps', dashboardController.createApp);
+  dashboard.delete('/apps/:appId', dashboardController.deleteApp);
+
+  // API Key management
+  dashboard.get('/apps/:appId/keys', dashboardController.listApiKeys);
+  dashboard.post('/apps/:appId/keys', dashboardController.createApiKey);
+  dashboard.get('/apps/:appId/keys/:keyId/reveal', dashboardController.revealApiKey);
+  dashboard.delete('/apps/:appId/keys/:keyId', dashboardController.deleteApiKey);
+
+  // Stats
+  dashboard.get('/apps/:appId/stats', dashboardController.getAppStats);
+
   router.use('/dashboard', dashboard);
 
   return router;

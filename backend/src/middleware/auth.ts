@@ -23,6 +23,8 @@ declare global {
     interface Request {
       /** Set by requireApiKey in multi-tenant mode. */
       projectId?: string;
+      /** Plan of the app owner — set alongside projectId by requireApiKey. */
+      userPlan?: string;
     }
   }
 }
@@ -125,7 +127,10 @@ export function createRequireApiKey(prisma: PrismaClient) {
     try {
       const apiKey = await prisma.apiKey.findFirst({
         where: {prefix, keyHash: hash, revokedAt: null},
-        select: {appId: true},
+        select: {
+          appId: true,
+          app: {select: {user: {select: {plan: true}}}},
+        },
       });
 
       if (!apiKey) {
@@ -140,6 +145,7 @@ export function createRequireApiKey(prisma: PrismaClient) {
       }
 
       req.projectId = apiKey.appId;
+      req.userPlan = apiKey.app.user.plan;
       next();
     } catch (err) {
       next(err);

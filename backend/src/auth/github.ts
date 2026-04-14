@@ -78,8 +78,8 @@ export function createGitHubAuthRouter(prisma: PrismaClient, jwtSecret: string):
 
   // Step 1: Redirect user to GitHub
   router.get('/github', (_req: Request, res: Response) => {
-    if (!config.GITHUB_CLIENT_ID) {
-      res.status(503).json({error: {message: 'GitHub OAuth not configured.'}});
+    if (!config.GITHUB_CLIENT_ID || !config.GITHUB_CLIENT_SECRET || !jwtSecret) {
+      res.redirect(`${config.FRONTEND_URL}?error=github_not_configured`);
       return;
     }
     const params = new URLSearchParams({
