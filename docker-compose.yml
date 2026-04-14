@@ -7,17 +7,30 @@
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 #
 # Services:
-#   backend  :3000  – REST API
-#   db       :5432  – PostgreSQL 16
-#   redis    :6379  – Redis 7
+#   dashboard :8080  – Vue SPA (nginx, proxies /auth + /dashboard to backend)
+#   backend   :6066  – REST API
+#   db        :5432  – PostgreSQL 16
+#   redis     :6379  – Redis 7
 
 services:
+  dashboard:
+    build:
+      context: ./dashboard
+    ports:
+      - "${DASHBOARD_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - share-net
+
   backend:
     build:
       context: ./backend
       target: production
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "${BACKEND_PORT:-6066}:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -33,6 +46,11 @@ services:
       FINGERPRINT_MATCH_TTL_HOURS: ${FINGERPRINT_MATCH_TTL_HOURS:-72}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      JWT_SECRET: ${JWT_SECRET:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
     depends_on:
       db:
         condition: service_healthy
