@@ -82,7 +82,7 @@ docker compose up backend db redis dashboard --build
 |------|------|
 | 后端 API | `http://localhost:6066` |
 | 前端控制台 | `http://localhost:80` |
-| 健康检查 | `http://localhost:6066/health` |
+| 健康检查 | `http://localhost:6066/api/health` |
 
 ### 热重载模式
 
@@ -173,7 +173,7 @@ docker compose logs -f traefik  # 观察证书申请过程（首次需要约 30 
 | 字段 | 本地开发 | 生产环境 |
 |------|----------|----------|
 | Homepage URL | `http://localhost:80` | `https://console.your-domain.com` |
-| Authorization callback URL | `http://localhost:6066/auth/github/callback` | `https://console.your-domain.com/api/auth/github/callback` |
+| Authorization callback URL | `http://localhost:6066/api/auth/github/callback` | `https://console.your-domain.com/api/auth/github/callback` |
 
 ---
 
@@ -181,7 +181,7 @@ docker compose logs -f traefik  # 观察证书申请过程（首次需要约 30 
 
 ```bash
 # 本地
-curl http://localhost:6066/health
+curl http://localhost:6066/api/health
 
 # 生产
 curl https://console.your-domain.com/api/health

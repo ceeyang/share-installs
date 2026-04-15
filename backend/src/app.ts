@@ -98,10 +98,13 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
     app.use('/examples', express.static(examplesPath));
     app.use('/sdk/js/dist', express.static(sdkJsDistPath));
     logger.info(`Examples:  http://localhost:${config.PORT}/examples/web/fingerprint-demo.html`);
+    logger.info(`Health:    http://localhost:${config.PORT}/api/health`);
   }
 
-  // Routes
-  app.use('/', createRouter(prisma, redis));
+  // Routes — mounted at /api so local and production share the same base path.
+  // Local:      http://localhost:6066/api/v1/clicks
+  // Production: https://console.share-installs.com/api/v1/clicks (nginx passes /api/ through)
+  app.use('/api', createRouter(prisma, redis));
 
   // 404 handler
   app.use(notFoundHandler);

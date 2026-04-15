@@ -54,7 +54,7 @@ docker compose up backend db redis dashboard --build
 ### 第 4 步：验证
 
 ```bash
-curl http://localhost:6066/health
+curl http://localhost:6066/api/health
 # {"status":"ok","mode":"self-hosted","version":"1.0.0","timestamp":"..."}
 ```
 
@@ -65,7 +65,7 @@ curl http://localhost:6066/health
 <script>
   // 本地开发直接指向 localhost
   const sdk = new ShareInstallsSDK({
-    apiBaseUrl: 'http://localhost:6066',  // 部署后改为 https://你的域名/api
+    apiBaseUrl: 'http://localhost:6066/api',  // 部署后改为 https://你的域名/api
   });
 
   const inviteCode = new URL(location.href).searchParams.get('code');

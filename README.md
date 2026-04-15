@@ -78,7 +78,7 @@ docker compose up --build
 
 **Verify it's running:**
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:6066/api/health
 # {"status":"ok","version":"1.0.0","timestamp":"..."}
 ```
 
@@ -152,7 +152,7 @@ npm run dev
 
 **验证：**
 ```bash
-curl http://localhost:6066/health
+curl http://localhost:6066/api/health
 # {"status":"ok","version":"1.0.0","timestamp":"..."}
 ```
 
@@ -256,7 +256,7 @@ All endpoints are prefixed with `/v1`.
 用户点击邀请链接后，由你的落地页调用，记录浏览器指纹。`inviteCode` 是你系统中的邀请码，我们原样存储。
 
 ```bash
-curl -X POST http://localhost:6066/v1/clicks \
+curl -X POST http://localhost:6066/api/v1/clicks \
   -H "Content-Type: application/json" \
   -d '{
     "inviteCode": "ABC12345",
@@ -281,7 +281,7 @@ Response:
 App 首次启动时调用，匹配成功后返回对应的邀请码。
 
 ```bash
-curl -X POST http://localhost:6066/v1/resolutions \
+curl -X POST http://localhost:6066/api/v1/resolutions \
   -H "Content-Type: application/json" \
   -d '{
     "channel": "ios",
