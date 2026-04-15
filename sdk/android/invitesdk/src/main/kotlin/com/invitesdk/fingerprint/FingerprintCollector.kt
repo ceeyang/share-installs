@@ -154,20 +154,13 @@ internal class FingerprintCollector(private val context: Context) {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun getDisplayMetrics(): DisplayMetrics? {
         return try {
-            val wm = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
-            val metrics = DisplayMetrics()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val bounds = wm?.currentWindowMetrics?.bounds
-                metrics.widthPixels = bounds?.width() ?: 0
-                metrics.heightPixels = bounds?.height() ?: 0
-                metrics.density = context.resources.displayMetrics.density
-            } else {
-                wm?.defaultDisplay?.getMetrics(metrics)
-            }
-            metrics
+            // Use resources.displayMetrics directly across all API levels.
+            // This reports the same logical pixel space as Chrome's screen.width/height
+            // (physical pixels / density), avoiding the system-bar inclusion bug
+            // that currentWindowMetrics.bounds introduced on API 30+.
+            context.resources.displayMetrics
         } catch (_: Exception) {
             null
         }
