@@ -83,7 +83,7 @@ internal class ApiClient(private val configuration: ShareInstallsConfiguration) 
         bodySerializer: SerializationStrategy<B>,
         responseSerializer: DeserializationStrategy<R>,
     ): R {
-        val url = "${configuration.normalizedBaseUrl}$path"
+        val url = "${configuration.resolvedBaseUrl}$path"
         val requestBody = json.encodeToString(bodySerializer, body).toRequestBody(mediaType)
 
         InviteLogger.d("POST $url")
