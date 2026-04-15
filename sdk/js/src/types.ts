@@ -6,16 +6,22 @@
  * the mobile SDK can later resolve the invite code via deferred deep linking.
  */
 
-/** SDK initialization options. */
+/** SDK initialization options. At least one of `apiBaseUrl` or `apiKey` must be provided. */
 export interface ShareInstallsOptions {
   /**
-   * Base URL of your self-hosted share-installs backend.
-   * Example: `"https://api.yourdomain.com"`
+   * Base URL of the share-installs backend.
+   *
+   * - **Omit** when using the hosted service (supply `apiKey` instead).
+   *   Defaults to `"https://console.share-installs.com/api"`.
+   * - **Set** when self-hosting. `apiKey` is not required in self-hosted mode.
+   *
+   * At least one of `apiBaseUrl` or `apiKey` must be provided.
    */
-  apiBaseUrl: string;
+  apiBaseUrl?: string;
   /**
-   * API key for multi-tenant deployments (MULTI_TENANT=true on the backend).
-   * Leave undefined for single-tenant (self-hosted) deployments.
+   * API key for the hosted service.
+   * Required when `apiBaseUrl` is omitted (or set to the hosted service URL).
+   * Leave `undefined` for self-hosted deployments.
    */
   apiKey?: string;
   /** Request timeout in milliseconds. Default: 5000. */

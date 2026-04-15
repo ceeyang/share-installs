@@ -10,40 +10,46 @@ package com.invitesdk.core
 /**
  * Configuration for the share-installs Android SDK.
  *
- * **Single-tenant (self-hosted):** only [apiBaseUrl] is required.
+ * At least one of [apiKey] or [apiBaseUrl] must be provided.
+ *
+ * **Hosted service** (only [apiKey] required):
  * ```kotlin
- * val config = ShareInstallsConfiguration(
- *     apiBaseUrl = "https://api.yourapp.com"
- * )
+ * val config = ShareInstallsConfiguration(apiKey = "sk_live_xxxxxxxx")
  * ShareInstallsSDK.configure(applicationContext, config)
  * ```
  *
- * **Multi-tenant (SaaS):** also supply [apiKey].
+ * **Self-hosted** (only [apiBaseUrl] required, no [apiKey]):
  * ```kotlin
- * val config = ShareInstallsConfiguration(
- *     apiBaseUrl = "https://api.shareinstalls.com",
- *     apiKey = "sk_live_xxxxxxxx"
- * )
+ * val config = ShareInstallsConfiguration(apiBaseUrl = "https://your-server.com/api")
  * ShareInstallsSDK.configure(applicationContext, config)
  * ```
  *
- * @property apiBaseUrl       Base URL of the share-installs backend (no trailing slash).
- * @property apiKey           API key for multi-tenant deployments. Null for single-tenant.
+ * @property apiKey           API key for the hosted service. Null for self-hosted deployments.
+ * @property apiBaseUrl       Backend URL. Defaults to the hosted service when [apiKey] is set.
  * @property resolveTimeoutMs Network timeout in milliseconds. Default: 5000.
  * @property debugLoggingEnabled Verbose logging. Disable in production.
  */
 data class ShareInstallsConfiguration(
-    val apiBaseUrl: String,
     val apiKey: String? = null,
+    val apiBaseUrl: String? = null,
     val resolveTimeoutMs: Long = 5_000L,
     val debugLoggingEnabled: Boolean = false,
 ) {
+    companion object {
+        /** Default base URL for the hosted service. */
+        const val HOSTED_API_BASE_URL = "https://console.share-installs.com/api"
+    }
+
     init {
-        require(apiBaseUrl.startsWith("http")) {
-            "apiBaseUrl must be a valid HTTP/HTTPS URL."
+        require(apiKey != null || apiBaseUrl != null) {
+            "[ShareInstalls] Provide apiKey (hosted service) or apiBaseUrl (self-hosted)."
+        }
+        apiBaseUrl?.let {
+            require(it.startsWith("http")) { "apiBaseUrl must be a valid HTTP/HTTPS URL." }
         }
     }
 
-    internal val normalizedBaseUrl: String
-        get() = apiBaseUrl.trimEnd('/')
+    /** Resolved base URL (never null after init). */
+    internal val resolvedBaseUrl: String
+        get() = (apiBaseUrl ?: HOSTED_API_BASE_URL).trimEnd('/')
 }

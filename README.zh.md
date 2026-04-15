@@ -320,7 +320,7 @@ curl -X POST http://localhost:6066/v1/resolutions \
 import { ShareInstallsSDK } from '@share-installs/js-sdk';
 
 const sdk = new ShareInstallsSDK({
-  apiBaseUrl: 'https://api.yourapp.com',  // 自部署填写自己的域名
+  apiBaseUrl: 'https://console.share-installs.com/api',  // 自部署填写自己的域名
   // apiKey: 'sk_live_...',               // SaaS 模式填写 API key
 });
 
@@ -347,7 +347,7 @@ https://github.com/ceeyang/share-installs
 import ShareInstallsSDK
 
 ShareInstallsSDK.configure(with: ShareInstallsConfiguration(
-    apiBaseURL: URL(string: "https://api.yourapp.com")!
+    apiBaseURL: URL(string: "https://console.share-installs.com/api")!
     // apiKey: "sk_live_..."  // SaaS 模式
 ))
 ```
@@ -375,7 +375,7 @@ implementation("com.share-installs:sdk-android:0.0.1")
 ShareInstallsSDK.configure(
     context = applicationContext,
     configuration = ShareInstallsConfiguration(
-        apiBaseUrl = "https://api.yourapp.com"
+        apiBaseUrl = "https://console.share-installs.com/api"
         // apiKey = "sk_live_..."  // SaaS 模式
     )
 )

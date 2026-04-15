@@ -39,7 +39,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
   static const _channel = MethodChannel('com.shareinstalls/sdk');
 
   final _apiUrlController = TextEditingController(
-    text: 'http://192.168.8.189:6066',
+    text: 'https://console.share-installs.com/api',
   );
   final _apiKeyController = TextEditingController();
 
@@ -311,7 +311,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
               controller: _apiUrlController,
               decoration: const InputDecoration(
                 labelText: 'API Base URL',
-                hintText: 'http://localhost:3000',
+                hintText: 'https://console.share-installs.com/api',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.link),
               ),

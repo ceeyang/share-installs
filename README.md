@@ -323,7 +323,7 @@ Response（未匹配）：
 import { ShareInstallsSDK } from '@share-installs/js-sdk';
 
 const sdk = new ShareInstallsSDK({
-  apiBaseUrl: 'https://api.yourapp.com',  // 自部署填写自己的域名
+  apiBaseUrl: 'https://console.share-installs.com/api',  // 自部署填写自己的域名
   // apiKey: 'sk_live_...',               // SaaS 模式填写 API key
 });
 
@@ -350,7 +350,7 @@ Initialize in `AppDelegate` or `@main App`:
 import ShareInstallsSDK
 
 ShareInstallsSDK.configure(with: ShareInstallsConfiguration(
-    apiBaseURL: URL(string: "https://api.yourapp.com")!
+    apiBaseURL: URL(string: "https://console.share-installs.com/api")!
     // apiKey: "sk_live_..."  // SaaS 模式
 ))
 ```
@@ -378,7 +378,7 @@ Initialize in `Application.onCreate()`:
 ShareInstallsSDK.configure(
     context = applicationContext,
     configuration = ShareInstallsConfiguration(
-        apiBaseUrl = "https://api.yourapp.com"
+        apiBaseUrl = "https://console.share-installs.com/api"
         // apiKey = "sk_live_..."  // SaaS 模式
     )
 )

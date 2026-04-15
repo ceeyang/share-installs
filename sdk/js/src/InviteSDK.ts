@@ -12,10 +12,15 @@
  *
  * ## Quick Start – CDN
  * ```html
- * <script src="https://cdn.yourdomain.com/share-installs-sdk.min.js"></script>
+ * <script src="https://cdn.jsdelivr.net/npm/@share-installs/js-sdk/dist/share-installs-sdk.min.js"></script>
  * <script>
- *   const sdk = new ShareInstallsSDK({ apiBaseUrl: 'https://api.yourdomain.com' });
- *   const code = location.pathname.split('/').pop();
+ *   // Hosted service: only apiKey is required
+ *   const sdk = new ShareInstallsSDK({ apiKey: 'sk_live_xxxxxxxx' });
+ *
+ *   // Self-hosted: only apiBaseUrl is required
+ *   // const sdk = new ShareInstallsSDK({ apiBaseUrl: 'https://your-server.com/api' });
+ *
+ *   const code = new URL(location.href).searchParams.get('code');
  *   await sdk.trackClick(code);
  * </script>
  * ```
@@ -24,14 +29,11 @@
  * ```ts
  * import { ShareInstallsSDK } from '@share-installs/js-sdk';
  *
- * // Single-tenant (self-hosted, no key needed)
- * const sdk = new ShareInstallsSDK({ apiBaseUrl: 'https://api.yourdomain.com' });
+ * // Hosted service (apiBaseUrl defaults to https://console.share-installs.com/api)
+ * const sdk = new ShareInstallsSDK({ apiKey: 'sk_live_xxxxxxxx' });
  *
- * // Multi-tenant (SaaS, API key required)
- * const sdk = new ShareInstallsSDK({
- *   apiBaseUrl: 'https://api.shareinstalls.com',
- *   apiKey: 'sk_live_xxxxxxxx',
- * });
+ * // Self-hosted (no apiKey needed)
+ * const sdk = new ShareInstallsSDK({ apiBaseUrl: 'https://your-server.com/api' });
  *
  * const code = new URL(location.href).searchParams.get('code')!;
  * await sdk.trackClick(code);
@@ -42,21 +44,33 @@ import {ApiClient} from './ApiClient.js';
 import {FingerprintCollector} from './FingerprintCollector.js';
 import type {ShareInstallsOptions, TrackClickResult} from './types.js';
 
+/** Default base URL for the hosted service. */
+const HOSTED_API_BASE_URL = 'https://console.share-installs.com/api';
+
 export class ShareInstallsSDK {
   private readonly client: ApiClient;
   private readonly options: Required<Omit<ShareInstallsOptions, 'apiKey'>> & {apiKey?: string};
 
-  static readonly VERSION = '1.0.0';
+  static readonly VERSION = '0.0.3';
 
   /**
-   * @param options.apiBaseUrl - Base URL of the share-installs backend.
-   * @param options.apiKey     - API key for multi-tenant deployments (optional).
+   * @param options.apiKey     - API key for the hosted service. Omit when self-hosting.
+   * @param options.apiBaseUrl - Backend URL for self-hosted deployments. Omit to use the hosted service.
    * @param options.timeoutMs  - Request timeout in ms. Default: 5000.
    * @param options.debug      - Verbose logging. Default: false.
+   *
+   * At least one of `apiKey` or `apiBaseUrl` must be provided.
    */
   constructor(options: ShareInstallsOptions) {
+    if (!options.apiKey && !options.apiBaseUrl) {
+      throw new Error(
+        '[ShareInstalls] Configuration error: provide `apiKey` (hosted service) ' +
+        'or `apiBaseUrl` (self-hosted). Both cannot be omitted.',
+      );
+    }
+    const apiBaseUrl = options.apiBaseUrl ?? HOSTED_API_BASE_URL;
     this.options = {
-      apiBaseUrl: options.apiBaseUrl,
+      apiBaseUrl,
       apiKey: options.apiKey,
       timeoutMs: options.timeoutMs ?? 5000,
       debug: options.debug ?? false,

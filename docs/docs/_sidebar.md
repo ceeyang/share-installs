@@ -1,7 +1,7 @@
 - **入门**
   - [简介](README.md)
   - [快速开始](guide/quickstart.md)
-  - [部署方式](guide/deployment.md)
+  - [部署指南](guide/deployment.md)
 
 - **SDK 集成**
   - [Web / JavaScript](sdk/web.md)

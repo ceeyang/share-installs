@@ -7,33 +7,36 @@ import Foundation
 
 /// Configuration for the share-installs iOS SDK.
 ///
-/// **Single-tenant (self-hosted):** only `apiBaseURL` is required.
+/// At least one of `apiKey` or `apiBaseURL` must be provided.
+///
+/// **Hosted service** (only `apiKey` required):
 /// ```swift
-/// let config = ShareInstallsConfiguration(
-///     apiBaseURL: URL(string: "https://api.yourapp.com")!
-/// )
+/// let config = ShareInstallsConfiguration(apiKey: "sk_live_xxxxxxxx")
 /// ShareInstallsSDK.configure(with: config)
 /// ```
 ///
-/// **Multi-tenant (SaaS):** also supply `apiKey`.
+/// **Self-hosted** (only `apiBaseURL` required, no `apiKey`):
 /// ```swift
 /// let config = ShareInstallsConfiguration(
-///     apiBaseURL: URL(string: "https://api.shareinstalls.com")!,
-///     apiKey: "sk_live_xxxxxxxx"
+///     apiBaseURL: URL(string: "https://your-server.com/api")!
 /// )
 /// ShareInstallsSDK.configure(with: config)
 /// ```
 public struct ShareInstallsConfiguration: Sendable {
 
-    // MARK: - Required
+    // MARK: - Constants
+
+    /// Default base URL for the hosted service.
+    public static let hostedAPIBaseURL = URL(string: "https://console.share-installs.com/api")!
+
+    // MARK: - Properties
 
     /// Base URL of the share-installs backend.
+    /// Defaults to the hosted service URL when `apiKey` is supplied and this is omitted.
     public let apiBaseURL: URL
 
-    // MARK: - Optional
-
-    /// API key for multi-tenant deployments.
-    /// Leave `nil` for single-tenant (self-hosted) deployments.
+    /// API key for the hosted service.
+    /// Leave `nil` for self-hosted deployments.
     public let apiKey: String?
 
     /// Maximum seconds to wait for the resolve response. Default: 5.0.
@@ -44,14 +47,23 @@ public struct ShareInstallsConfiguration: Sendable {
 
     // MARK: - Init
 
+    /// - Parameters:
+    ///   - apiKey: API key for the hosted service. Omit when self-hosting.
+    ///   - apiBaseURL: Backend URL for self-hosted deployments.
+    ///                 Defaults to the hosted service URL when `apiKey` is provided.
+    ///                 At least one of `apiKey` or `apiBaseURL` must be set.
     public init(
-        apiBaseURL: URL,
         apiKey: String? = nil,
+        apiBaseURL: URL? = nil,
         resolveTimeoutSeconds: Double = 5.0,
         debugLoggingEnabled: Bool = false
     ) {
-        self.apiBaseURL = apiBaseURL
+        precondition(
+            apiKey != nil || apiBaseURL != nil,
+            "[ShareInstalls] Provide `apiKey` (hosted service) or `apiBaseURL` (self-hosted)."
+        )
         self.apiKey = apiKey
+        self.apiBaseURL = apiBaseURL ?? ShareInstallsConfiguration.hostedAPIBaseURL
         self.resolveTimeoutSeconds = resolveTimeoutSeconds
         self.debugLoggingEnabled = debugLoggingEnabled
     }

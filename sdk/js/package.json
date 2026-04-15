@@ -1,6 +1,6 @@
 {
   "name": "@ceeyang/share-installs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Client-side Web SDK for share-installs – embed in your invite landing page to collect browser fingerprint signals and enable deferred deep link invite attribution",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
