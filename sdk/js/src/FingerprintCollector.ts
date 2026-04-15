@@ -34,6 +34,14 @@ export class FingerprintCollector {
         }
       : null;
 
+    // UA-CH: get real Android OS version.
+    // Chrome on Android freezes its UA string to "Android 10" for all devices
+    // (Chrome 110+, Feb 2023, Privacy Sandbox policy). UA-CH returns the real
+    // platform version (e.g. "16.0.0") and is available in Chrome 89+.
+    // iOS is intentionally skipped — Safari UA already reports the real version
+    // and iOS doesn't support navigator.userAgentData.
+    const osVersion = await this.collectAndroidOsVersion();
+
     return {
       canvas,
       webgl,
@@ -52,6 +60,7 @@ export class FingerprintCollector {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       touchPoints: navigator.maxTouchPoints ?? 0,
       ua: navigator.userAgent,
+      osVersion,
       connection,
     };
   }
@@ -210,6 +219,37 @@ export class FingerprintCollector {
         // Timeout guard: resolve null if audio doesn't process within 2s
         setTimeout(() => resolve(null), 2000);
       });
+    } catch {
+      return null;
+    }
+  }
+
+  // ---- OS version via UA-CH ----
+
+  /**
+   * Returns the real Android OS version via User-Agent Client Hints.
+   * Only runs on Android Chrome (89+); returns null on iOS and non-Chrome browsers.
+   * iOS is intentionally excluded — Safari UA already reports the real iOS version,
+   * and the backend extracts it directly from the UA string.
+   */
+  private static async collectAndroidOsVersion(): Promise<string | null> {
+    try {
+      const uaData = (navigator as Navigator & {
+        userAgentData?: {
+          platform?: string;
+          getHighEntropyValues: (hints: string[]) => Promise<{platformVersion?: string}>;
+        };
+      }).userAgentData;
+
+      if (!uaData || !this.isAndroid()) return null;
+
+      const high = await uaData.getHighEntropyValues(['platformVersion']);
+      const raw = high.platformVersion; // e.g. "16.0.0"
+      if (!raw) return null;
+
+      // Normalise to "major.minor" to match Build.VERSION.RELEASE on the Android SDK side.
+      const parts = raw.split('.');
+      return parts.length >= 2 ? `${parts[0]}.${parts[1]}` : parts[0] ?? null;
     } catch {
       return null;
     }

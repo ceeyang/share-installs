@@ -89,15 +89,25 @@ export interface FingerprintSignals {
  * a different hash, making the exact-match Redis lookup always miss.
  */
 export function computeFingerprint(signals: FingerprintSignals): string {
-  // Languages are intentionally excluded: iOS returns BCP 47 full tags
-  // ("zh-Hans-CN") while web returns short tags ("zh-CN"), producing different
-  // strings for the same device and breaking the hash match.
-  // Timezone + screen + pixelRatio are stable and consistent across platforms.
+  // Screen snapped to nearest 4dp: Chrome's screen.width rounds up by 1px
+  // vs Android DisplayMetrics on some devices. Snapping absorbs this without
+  // losing meaningful device discrimination.
+  //
+  // osVersion is always included. Sources per platform:
+  //   iOS     — extracted from Safari UA by backend (real version, always present)
+  //   Android — sent by JS SDK via UA-CH (Chrome 89+, real version); falls back
+  //             to '' when UA-CH is unavailable (older/non-Chrome browsers)
+  //   Native  — Build.VERSION.RELEASE (Android) / UIDevice.systemVersion (iOS)
+  //
+  // When both sides have the real osVersion they match exactly. When web side
+  // has no osVersion (UA-CH unavailable), normalizeOsVersion returns '' and the
+  // hash won't match the native hash — fuzzy matching is used as fallback.
+  const snap4 = (n: number) => Math.round(n / 4) * 4;
   const parts = [
     signals.ipAddress?.split('.').slice(0, 3).join('.') ?? '',
     signals.timezone ?? '',
-    Math.min(signals.screenWidth ?? 0, signals.screenHeight ?? 0).toString(),
-    Math.max(signals.screenWidth ?? 0, signals.screenHeight ?? 0).toString(),
+    snap4(Math.min(signals.screenWidth ?? 0, signals.screenHeight ?? 0)).toString(),
+    snap4(Math.max(signals.screenWidth ?? 0, signals.screenHeight ?? 0)).toString(),
     signals.pixelRatio?.toFixed(2) ?? '',
     normalizeOsVersion(signals.osVersion),
   ];

@@ -63,6 +63,12 @@ export interface BrowserFingerprint {
   touchPoints: number;
   /** navigator.userAgent */
   ua: string;
+  /**
+   * Real OS version obtained via User-Agent Client Hints on Android Chrome.
+   * Null when UA-CH is unavailable (non-Chrome browsers, iOS).
+   * iOS devices don't need this — the UA string already reports the real version.
+   */
+  osVersion: string | null;
   connection: {
     type: string | null;
     effective: string | null;

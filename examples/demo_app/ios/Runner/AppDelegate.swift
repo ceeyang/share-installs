@@ -47,8 +47,8 @@ import ShareInstalls
     let debug = args["debug"] as? Bool ?? false
 
     let config = ShareInstallsConfiguration(
-      apiBaseURL: url,
       apiKey: apiKey,
+      apiBaseURL: url,
       debugLoggingEnabled: debug
     )
 

@@ -64,6 +64,7 @@ export class ResolveController {
     body('fingerprint.audio').optional({nullable: true}).customSanitizer(v => v != null ? String(v) : v),
     body('fingerprint.touchPoints').optional({nullable: true}).isInt({min: 0}),
     body('fingerprint.ua').optional({nullable: true}).isString(),
+    body('fingerprint.osVersion').optional({nullable: true}).isString(),
     body('referrer').optional({nullable: true}).isString(),
 
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -90,6 +91,7 @@ export class ResolveController {
             timezone?: string;
             touchPoints?: number;
             ua?: string;
+            osVersion?: string | null;
             connection?: {type?: string; effective?: string};
           };
           referrer?: string;
@@ -97,7 +99,10 @@ export class ResolveController {
 
         const ua = typeof fingerprint.ua === 'string' ? fingerprint.ua : (req.headers['user-agent'] ?? '');
         let osVersion: string | undefined;
+
         if (ua.includes('iPhone OS') || ua.includes('iPad OS')) {
+            // iOS: extract real version from Safari UA string (reliable).
+            // Safari reports the actual iOS version; no UA-CH needed.
             const iphoneOsMatch = ua.match(/iPhone OS (\d+)[_.](\d+)/);
             const safariVersionMatch = ua.match(/Version\/(\d+)\.(\d+)/);
             if (iphoneOsMatch && safariVersionMatch) {
@@ -114,10 +119,12 @@ export class ResolveController {
             } else if (safariVersionMatch) {
                 osVersion = `${safariVersionMatch[1]}.${safariVersionMatch[2]}`;
             }
-        } else if (ua.includes('Android')) {
-            const match = ua.match(/Android (\d+(\.\d+)?)/);
-            if (match) osVersion = match[1];
+        } else if (ua.includes('Android') && typeof fingerprint.osVersion === 'string') {
+            // Android: UA string is frozen to "Android 10" by Chrome (Privacy Sandbox,
+            // Chrome 110+). Use the real version from UA-CH sent by the JS SDK instead.
+            osVersion = fingerprint.osVersion;
         }
+        // Other platforms: leave osVersion undefined.
 
         const eventId = await this.fingerprintService.collectClick({
           inviteCode,

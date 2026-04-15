@@ -83,8 +83,8 @@ export class FingerprintService {
   async collectClick(params: CollectClickParams): Promise<string> {
     const {inviteCode, customData, projectId, referrer, ...signals} = params;
 
-    const fingerprint = computeFingerprint(signals);
     const platform = this.detectWebPlatform(signals.userAgent ?? '');
+    const fingerprint = computeFingerprint(signals);
 
     const clickData: Prisma.ClickEventUncheckedCreateInput = {
       inviteCode,
