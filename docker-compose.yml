@@ -40,13 +40,13 @@ services:
     labels:
       - "traefik.enable=true"
       # HTTP → HTTPS 重定向
-      - "traefik.http.routers.dashboard-http.rule=Host(`app.share-installs.com`)"
+      - "traefik.http.routers.dashboard-http.rule=Host(`console.share-installs.com`)"
       - "traefik.http.routers.dashboard-http.entrypoints=web"
       - "traefik.http.routers.dashboard-http.middlewares=https-redirect"
       - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
       # HTTPS 路由
-      - "traefik.http.routers.dashboard-https.rule=Host(`app.share-installs.com`)"
+      - "traefik.http.routers.dashboard-https.rule=Host(`console.share-installs.com`)"
       - "traefik.http.routers.dashboard-https.entrypoints=websecure"
       - "traefik.http.routers.dashboard-https.tls=true"
       - "traefik.http.routers.dashboard-https.tls.certresolver=letsencrypt"

@@ -60,12 +60,17 @@
     .badge { display:inline-flex; align-items:center; gap:0.45rem; background:rgba(34,197,94,0.1); color:var(--accent); border:1px solid rgba(34,197,94,0.28); font-size:0.78rem; font-weight:600; padding:0.3rem 0.9rem; border-radius:20px; margin-bottom:2rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.02em; }
     .hero h1 { font-family:'Space Grotesk',sans-serif; font-size:clamp(2.4rem,5.5vw,4.2rem); font-weight:700; line-height:1.12; margin-bottom:1.5rem; letter-spacing:-0.03em; }
     .hero h1 .hi { color:var(--accent); }
-    .hero-sub { font-size:1.1rem; color:var(--text-muted); max-width:520px; margin:0 auto 2.5rem; line-height:1.75; }
-    .hero-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:4rem; }
+    .hero-sub { font-size:1.1rem; color:var(--text-muted); max-width:560px; margin:0 auto 2.5rem; line-height:1.75; }
+    .hero-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
     .btn-primary { background:var(--accent); color:#0F172A; padding:0.8rem 1.75rem; border-radius:10px; font-weight:700; text-decoration:none; font-size:0.95rem; transition:background 0.2s,transform 0.15s,box-shadow 0.2s; cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; }
     .btn-primary:hover { background:var(--accent-dark); transform:translateY(-1px); box-shadow:0 8px 28px var(--accent-glow-md); }
     .btn-secondary { background:transparent; color:var(--text); padding:0.8rem 1.75rem; border-radius:10px; font-weight:600; text-decoration:none; font-size:0.95rem; border:1.5px solid var(--border); transition:border-color 0.2s,transform 0.15s; cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; }
     .btn-secondary:hover { border-color:var(--text-dim); transform:translateY(-1px); }
+
+    /* Feature pills */
+    .hero-pills { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:3.5rem; }
+    .pill { display:inline-flex; align-items:center; gap:0.45rem; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:0.38rem 0.9rem; font-size:0.8rem; color:var(--text-muted); white-space:nowrap; }
+    .pill svg { width:13px; height:13px; color:var(--accent); flex-shrink:0; }
 
     /* Terminal — always dark */
     .terminal { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; text-align:left; max-width:560px; margin:0 auto; box-shadow:0 28px 64px rgba(0,0,0,0.35); }
@@ -82,7 +87,7 @@
     .sec { padding:6rem 2rem; border-top:1px solid var(--border); }
     .sec-label { text-align:center; font-size:0.72rem; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; color:var(--accent); margin-bottom:0.75rem; font-family:'Space Grotesk',sans-serif; }
     .sec-title { text-align:center; font-family:'Space Grotesk',sans-serif; font-size:clamp(1.65rem,3vw,2.5rem); font-weight:700; margin-bottom:0.9rem; letter-spacing:-0.025em; }
-    .sec-sub { text-align:center; color:var(--text-muted); font-size:0.975rem; max-width:480px; margin:0 auto 4rem; line-height:1.75; }
+    .sec-sub { text-align:center; color:var(--text-muted); font-size:0.975rem; max-width:520px; margin:0 auto 4rem; line-height:1.75; }
 
     /* ── HOW IT WORKS ── */
     .flow-row { display:flex; align-items:flex-start; justify-content:center; flex-wrap:wrap; gap:0; }
@@ -115,8 +120,33 @@
     .sdk-ic svg { width:20px; height:20px; }
     .sdk-card h3 { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.925rem; }
     .sdk-sub { font-size:0.76rem; color:var(--text-dim); margin-top:0.15rem; }
-    /* SDK code pill — always dark */
     .sdk-code { background:#0F172A; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.65rem 1rem; font-family:var(--mono); font-size:0.76rem; color:#22C55E; overflow-x:auto; white-space:nowrap; }
+
+    /* ── PRICING ── */
+    .pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.25rem; max-width:1080px; margin:0 auto; }
+    .price-card { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:2rem; display:flex; flex-direction:column; position:relative; transition:border-color 0.2s,box-shadow 0.2s; }
+    .price-card:hover { border-color:var(--border-hover); box-shadow:0 8px 32px rgba(0,0,0,0.08); }
+    .price-card.popular { border-color:rgba(34,197,94,0.5); background:linear-gradient(145deg,var(--surface) 0%,rgba(34,197,94,0.04) 100%); }
+    .popular-badge { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--accent); color:#0F172A; font-size:0.68rem; font-weight:700; padding:0.22rem 0.9rem; border-radius:20px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
+    .price-tier { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); font-family:'Space Grotesk',sans-serif; margin-bottom:0.75rem; }
+    .price-amount { font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:700; line-height:1; color:var(--text); margin-bottom:0.3rem; }
+    .price-amount span { font-size:1rem; font-weight:500; color:var(--text-muted); }
+    .price-desc { font-size:0.84rem; color:var(--text-muted); margin-bottom:1.75rem; line-height:1.6; min-height:2.8rem; }
+    .price-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; margin-bottom:2rem; flex:1; }
+    .price-list li { display:flex; align-items:flex-start; gap:0.6rem; font-size:0.84rem; color:var(--text-muted); }
+    .price-list li svg { width:15px; height:15px; flex-shrink:0; margin-top:2px; color:var(--accent); }
+    .price-list li.dim svg { color:var(--text-dim); }
+    .price-list li.dim { color:var(--text-dim); }
+    .price-btn { display:block; text-align:center; padding:0.7rem 1.25rem; border-radius:10px; font-size:0.88rem; font-weight:700; text-decoration:none; transition:background 0.2s,border-color 0.2s,transform 0.15s; cursor:pointer; }
+    .price-btn.outline { border:1.5px solid var(--border); color:var(--text); background:transparent; }
+    .price-btn.outline:hover { border-color:var(--text-dim); transform:translateY(-1px); }
+    .price-btn.solid { background:var(--accent); color:#0F172A; border:1.5px solid transparent; }
+    .price-btn.solid:hover { background:var(--accent-dark); transform:translateY(-1px); }
+    .price-btn.ghost { background:var(--surface-2); color:var(--text-muted); border:1.5px solid transparent; }
+    .price-btn.ghost:hover { color:var(--text); transform:translateY(-1px); }
+    .pricing-note { text-align:center; margin-top:2rem; font-size:0.82rem; color:var(--text-dim); }
+    .pricing-note a { color:var(--accent); text-decoration:none; }
+    .pricing-note a:hover { text-decoration:underline; }
 
     /* ── MODES ── */
     .modes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:1.5rem; max-width:880px; margin:0 auto; }
@@ -131,7 +161,7 @@
     .mode-list li { display:flex; align-items:center; gap:0.55rem; font-size:0.84rem; color:var(--text-muted); }
     .mode-list li svg { width:15px; height:15px; flex-shrink:0; color:var(--accent); }
 
-    /* ── QUICKSTART — always dark ── */
+    /* ── QUICKSTART ── */
     .qs-inner { max-width:700px; margin:0 auto; }
     .code-block { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; margin-bottom:1.25rem; }
     .code-hdr { background:rgba(255,255,255,0.03); padding:0.55rem 1.25rem; border-bottom:1px solid rgba(255,255,255,0.08); font-family:var(--mono); font-size:0.72rem; color:#64748B; display:flex; align-items:center; gap:0.45rem; }
@@ -139,12 +169,22 @@
     pre { padding:1.2rem 1.5rem; font-family:var(--mono); font-size:0.81rem; line-height:1.85; overflow-x:auto; color:#E2E8F0; }
     .cc { color:#475569; } .cmd { color:#38BDF8; } .ok { color:#22C55E; }
 
+    /* ── FAQ ── */
+    .faq-list { max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:0.75rem; }
+    .faq-item { background:var(--surface); border:1.5px solid var(--border); border-radius:14px; overflow:hidden; transition:border-color 0.2s; }
+    .faq-item:hover { border-color:var(--border-hover); }
+    .faq-q { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.2rem 1.5rem; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:0.94rem; font-weight:600; color:var(--text); user-select:none; }
+    .faq-q svg { width:18px; height:18px; flex-shrink:0; color:var(--text-dim); transition:transform 0.2s; }
+    .faq-item.open .faq-q svg { transform:rotate(180deg); color:var(--accent); }
+    .faq-a { display:none; padding:0 1.5rem 1.2rem; font-size:0.875rem; color:var(--text-muted); line-height:1.75; }
+    .faq-item.open .faq-a { display:block; }
+
     /* ── CTA ── */
     .cta-sec { padding:7rem 2rem; text-align:center; border-top:1px solid var(--border); position:relative; overflow:hidden; }
     .cta-sec::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,rgba(34,197,94,0.07) 0%,transparent 62%); pointer-events:none; }
     .cta-sec .inner { position:relative; z-index:1; }
     .cta-sec h2 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.9rem,3.5vw,2.9rem); font-weight:700; margin-bottom:1rem; letter-spacing:-0.025em; }
-    .cta-sec p { color:var(--text-muted); font-size:1.05rem; margin-bottom:2.5rem; max-width:400px; margin-left:auto; margin-right:auto; }
+    .cta-sec p { color:var(--text-muted); font-size:1.05rem; margin-bottom:2.5rem; max-width:420px; margin-left:auto; margin-right:auto; }
 
     /* ── FOOTER ── */
     footer { padding:2rem; text-align:center; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-dim); }
@@ -162,14 +202,16 @@
   </a>
   <div class="nav-links">
     <a href="#features" class="hide-sm">Features</a>
+    <a href="#pricing" class="hide-sm">Pricing</a>
     <a href="#quickstart" class="hide-sm">Quick Start</a>
     <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm">GitHub</a>
+    <a href="https://console.share-installs.com" class="hide-sm" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">Console</a>
     <a href="index.zh.html" class="nav-lang">中文</a>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
       <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       <svg id="icon-sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
     </button>
-    <a href="http://app.share-installs.com" class="nav-btn">
+    <a href="https://console.share-installs.com" class="nav-btn">
       Get Started Free
     </a>
   </div>
@@ -183,9 +225,9 @@
       Open Source &nbsp;·&nbsp; Self-Hosted &nbsp;·&nbsp; Apache 2.0
     </div>
     <h1>Invite attribution<br>that <span class="hi">just works</span></h1>
-    <p class="hero-sub">When a user clicks your invite link and installs the app, the invite code resolves automatically on first launch — no clipboard tricks, no login required.</p>
+    <p class="hero-sub">When a user clicks your invite link and installs the app, the invite code resolves automatically on first launch — no user interaction required, no third-party SDK lock-in.</p>
     <div class="hero-actions">
-      <a class="btn-primary" href="http://app.share-installs.com">
+      <a class="btn-primary" href="https://console.share-installs.com">
         Get Started Free
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
       </a>
@@ -194,21 +236,47 @@
         View on GitHub
       </a>
     </div>
+
+    <!-- Feature pills -->
+    <div class="hero-pills">
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Invisible to users
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        No login required
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Data stays yours
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        iOS · Android · Web SDKs
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Apache 2.0 open source
+      </span>
+    </div>
+
     <div class="terminal">
       <div class="term-bar">
         <span class="td r"></span><span class="td y"></span><span class="td g"></span>
-        <span class="term-label">POST /v1/resolutions</span>
+        <span class="term-label">POST /v1/resolutions — invite code resolved on first launch</span>
       </div>
       <div class="term-body">
-        <div><span class="tc">// Mobile SDK — first launch</span></div>
+        <div><span class="tc">// Mobile SDK — called on first app launch</span></div>
         <div><span class="tm">POST</span> <span>/v1/resolutions</span></div>
         <div><span class="tk">Authorization:</span> <span class="tv">Bearer sk_live_•••</span></div>
         <div>&nbsp;</div>
-        <div><span class="ta">←</span> <span class="td2">200 OK</span></div>
+        <div><span class="ta">←</span> <span class="td2">200 OK &nbsp;·&nbsp; confidence 0.94</span></div>
         <div><span class="td2">{</span></div>
         <div>&nbsp;&nbsp;<span class="tk">"inviteCode"</span><span class="td2">:</span> <span class="tv">"INV-2024-K9X"</span><span class="td2">,</span></div>
         <div>&nbsp;&nbsp;<span class="tk">"channel"</span><span class="td2">:</span> <span class="tv">"fuzzy"</span><span class="td2">,</span></div>
-        <div>&nbsp;&nbsp;<span class="tk">"confidence"</span><span class="td2">:</span> <span class="tn">0.94</span></div>
+        <div>&nbsp;&nbsp;<span class="tk">"confidence"</span><span class="td2">:</span> <span class="tn">0.94</span><span class="td2">,</span></div>
+        <div>&nbsp;&nbsp;<span class="tk">"matchedAt"</span><span class="td2">:</span> <span class="tv">"2024-01-15T08:32:11Z"</span></div>
         <div><span class="td2">}</span></div>
       </div>
     </div>
@@ -220,11 +288,11 @@
   <div class="container">
     <div class="sec-label">How it works</div>
     <h2 class="sec-title">Five steps. Zero friction.</h2>
-    <p class="sec-sub">Device fingerprinting bridges the gap between a web click and an app install — without cookies, logins, or clipboard permission.</p>
+    <p class="sec-sub">Device fingerprinting bridges the gap between a web click and an app install — no cookies, no login, no clipboard permission needed.</p>
     <div class="flow-row">
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></div>
-        <strong>Share Link</strong><p>User A shares an invite link</p>
+        <strong>Share</strong><p>User A generates and shares an invite link</p>
       </div>
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
@@ -234,7 +302,7 @@
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
-        <strong>Fingerprint</strong><p>JS SDK captures browser signals</p>
+        <strong>Fingerprint</strong><p>JS SDK captures multi-signal browser fingerprint</p>
       </div>
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
@@ -244,7 +312,7 @@
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-        <strong>Matched</strong><p>Invite code resolved automatically</p>
+        <strong>Matched</strong><p>Invite code auto-resolved and returned</p>
       </div>
     </div>
   </div>
@@ -253,39 +321,39 @@
 <!-- FEATURES -->
 <section class="sec" id="features">
   <div class="container">
-    <div class="sec-label">Why share-installs</div>
+    <div class="sec-label">Core Features</div>
     <h2 class="sec-title">Everything you need.<br>Nothing you don't.</h2>
-    <p class="sec-sub">Built for developers who want precise invite tracking without third-party lock-in.</p>
+    <p class="sec-sub">Built for developers who want precise invite tracking without third-party lock-in. Your data, your infrastructure.</p>
     <div class="feat-grid">
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg></div>
         <h3>Fully Self-Hosted</h3>
-        <p>Your data never leaves your infrastructure. Deploy with a single <code class="inline">docker compose up</code> command. No vendor lock-in, no monthly fees.</p>
+        <p>Your data never leaves your infrastructure. A single <code class="inline">docker compose up</code> deploys the full stack — API, PostgreSQL, and Redis. No vendor lock-in, no monthly fees, forever free.</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
         <h3>Three-Channel Resolution</h3>
-        <p>Redis exact hash match → PostgreSQL fuzzy scoring → Android clipboard fallback. Maximises match rate across all scenarios.</p>
+        <p><strong>Redis exact hash</strong> (zero-latency cache) → <strong>PostgreSQL fuzzy scoring</strong> (weighted multi-signal) → <strong>Android clipboard fallback</strong>. Three-tier degradation maximises match rate in all scenarios.</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg></div>
         <h3>Smart Fingerprinting</h3>
-        <p>Multi-signal matching across timezone, screen, IP subnet, language, and hardware. Configurable confidence threshold (0–1).</p>
+        <p>Weighted matching across IP subnet, timezone, screen resolution, language, OS version, and hardware concurrency. Configurable confidence threshold (0–1), 72-hour match window by default.</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/></svg></div>
-        <h3>Native SDKs</h3>
-        <p>First-class Swift SDK for iOS, Kotlin SDK for Android, and a TypeScript Web SDK. All open source, ready to ship.</p>
+        <h3>Native SDKs for All Platforms</h3>
+        <p>First-class Swift SDK for iOS, Kotlin SDK for Android, and a TypeScript Web SDK — all open source, production-ready, and dependency-light. Integrate in minutes, not days.</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg></div>
         <h3>Your Invite Codes</h3>
-        <p>Bring your own invite codes. We store and return them verbatim. Generation, validation, and usage limits are yours to own.</p>
+        <p>Bring your own invite codes — stored and returned verbatim. Generation logic, validation rules, and usage limits are entirely yours. Custom metadata fields travel with each code.</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
-        <h3>Multi-Tenant Ready</h3>
-        <p>Run as a shared SaaS with per-project API keys and usage quotas, or deploy in single-tenant mode with zero auth overhead.</p>
+        <h3>Multi-Tenant & Quota Control</h3>
+        <p>Run as a shared SaaS with per-project API keys and tiered quota enforcement (Free / Pro / Unlimited), or deploy in single-tenant mode with zero auth overhead for private teams.</p>
       </div>
     </div>
   </div>
@@ -294,23 +362,23 @@
 <!-- SDKs -->
 <section class="sec">
   <div class="container">
-    <div class="sec-label">SDKs</div>
+    <div class="sec-label">SDK Integration</div>
     <h2 class="sec-title">Integrate in minutes</h2>
-    <p class="sec-sub">Official SDKs for all major platforms. Drop them in and go.</p>
+    <p class="sec-sub">Official SDKs for all major platforms. All open source, no black-box dependencies.</p>
     <div class="sdk-grid">
       <div class="sdk-card">
         <div class="sdk-head">
           <div class="sdk-ic" style="background:rgba(247,223,30,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#F7DF1E" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg></div>
-          <div><h3>Web / JavaScript</h3><div class="sdk-sub">TypeScript · Browser + Node</div></div>
+          <div><h3>Web / JavaScript</h3><div class="sdk-sub">TypeScript · Browser + Node.js</div></div>
         </div>
         <div class="sdk-code">npm install @share-installs/js-sdk</div>
       </div>
       <div class="sdk-card">
         <div class="sdk-head">
           <div class="sdk-ic" style="background:rgba(0,122,255,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3"/></svg></div>
-          <div><h3>iOS</h3><div class="sdk-sub">Swift 5.9+ · Swift Package Manager</div></div>
+          <div><h3>iOS</h3><div class="sdk-sub">Swift 5.9+ · CocoaPods</div></div>
         </div>
-        <div class="sdk-code">swift package add share-installs/sdk-ios</div>
+        <div class="sdk-code">pod 'ShareInstalls'  <span style="color:#475569"># SPM: swift package add share-installs/sdk-ios</span></div>
       </div>
       <div class="sdk-card">
         <div class="sdk-head">
@@ -323,6 +391,86 @@
   </div>
 </section>
 
+<!-- PRICING -->
+<section class="sec" id="pricing">
+  <div class="container">
+    <div class="sec-label">Pricing</div>
+    <h2 class="sec-title">Start free,<br>scale when ready.</h2>
+    <p class="sec-sub">Whether you're a solo developer or a growing team, there's a plan for you. Self-hosted is always free.</p>
+    <div class="pricing-grid">
+
+      <!-- Self-hosted -->
+      <div class="price-card">
+        <div class="price-tier">Self-Hosted</div>
+        <div class="price-amount">Free<span> / forever</span></div>
+        <p class="price-desc">Deploy on your own server. Full control, no usage limits, zero cost.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited projects & API calls</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Data never leaves your server</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>One-command Docker Compose deploy</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>PostgreSQL + Redis included</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0 — fork & modify freely</li>
+        </ul>
+        <a class="price-btn ghost" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+
+      <!-- Free SaaS -->
+      <div class="price-card">
+        <div class="price-tier">Free</div>
+        <div class="price-amount">$0<span> / month</span></div>
+        <p class="price-desc">Perfect for indie developers and side projects. No credit card required.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>10 resolutions / minute</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>1 project</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth login</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Basic dashboard</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>All platform SDKs</li>
+          <li class="dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>No priority support</li>
+        </ul>
+        <a class="price-btn outline" href="https://console.share-installs.com">Sign up free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="price-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="price-tier">Pro</div>
+        <div class="price-amount">$9<span> / month</span></div>
+        <p class="price-desc">For growing product teams that need higher throughput and priority support.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>60 resolutions / minute</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Up to 5 projects</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Advanced analytics & funnel</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Multiple API keys per project</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Priority email support</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Free</li>
+        </ul>
+        <a class="price-btn solid" href="https://console.share-installs.com">Upgrade to Pro</a>
+      </div>
+
+      <!-- Unlimited -->
+      <div class="price-card">
+        <div class="price-tier">Unlimited</div>
+        <div class="price-amount">$29<span> / month</span></div>
+        <p class="price-desc">For high-traffic apps and enterprise teams that need unlimited scale.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>600 resolutions / minute</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited projects</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dedicated support & SLA</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Custom quota configuration</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Pro</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Invoicing & team billing</li>
+        </ul>
+        <a class="price-btn outline" href="https://console.share-installs.com">Upgrade now</a>
+      </div>
+
+    </div>
+    <p class="pricing-note">
+      Need more than Unlimited? <a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">Contact us</a> for a custom plan.
+      Or go <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">self-hosted</a> — unlimited usage, zero cost.
+    </p>
+  </div>
+</section>
+
 <!-- DEPLOY MODES -->
 <section class="sec" id="deploy">
   <div class="container">
@@ -332,24 +480,26 @@
     <div class="modes-grid">
       <div class="mode-card">
         <span class="mode-tag">Self-Hosted</span>
-        <h3>Run Your Own</h3>
-        <p>Deploy on your servers. No API keys, no auth overhead. Perfect for private teams and single-app deployments.</p>
+        <h3>Run it yourself, full control</h3>
+        <p>Deploy on your own server or private cloud. Data never leaves your infrastructure. No usage limits, ideal for privacy-sensitive teams and single-app deployments.</p>
         <ul class="mode-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>One-command Docker deploy</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>No authentication required</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Optional admin secret for project management</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>PostgreSQL + Redis included in Compose</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>One-command Docker Compose deploy</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>No authentication required out of the box</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Optional Admin Secret for project management</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>PostgreSQL + Redis bundled in Compose</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0 — fully open source</li>
         </ul>
       </div>
       <div class="mode-card saas">
-        <span class="mode-tag">SaaS Mode</span>
-        <h3>Managed Service</h3>
-        <p>Enable multi-tenant mode for teams. GitHub OAuth login, per-project API keys, and plan-based usage quotas.</p>
+        <span class="mode-tag">SaaS Hosted</span>
+        <h3>Zero ops, focus on your product</h3>
+        <p>No server management — sign up and go. Multi-tenant mode with GitHub OAuth login, per-project API key management, and plan-based usage quotas.</p>
         <ul class="mode-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth login</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth one-click login</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Per-project API key management</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Free / Pro / Unlimited tiers</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dashboard with usage analytics</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>No ops — scale on demand</li>
         </ul>
       </div>
     </div>
@@ -361,19 +511,26 @@
   <div class="qs-inner">
     <div class="sec-label">Quick Start</div>
     <h2 class="sec-title">Up and running in 60 seconds</h2>
-    <p class="sec-sub">Start with self-hosted mode. Upgrade to SaaS when you need multi-tenancy.</p>
+    <p class="sec-sub">Three steps to self-host. Or sign up for SaaS — no server needed.</p>
     <div class="code-block">
-      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>bash</div>
-      <pre><span class="cc"># Clone and start all services</span>
+      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Self-hosted deploy — bash</div>
+      <pre><span class="cc"># 1. Clone the repo</span>
 <span class="cmd">git clone</span> https://github.com/ceeyang/share-installs.git
 <span class="cmd">cd</span> share-installs
-<span class="cmd">docker compose up</span> --build</pre>
+
+<span class="cc"># 2. Start all services (API + PostgreSQL + Redis + Dashboard)</span>
+<span class="cmd">docker compose up</span> --build -d</pre>
     </div>
     <div class="code-block">
-      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>bash</div>
-      <pre><span class="cc"># Verify the server is running</span>
-<span class="cmd">curl</span> http://localhost:6066/health
-<span class="ok">→ {"status":"ok","mode":"self-hosted","version":"1.0.0"}</span></pre>
+      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Verify & create your first project</div>
+      <pre><span class="cmd">curl</span> http://localhost:6066/health
+<span class="ok">→ {"status":"ok","mode":"self-hosted","version":"1.0.0"}</span>
+
+<span class="cc"># 3. Create your first project</span>
+<span class="cmd">curl</span> -X POST http://localhost:6066/v1/projects \
+  -H <span class="ok">"Content-Type: application/json"</span> \
+  -d <span class="ok">'{"name":"my-app"}'</span>
+<span class="ok">→ {"id":"proj_xxx","apiKey":"sk_live_•••"}</span></pre>
     </div>
     <div style="text-align:center;margin-top:2rem">
       <a class="btn-primary" href="https://github.com/ceeyang/share-installs#quick-start--docker" target="_blank" rel="noopener">
@@ -384,17 +541,66 @@
   </div>
 </section>
 
+<!-- FAQ -->
+<section class="sec" id="faq">
+  <div class="container">
+    <div class="sec-label">FAQ</div>
+    <h2 class="sec-title">Questions you might have</h2>
+    <p class="sec-sub">Can't find what you're looking for? Open an issue on GitHub and we'll get back to you.</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What's the difference between self-hosted and SaaS?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">Self-hosted means you run the entire stack on your own server — your data never leaves your infrastructure and there are no usage limits, forever free. SaaS means we operate the infrastructure for you, so you can focus on building. Both options use the exact same codebase and feature set.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          How accurate is device fingerprint attribution?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">Under normal network conditions, the exact hash match channel (Redis) achieves near-100% accuracy. The fuzzy fingerprint channel (PostgreSQL) typically scores above 0.85 confidence. You can tune <code style="font-family:monospace;font-size:0.9em;color:var(--accent)">FINGERPRINT_MATCH_THRESHOLD</code> (default 0.75) to balance precision vs. coverage.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          What are the Free tier limits? Do upgrades apply immediately?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">The Free tier allows 10 resolutions per minute and 1 project — enough for indie projects and early validation. Upgrading to Pro or Unlimited takes effect immediately with no restart or re-configuration needed. If you outgrow Unlimited, self-hosting removes all limits at zero cost.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Can I call the API directly without an SDK?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">Absolutely. share-installs exposes a standard RESTful API — any language or platform that can make HTTP requests can integrate directly. The SDKs are simply convenience wrappers. Full API documentation and examples are available in the GitHub repository.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Is my data safe? Will it be used for anything else?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">On self-hosted, we have zero access to your data — it lives entirely on your server. On SaaS, your attribution data is used solely to provide the service and is never shared with third parties or used for advertising. The codebase is fully open source, so you can audit every data handling decision yourself.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-sec">
   <div class="inner">
     <h2>Open source and free forever</h2>
-    <p>Self-host it, fork it, or contribute. Licensed under Apache 2.0.</p>
+    <p>Self-host at zero cost, or validate your idea on the free SaaS tier.</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a class="btn-primary" href="http://app.share-installs.com">
+      <a class="btn-primary" href="https://console.share-installs.com">
         Get Started Free
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
       </a>
-      <a class="btn-secondary" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">Star on GitHub</a>
+      <a class="btn-secondary" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+        Star on GitHub
+      </a>
     </div>
   </div>
 </section>
@@ -404,6 +610,7 @@
   <div class="foot-links">
     <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">GitHub</a>
     <a href="https://github.com/ceeyang/share-installs/blob/main/README.md" target="_blank" rel="noopener">Docs</a>
+    <a href="#pricing">Pricing</a>
     <a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">Issues</a>
     <a href="index.zh.html">中文</a>
   </div>
@@ -417,12 +624,18 @@
     document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
     document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
   }
-  // Sync toggle icon with current theme on load
   (function() {
     const dark = document.documentElement.classList.contains('dark');
     document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
     document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
   })();
+
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
 </script>
 </body>
 </html>

@@ -60,12 +60,17 @@
     .badge { display:inline-flex; align-items:center; gap:0.45rem; background:rgba(34,197,94,0.1); color:var(--accent); border:1px solid rgba(34,197,94,0.28); font-size:0.78rem; font-weight:600; padding:0.3rem 0.9rem; border-radius:20px; margin-bottom:2rem; font-family:'Space Grotesk',sans-serif; letter-spacing:0.02em; }
     .hero h1 { font-family:'Space Grotesk',sans-serif; font-size:clamp(2.4rem,5.5vw,4.2rem); font-weight:700; line-height:1.12; margin-bottom:1.5rem; letter-spacing:-0.03em; }
     .hero h1 .hi { color:var(--accent); }
-    .hero-sub { font-size:1.1rem; color:var(--text-muted); max-width:520px; margin:0 auto 2.5rem; line-height:1.75; }
-    .hero-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:4rem; }
+    .hero-sub { font-size:1.1rem; color:var(--text-muted); max-width:560px; margin:0 auto 2.5rem; line-height:1.75; }
+    .hero-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:3rem; }
     .btn-primary { background:var(--accent); color:#0F172A; padding:0.8rem 1.75rem; border-radius:10px; font-weight:700; text-decoration:none; font-size:0.95rem; transition:background 0.2s,transform 0.15s,box-shadow 0.2s; cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; }
     .btn-primary:hover { background:var(--accent-dark); transform:translateY(-1px); box-shadow:0 8px 28px var(--accent-glow-md); }
     .btn-secondary { background:transparent; color:var(--text); padding:0.8rem 1.75rem; border-radius:10px; font-weight:600; text-decoration:none; font-size:0.95rem; border:1.5px solid var(--border); transition:border-color 0.2s,transform 0.15s; cursor:pointer; display:inline-flex; align-items:center; gap:0.5rem; }
     .btn-secondary:hover { border-color:var(--text-dim); transform:translateY(-1px); }
+
+    /* Feature pills */
+    .hero-pills { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-bottom:3.5rem; }
+    .pill { display:inline-flex; align-items:center; gap:0.45rem; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:0.38rem 0.9rem; font-size:0.8rem; color:var(--text-muted); white-space:nowrap; }
+    .pill svg { width:13px; height:13px; color:var(--accent); flex-shrink:0; }
 
     /* Terminal — always dark */
     .terminal { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; text-align:left; max-width:560px; margin:0 auto; box-shadow:0 28px 64px rgba(0,0,0,0.35); }
@@ -82,7 +87,7 @@
     .sec { padding:6rem 2rem; border-top:1px solid var(--border); }
     .sec-label { text-align:center; font-size:0.72rem; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; color:var(--accent); margin-bottom:0.75rem; font-family:'Space Grotesk',sans-serif; }
     .sec-title { text-align:center; font-family:'Space Grotesk',sans-serif; font-size:clamp(1.65rem,3vw,2.5rem); font-weight:700; margin-bottom:0.9rem; letter-spacing:-0.025em; }
-    .sec-sub { text-align:center; color:var(--text-muted); font-size:0.975rem; max-width:480px; margin:0 auto 4rem; line-height:1.75; }
+    .sec-sub { text-align:center; color:var(--text-muted); font-size:0.975rem; max-width:520px; margin:0 auto 4rem; line-height:1.75; }
 
     /* ── HOW IT WORKS ── */
     .flow-row { display:flex; align-items:flex-start; justify-content:center; flex-wrap:wrap; gap:0; }
@@ -118,6 +123,32 @@
     /* SDK code pill — always dark */
     .sdk-code { background:#0F172A; border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:0.65rem 1rem; font-family:var(--mono); font-size:0.76rem; color:#22C55E; overflow-x:auto; white-space:nowrap; }
 
+    /* ── PRICING ── */
+    .pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.25rem; max-width:1080px; margin:0 auto; }
+    .price-card { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:2rem; display:flex; flex-direction:column; position:relative; transition:border-color 0.2s,box-shadow 0.2s; }
+    .price-card:hover { border-color:var(--border-hover); box-shadow:0 8px 32px rgba(0,0,0,0.08); }
+    .price-card.popular { border-color:rgba(34,197,94,0.5); background:linear-gradient(145deg,var(--surface) 0%,rgba(34,197,94,0.04) 100%); }
+    .popular-badge { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--accent); color:#0F172A; font-size:0.68rem; font-weight:700; padding:0.22rem 0.9rem; border-radius:20px; font-family:'Space Grotesk',sans-serif; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
+    .price-tier { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); font-family:'Space Grotesk',sans-serif; margin-bottom:0.75rem; }
+    .price-amount { font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:700; line-height:1; color:var(--text); margin-bottom:0.3rem; }
+    .price-amount span { font-size:1rem; font-weight:500; color:var(--text-muted); }
+    .price-desc { font-size:0.84rem; color:var(--text-muted); margin-bottom:1.75rem; line-height:1.6; min-height:2.8rem; }
+    .price-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; margin-bottom:2rem; flex:1; }
+    .price-list li { display:flex; align-items:flex-start; gap:0.6rem; font-size:0.84rem; color:var(--text-muted); }
+    .price-list li svg { width:15px; height:15px; flex-shrink:0; margin-top:2px; color:var(--accent); }
+    .price-list li.dim svg { color:var(--text-dim); }
+    .price-list li.dim { color:var(--text-dim); }
+    .price-btn { display:block; text-align:center; padding:0.7rem 1.25rem; border-radius:10px; font-size:0.88rem; font-weight:700; text-decoration:none; transition:background 0.2s,border-color 0.2s,transform 0.15s; cursor:pointer; }
+    .price-btn.outline { border:1.5px solid var(--border); color:var(--text); background:transparent; }
+    .price-btn.outline:hover { border-color:var(--text-dim); transform:translateY(-1px); }
+    .price-btn.solid { background:var(--accent); color:#0F172A; border:1.5px solid transparent; }
+    .price-btn.solid:hover { background:var(--accent-dark); transform:translateY(-1px); }
+    .price-btn.ghost { background:var(--surface-2); color:var(--text-muted); border:1.5px solid transparent; }
+    .price-btn.ghost:hover { color:var(--text); transform:translateY(-1px); }
+    .pricing-note { text-align:center; margin-top:2rem; font-size:0.82rem; color:var(--text-dim); }
+    .pricing-note a { color:var(--accent); text-decoration:none; }
+    .pricing-note a:hover { text-decoration:underline; }
+
     /* ── MODES ── */
     .modes-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); gap:1.5rem; max-width:880px; margin:0 auto; }
     .mode-card { background:var(--surface); border:1.5px solid var(--border); border-radius:20px; padding:2rem; }
@@ -139,12 +170,22 @@
     pre { padding:1.2rem 1.5rem; font-family:var(--mono); font-size:0.81rem; line-height:1.85; overflow-x:auto; color:#E2E8F0; }
     .cc { color:#475569; } .cmd { color:#38BDF8; } .ok { color:#22C55E; }
 
+    /* ── FAQ ── */
+    .faq-list { max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:0.75rem; }
+    .faq-item { background:var(--surface); border:1.5px solid var(--border); border-radius:14px; overflow:hidden; transition:border-color 0.2s; }
+    .faq-item:hover { border-color:var(--border-hover); }
+    .faq-q { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.2rem 1.5rem; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:0.94rem; font-weight:600; color:var(--text); user-select:none; }
+    .faq-q svg { width:18px; height:18px; flex-shrink:0; color:var(--text-dim); transition:transform 0.2s; }
+    .faq-item.open .faq-q svg { transform:rotate(180deg); color:var(--accent); }
+    .faq-a { display:none; padding:0 1.5rem 1.2rem; font-size:0.875rem; color:var(--text-muted); line-height:1.75; }
+    .faq-item.open .faq-a { display:block; }
+
     /* ── CTA ── */
     .cta-sec { padding:7rem 2rem; text-align:center; border-top:1px solid var(--border); position:relative; overflow:hidden; }
     .cta-sec::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,rgba(34,197,94,0.07) 0%,transparent 62%); pointer-events:none; }
     .cta-sec .inner { position:relative; z-index:1; }
     .cta-sec h2 { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.9rem,3.5vw,2.9rem); font-weight:700; margin-bottom:1rem; letter-spacing:-0.025em; }
-    .cta-sec p { color:var(--text-muted); font-size:1.05rem; margin-bottom:2.5rem; max-width:400px; margin-left:auto; margin-right:auto; }
+    .cta-sec p { color:var(--text-muted); font-size:1.05rem; margin-bottom:2.5rem; max-width:420px; margin-left:auto; margin-right:auto; }
 
     /* ── FOOTER ── */
     footer { padding:2rem; text-align:center; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-dim); }
@@ -162,14 +203,16 @@
   </a>
   <div class="nav-links">
     <a href="#features" class="hide-sm">功能</a>
+    <a href="#pricing" class="hide-sm">价格</a>
     <a href="#quickstart" class="hide-sm">快速开始</a>
     <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm">GitHub</a>
+    <a href="https://console.share-installs.com" class="hide-sm" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">控制台</a>
     <a href="index.html" class="nav-lang">EN</a>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
       <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
       <svg id="icon-sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
     </button>
-    <a href="http://app.share-installs.com" class="nav-btn">
+    <a href="https://console.share-installs.com" class="nav-btn">
       免费开始
     </a>
   </div>
@@ -183,9 +226,9 @@
       开源 &nbsp;·&nbsp; 自托管 &nbsp;·&nbsp; Apache 2.0
     </div>
     <h1>邀请归因，<br><span class="hi">开箱即用</span></h1>
-    <p class="hero-sub">用户点击邀请链接并安装 App 后，邀请码在首次启动时自动识别回填 — 无需剪贴板权限，无需用户登录。</p>
+    <p class="hero-sub">用户点击邀请链接并安装 App 后，邀请码在首次启动时自动识别回填。无需剪贴板权限，无需用户登录，无需第三方 SDK 绑定。</p>
     <div class="hero-actions">
-      <a class="btn-primary" href="http://app.share-installs.com">
+      <a class="btn-primary" href="https://console.share-installs.com">
         免费开始使用
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
       </a>
@@ -194,21 +237,47 @@
         在 GitHub 上查看
       </a>
     </div>
+
+    <!-- Feature pills -->
+    <div class="hero-pills">
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        无需用户感知
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        无需用户登录
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        数据完全自控
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        iOS · Android · Web 三端 SDK
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        Apache 2.0 开源
+      </span>
+    </div>
+
     <div class="terminal">
       <div class="term-bar">
         <span class="td r"></span><span class="td y"></span><span class="td g"></span>
-        <span class="term-label">POST /v1/resolutions</span>
+        <span class="term-label">POST /v1/resolutions — 首次启动自动识别邀请码</span>
       </div>
       <div class="term-body">
-        <div><span class="tc">// 移动端 SDK — 首次启动</span></div>
+        <div><span class="tc">// 移动端 SDK — 首次启动时调用</span></div>
         <div><span class="tm">POST</span> <span>/v1/resolutions</span></div>
         <div><span class="tk">Authorization:</span> <span class="tv">Bearer sk_live_•••</span></div>
         <div>&nbsp;</div>
-        <div><span class="ta">←</span> <span class="td2">200 OK</span></div>
+        <div><span class="ta">←</span> <span class="td2">200 OK &nbsp;·&nbsp; 置信度 0.94</span></div>
         <div><span class="td2">{</span></div>
         <div>&nbsp;&nbsp;<span class="tk">"inviteCode"</span><span class="td2">:</span> <span class="tv">"INV-2024-K9X"</span><span class="td2">,</span></div>
         <div>&nbsp;&nbsp;<span class="tk">"channel"</span><span class="td2">:</span> <span class="tv">"fuzzy"</span><span class="td2">,</span></div>
-        <div>&nbsp;&nbsp;<span class="tk">"confidence"</span><span class="td2">:</span> <span class="tn">0.94</span></div>
+        <div>&nbsp;&nbsp;<span class="tk">"confidence"</span><span class="td2">:</span> <span class="tn">0.94</span><span class="td2">,</span></div>
+        <div>&nbsp;&nbsp;<span class="tk">"matchedAt"</span><span class="td2">:</span> <span class="tv">"2024-01-15T08:32:11Z"</span></div>
         <div><span class="td2">}</span></div>
       </div>
     </div>
@@ -224,7 +293,7 @@
     <div class="flow-row">
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></div>
-        <strong>分享链接</strong><p>用户 A 分享邀请链接</p>
+        <strong>分享链接</strong><p>用户 A 生成并分享邀请链接</p>
       </div>
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
@@ -234,7 +303,7 @@
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
-        <strong>采集指纹</strong><p>JS SDK 采集浏览器特征信号</p>
+        <strong>采集指纹</strong><p>JS SDK 采集浏览器多维特征信号</p>
       </div>
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
@@ -244,7 +313,7 @@
       <div class="flow-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg></div>
       <div class="flow-item">
         <div class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-        <strong>自动匹配</strong><p>邀请码自动识别并回填</p>
+        <strong>自动匹配</strong><p>邀请码精准识别并自动回填</p>
       </div>
     </div>
   </div>
@@ -253,39 +322,39 @@
 <!-- FEATURES -->
 <section class="sec" id="features">
   <div class="container">
-    <div class="sec-label">为什么选择 share-installs</div>
+    <div class="sec-label">核心功能</div>
     <h2 class="sec-title">一切所需，<br>恰到好处。</h2>
-    <p class="sec-sub">专为不想被第三方锁定的开发者设计，精准追踪邀请归因。</p>
+    <p class="sec-sub">专为不想被第三方锁定的开发者设计，精准追踪邀请归因，数据永远归你所有。</p>
     <div class="feat-grid">
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg></div>
         <h3>完全自托管</h3>
-        <p>数据永远不离开你的基础设施。一条 <code class="inline">docker compose up</code> 命令即可部署。无供应商锁定，无月租费用。</p>
+        <p>数据永远不离开你的基础设施。一条 <code class="inline">docker compose up</code> 命令即可部署完整服务栈（API + PostgreSQL + Redis）。无供应商锁定，无月租费用，永久免费。</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div>
-        <h3>三通道归因</h3>
-        <p>Redis 精确哈希匹配 → PostgreSQL 模糊评分 → Android 剪贴板兜底。多场景最大化匹配率。</p>
+        <h3>三通道归因引擎</h3>
+        <p><strong>Redis 精确哈希匹配</strong>（高速缓存，零延迟）→ <strong>PostgreSQL 模糊评分</strong>（多维特征加权）→ <strong>Android 剪贴板兜底</strong>。三级降级确保最大化匹配率。</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg></div>
         <h3>智能设备指纹</h3>
-        <p>综合时区、屏幕分辨率、IP 子网、语言、硬件信息多维度匹配，置信度阈值（0–1）可自由配置。</p>
+        <p>综合 IP 子网、时区、屏幕分辨率、语言、操作系统版本、硬件并发数等多维信号加权匹配。置信度阈值（0–1）可自由配置，匹配窗口期默认 72 小时。</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/></svg></div>
-        <h3>原生 SDK 支持</h3>
-        <p>iOS 原生 Swift SDK、Android Kotlin SDK、TypeScript Web SDK，全部开源，生产就绪。</p>
+        <h3>全平台原生 SDK</h3>
+        <p>iOS 原生 Swift SDK、Android Kotlin SDK、TypeScript Web SDK，三端全覆盖，全部开源。生产就绪，几行代码完成接入，无需额外依赖。</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg></div>
         <h3>自定义邀请码</h3>
-        <p>带上你自己的邀请码，原样存储与返回。生成规则、校验逻辑、使用次数限制完全由你控制。</p>
+        <p>带上你自己的邀请码，原样存储与返回。生成规则、校验逻辑、使用次数限制完全由你控制。支持自定义元数据字段随邀请码一同传递。</p>
       </div>
       <div class="feat-card">
         <div class="feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
-        <h3>多租户就绪</h3>
-        <p>以共享 SaaS 模式运行，支持按项目 API 密钥和用量配额；或以单租户模式部署，零鉴权开销。</p>
+        <h3>多租户 & 用量配额</h3>
+        <p>以共享 SaaS 模式运行，支持按项目 API 密钥管理、用量配额分层控制（Free / Pro / Unlimited）；或以单租户模式部署，零鉴权开销，适合私有团队。</p>
       </div>
     </div>
   </div>
@@ -296,21 +365,21 @@
   <div class="container">
     <div class="sec-label">SDK 集成</div>
     <h2 class="sec-title">几分钟完成接入</h2>
-    <p class="sec-sub">覆盖全平台的官方 SDK，即插即用。</p>
+    <p class="sec-sub">覆盖全平台的官方 SDK，即插即用。全部开源，无黑盒依赖。</p>
     <div class="sdk-grid">
       <div class="sdk-card">
         <div class="sdk-head">
           <div class="sdk-ic" style="background:rgba(247,223,30,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#F7DF1E" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg></div>
-          <div><h3>Web / JavaScript</h3><div class="sdk-sub">TypeScript · 浏览器 + Node</div></div>
+          <div><h3>Web / JavaScript</h3><div class="sdk-sub">TypeScript · 浏览器 + Node.js</div></div>
         </div>
         <div class="sdk-code">npm install @share-installs/js-sdk</div>
       </div>
       <div class="sdk-card">
         <div class="sdk-head">
           <div class="sdk-ic" style="background:rgba(0,122,255,0.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3"/></svg></div>
-          <div><h3>iOS</h3><div class="sdk-sub">Swift 5.9+ · Swift Package Manager</div></div>
+          <div><h3>iOS</h3><div class="sdk-sub">Swift 5.9+ · CocoaPods</div></div>
         </div>
-        <div class="sdk-code">swift package add share-installs/sdk-ios</div>
+        <div class="sdk-code">pod 'ShareInstalls'  <span style="color:#475569"># SPM: swift package add share-installs/sdk-ios</span></div>
       </div>
       <div class="sdk-card">
         <div class="sdk-head">
@@ -323,6 +392,159 @@
   </div>
 </section>
 
+<!-- PRICING -->
+<section class="sec" id="pricing">
+  <div class="container">
+    <div class="sec-label">价格方案</div>
+    <h2 class="sec-title">从免费开始，<br>按需升级。</h2>
+    <p class="sec-sub">不管是独立开发者还是成长中的团队，都有适合你的方案。自托管版永久免费开源。</p>
+    <div class="pricing-grid">
+
+      <!-- Self-hosted -->
+      <div class="price-card">
+        <div class="price-tier">自托管</div>
+        <div class="price-amount">免费<span> / 永久</span></div>
+        <p class="price-desc">部署在你自己的服务器，数据完全自控，无任何使用限制。</p>
+        <ul class="price-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            无限项目 & API 调用
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            数据永远不离开你的服务器
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            一键 Docker Compose 部署
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            含 PostgreSQL + Redis
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Apache 2.0 开源协议
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            完整源码可 Fork / 修改
+          </li>
+        </ul>
+        <a class="price-btn ghost" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">查看 GitHub 文档</a>
+      </div>
+
+      <!-- Free SaaS -->
+      <div class="price-card">
+        <div class="price-tier">免费版</div>
+        <div class="price-amount">$0<span> / 月</span></div>
+        <p class="price-desc">适合个人开发者和小型项目，无需信用卡，注册即用。</p>
+        <ul class="price-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            每分钟 10 次归因解析
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            1 个项目
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            GitHub OAuth 登录
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Dashboard 基础数据
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            全平台 SDK 支持
+          </li>
+          <li class="dim">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            无优先支持
+          </li>
+        </ul>
+        <a class="price-btn outline" href="https://console.share-installs.com">免费注册</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="price-card popular">
+        <div class="popular-badge">最受欢迎</div>
+        <div class="price-tier">Pro</div>
+        <div class="price-amount">$9<span> / 月</span></div>
+        <p class="price-desc">适合成长中的产品团队，更高配额与优先支持。</p>
+        <ul class="price-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            每分钟 60 次归因解析
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            最多 5 个项目
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            高级数据分析 & 漏斗图
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            API 密钥多密钥管理
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            邮件优先支持
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            免费版全部功能
+          </li>
+        </ul>
+        <a class="price-btn solid" href="https://console.share-installs.com">立即升级</a>
+      </div>
+
+      <!-- Unlimited -->
+      <div class="price-card">
+        <div class="price-tier">Unlimited</div>
+        <div class="price-amount">$29<span> / 月</span></div>
+        <p class="price-desc">适合高流量应用和企业级团队，无限扩展，专属支持。</p>
+        <ul class="price-list">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            每分钟 600 次归因解析
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            无限项目
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            专属客服 & 响应 SLA
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            自定义配额限制
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Pro 版全部功能
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            发票 & 团队账单管理
+          </li>
+        </ul>
+        <a class="price-btn outline" href="https://console.share-installs.com">立即升级</a>
+      </div>
+
+    </div>
+    <p class="pricing-note">
+      需要超出 Unlimited 的定制配额？<a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">联系我们</a> 获取企业方案。
+      或直接选择<a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">自托管</a>，零成本无限使用。
+    </p>
+  </div>
+</section>
+
 <!-- DEPLOY MODES -->
 <section class="sec" id="deploy">
   <div class="container">
@@ -332,24 +554,26 @@
     <div class="modes-grid">
       <div class="mode-card">
         <span class="mode-tag">自托管</span>
-        <h3>自己跑</h3>
-        <p>部署在你自己的服务器。无 API 密钥依赖，无鉴权开销。适合私有团队和单应用场景。</p>
+        <h3>自己跑，完全掌控</h3>
+        <p>部署在你自己的服务器或私有云，数据不出你的基础设施。适合隐私要求严格的团队和单应用场景，无任何使用上限。</p>
         <ul class="mode-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>一键 Docker 部署</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>无需身份认证</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>可选管理员密钥管理项目</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Compose 内含 PostgreSQL + Redis</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>一键 Docker Compose 部署</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>无需身份认证，开箱即用</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>可选 Admin Secret 管理项目</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>内含 PostgreSQL + Redis</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0，源码完全开放</li>
         </ul>
       </div>
       <div class="mode-card saas">
-        <span class="mode-tag">SaaS 模式</span>
-        <h3>托管服务</h3>
-        <p>为团队启用多租户模式。GitHub OAuth 登录、按项目 API 密钥管理、基于订阅计划的用量配额。</p>
+        <span class="mode-tag">SaaS 托管</span>
+        <h3>开箱即用，专注业务</h3>
+        <p>无需维护服务器，注册即用。为团队启用多租户模式，GitHub OAuth 登录，按项目 API 密钥管理，基于订阅计划的用量配额。</p>
         <ul class="mode-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth 登录</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth 一键登录</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>按项目 API 密钥管理</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>免费 / Pro / Unlimited 三档</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>仪表盘 + 用量分析</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Free / Pro / Unlimited 三档</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dashboard 可视化 + 用量分析</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>无需运维，随时扩容</li>
         </ul>
       </div>
     </div>
@@ -361,25 +585,78 @@
   <div class="qs-inner">
     <div class="sec-label">快速开始</div>
     <h2 class="sec-title">60 秒跑起来</h2>
-    <p class="sec-sub">从自托管模式开始，需要多租户时升级到 SaaS。</p>
+    <p class="sec-sub">自托管模式三步完成部署，SaaS 模式注册即可使用 — 无需配置服务器。</p>
     <div class="code-block">
-      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>bash</div>
-      <pre><span class="cc"># 克隆仓库并启动所有服务</span>
+      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>自托管部署 — bash</div>
+      <pre><span class="cc"># 1. 克隆仓库</span>
 <span class="cmd">git clone</span> https://github.com/ceeyang/share-installs.git
 <span class="cmd">cd</span> share-installs
-<span class="cmd">docker compose up</span> --build</pre>
+
+<span class="cc"># 2. 启动所有服务（API + PostgreSQL + Redis + Dashboard）</span>
+<span class="cmd">docker compose up</span> --build -d</pre>
     </div>
     <div class="code-block">
-      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>bash</div>
-      <pre><span class="cc"># 验证服务是否正常运行</span>
-<span class="cmd">curl</span> http://localhost:6066/health
-<span class="ok">→ {"status":"ok","mode":"self-hosted","version":"1.0.0"}</span></pre>
+      <div class="code-hdr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>验证部署</div>
+      <pre><span class="cmd">curl</span> http://localhost:6066/health
+<span class="ok">→ {"status":"ok","mode":"self-hosted","version":"1.0.0"}</span>
+
+<span class="cc"># 3. 创建你的第一个项目</span>
+<span class="cmd">curl</span> -X POST http://localhost:6066/v1/projects \
+  -H <span class="ok">"Content-Type: application/json"</span> \
+  -d <span class="ok">'{"name":"my-app"}'</span>
+<span class="ok">→ {"id":"proj_xxx","apiKey":"sk_live_•••"}</span></pre>
     </div>
     <div style="text-align:center;margin-top:2rem">
       <a class="btn-primary" href="https://github.com/ceeyang/share-installs#quick-start--docker" target="_blank" rel="noopener">
-        完整文档
+        完整部署文档
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="faq">
+  <div class="container">
+    <div class="sec-label">常见问题</div>
+    <h2 class="sec-title">你可能想知道的</h2>
+    <p class="sec-sub">找不到答案？在 GitHub Issues 上提问，我们会尽快回复。</p>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          自托管和 SaaS 托管的核心区别是什么？
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">自托管意味着你在自己的服务器上运行全部服务，数据不会离开你的基础设施，无任何使用上限，永久免费。SaaS 托管由我们运维，你无需管理服务器，注册即用，适合不想维护基础设施的团队。两者使用的是同一套代码，功能完全一致。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          设备指纹归因的准确率有多高？
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">在正常网络环境下，精确哈希匹配（Redis 通道）准确率接近 100%；模糊指纹匹配（PostgreSQL 通道）置信度通常在 0.85 以上。你可以通过配置 <code style="font-family:monospace;font-size:0.9em;color:var(--accent)">FINGERPRINT_MATCH_THRESHOLD</code>（默认 0.75）来调整接受匹配的最低置信度阈值，在精准度与覆盖率之间取得平衡。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          免费版有哪些限制？升级后能立即生效吗？
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">免费版限制为每分钟 10 次归因解析、1 个项目，适合个人项目和初期验证。升级到 Pro 或 Unlimited 后，新的配额限制立即生效，无需重启服务或重新配置 API 密钥。如果你的流量需求更高，也可以随时切换到自托管方案，完全没有限制。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          不用 SDK，能直接调用 REST API 吗？
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">完全可以。share-installs 提供标准的 RESTful API，任何能发 HTTP 请求的语言或平台都可以直接对接，无需安装 SDK。SDK 只是对 API 的封装，方便快速集成，但不是必须的。API 文档和示例见 GitHub 仓库。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          我的数据安全吗？会被用于其他目的吗？
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-a">自托管模式下，你的所有数据都存储在自己的服务器，我们完全无法访问。SaaS 模式下，你的归因数据仅用于为你提供服务，不会被用于任何广告或第三方目的。代码完全开源，你可以随时审计所有数据处理逻辑。</div>
+      </div>
     </div>
   </div>
 </section>
@@ -388,13 +665,16 @@
 <section class="cta-sec">
   <div class="inner">
     <h2>开源，永久免费</h2>
-    <p>自托管、Fork，或参与贡献。Apache 2.0 协议授权。</p>
+    <p>自托管零成本运行，或在 SaaS 免费版上快速验证你的想法。</p>
     <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a class="btn-primary" href="http://app.share-installs.com">
+      <a class="btn-primary" href="https://console.share-installs.com">
         免费开始使用
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
       </a>
-      <a class="btn-secondary" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">在 GitHub 上 Star</a>
+      <a class="btn-secondary" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg>
+        在 GitHub 上 Star
+      </a>
     </div>
   </div>
 </section>
@@ -404,6 +684,7 @@
   <div class="foot-links">
     <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">GitHub</a>
     <a href="https://github.com/ceeyang/share-installs/blob/main/README.md" target="_blank" rel="noopener">文档</a>
+    <a href="#pricing">价格</a>
     <a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">反馈</a>
     <a href="index.html">English</a>
   </div>
@@ -417,12 +698,18 @@
     document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
     document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
   }
-  // Sync toggle icon with current theme on load
   (function() {
     const dark = document.documentElement.classList.contains('dark');
     document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
     document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
   })();
+
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
 </script>
 </body>
 </html>
