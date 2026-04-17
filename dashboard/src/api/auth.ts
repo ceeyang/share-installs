@@ -4,7 +4,7 @@ import type { User, Quota } from './types'
 
 // Separate client for /auth/* endpoints (not under /dashboard/ prefix)
 const authClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
+  baseURL: import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/api` : '',
   withCredentials: true,
 })
 
