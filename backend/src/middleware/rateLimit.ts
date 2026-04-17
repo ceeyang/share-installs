@@ -148,3 +148,24 @@ export function createPlanRateLimiter(redis: Redis) {
     next();
   };
 }
+
+/**
+ * Registration rate limiter: 5 attempts per 15 minutes per IP.
+ * Prevents automated account creation without CAPTCHA overhead.
+ */
+export function createRegisterRateLimiter(redis: Redis) {
+  const isDev = config.NODE_ENV === 'development';
+
+  return rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    store: new RedisStore(redis, 15 * 60 * 1000, 'rl:register'),
+    skip: isDev ? () => true : undefined,
+    message: {
+      error: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many registration attempts. Please try again in 15 minutes.',
+    },
+  });
+}
