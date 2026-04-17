@@ -1,5 +1,5 @@
 import {Router, Request, Response} from 'express';
-import {PrismaClient} from '@prisma/client';
+import {PrismaClient, Prisma} from '@prisma/client';
 import type {Redis} from 'ioredis';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -52,26 +52,29 @@ export function createEmailAuthRouter(
       return;
     }
 
-    try {
-      const existing = await prisma.user.findUnique({where: {email}});
-      if (existing) {
-        res.status(409).json({error: 'Email already registered'});
-        return;
-      }
+    const normalizedEmail = email.toLowerCase();
 
+    try {
       const passwordHash = await bcrypt.hash(password, 12);
       const resolvedName = displayName?.trim() || `user_${randomHex(4)}`;
       const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${randomHex(8)}`;
 
       const user = await prisma.user.create({
-        data: {email, passwordHash, displayName: resolvedName, avatarUrl},
+        data: {email: normalizedEmail, passwordHash, displayName: resolvedName, avatarUrl},
       });
 
       const token = signJwt({sub: user.id}, jwtSecret);
       setSessionCookie(res, token);
       logger.info({userId: user.id}, 'User registered via email');
       res.json({ok: true});
-    } catch (err) {
+    } catch (err: unknown) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        res.status(409).json({error: 'Email already registered'});
+        return;
+      }
       logger.error({err}, 'Email register error');
       res.status(500).json({error: 'Internal server error'});
     }
@@ -86,8 +89,10 @@ export function createEmailAuthRouter(
       return;
     }
 
+    const normalizedEmail = email.toLowerCase();
+
     try {
-      const user = await prisma.user.findUnique({where: {email}});
+      const user = await prisma.user.findUnique({where: {email: normalizedEmail}});
       // Use a constant-time dummy hash when user not found to prevent timing attacks
       const hash =
         user?.passwordHash ??
