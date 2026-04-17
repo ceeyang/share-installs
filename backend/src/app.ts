@@ -32,7 +32,7 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
   // CORS
   const allowedOrigins = config.CORS_ORIGINS.split(',').map(s => s.trim());
   const corsOptions: cors.CorsOptions = {
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-SDK-Platform', 'X-SDK-Version', 'X-Request-Id'],
     exposedHeaders: ['X-Request-Id'],
     credentials: true, // Required for cross-origin cookie sessions (dashboard SPA → API)
