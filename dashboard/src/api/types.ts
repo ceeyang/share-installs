@@ -2,9 +2,12 @@
 
 export interface User {
   id: string
-  githubLogin: string
+  githubLogin: string | null
+  displayName: string | null
   email: string | null
-  avatarUrl: string
+  avatarUrl: string | null
+  createdAt: string
+  hasPassword?: boolean
 }
 
 export interface Quota {

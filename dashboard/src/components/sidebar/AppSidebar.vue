@@ -41,12 +41,12 @@
       <!-- User info row -->
       <div v-if="auth.user" class="flex items-center gap-2 px-2 py-1.5 mb-1">
         <img
-          :src="auth.user.avatarUrl"
-          :alt="auth.user.githubLogin"
+          :src="auth.user.avatarUrl ?? undefined"
+          :alt="auth.user.displayName ?? auth.user.githubLogin ?? auth.user.email ?? ''"
           class="w-7 h-7 rounded-full border border-border flex-shrink-0"
         />
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-brand-text truncate">{{ auth.user.githubLogin }}</p>
+          <p class="text-xs font-semibold text-brand-text truncate">{{ auth.user.displayName ?? auth.user.githubLogin ?? auth.user.email }}</p>
           <p class="text-[10px] uppercase tracking-wider text-muted font-medium">{{ auth.planName }}</p>
         </div>
         <ThemeToggle />
