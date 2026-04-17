@@ -1,15 +1,38 @@
-import { createRouter, createWebHistory } from 'vue-router';
+// dashboard/src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import { authGuard } from './guards'
 
 const routes = [
-  { path: '/', component: () => import('../views/Login.vue') },
-  { path: '/apps', component: () => import('../views/AppList.vue') },
-  { path: '/apps/:id', component: () => import('../views/AppDetail.vue') },
-  { path: '/pricing', component: () => import('../views/Pricing.vue') }
-];
+  {
+    path: '/login',
+    component: () => import('@/views/LoginView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/apps',
+    component: () => import('@/views/AppsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/apps/:id',
+    component: () => import('@/views/AppDetailView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/pricing',
+    component: () => import('@/views/PricingView.vue'),
+    meta: { requiresAuth: true },
+  },
+  // Fallbacks
+  { path: '/', redirect: '/apps' },
+  { path: '/:pathMatch(.*)*', redirect: '/apps' },
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
+  routes,
+})
 
-export default router;
+router.beforeEach(authGuard)
+
+export default router

@@ -33,7 +33,7 @@ onMounted(() => {
 <template>
   <button 
     @click="toggleTheme" 
-    class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-white/5 border border-white/10 hover:border-brand-cta group"
+    class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-surface-2 border border-border hover:border-brand-cta group cursor-pointer"
     aria-label="Toggle Theme"
   >
     <!-- Sun icon (shown when dark mode is active to switch to light) -->
