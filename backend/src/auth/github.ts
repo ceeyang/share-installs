@@ -118,7 +118,7 @@ export function createGitHubAuthRouter(prisma: PrismaClient, jwtSecret: string):
         },
       });
 
-      const token = signJwt({sub: user.id, githubLogin: user.githubLogin}, jwtSecret);
+      const token = signJwt({sub: user.id, githubLogin: user.githubLogin ?? ''}, jwtSecret);
       const isHttps = config.FRONTEND_URL.startsWith('https://');
 
       res.cookie('session', token, {

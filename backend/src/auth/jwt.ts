@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken';
 
 export interface JwtPayload {
   sub: string;
-  githubLogin: string;
+  githubLogin?: string;
   iat?: number;
   exp?: number;
 }
