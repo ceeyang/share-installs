@@ -36,10 +36,12 @@ enum Plan {
 
 model User {
   id            String    @id @default(cuid())
-  githubId      String    @unique @map("github_id")
-  githubLogin   String    @map("github_login")
-  email         String?
+  githubId      String?   @unique @map("github_id")
+  githubLogin   String?   @map("github_login")
+  email         String?   @unique
   avatarUrl     String?   @map("avatar_url")
+  displayName   String?   @map("display_name")
+  passwordHash  String?   @map("password_hash")
   plan          Plan      @default(FREE)
   planExpiresAt DateTime? @map("plan_expires_at")
   createdAt     DateTime  @default(now()) @map("created_at")
