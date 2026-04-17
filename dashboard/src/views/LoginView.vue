@@ -1,7 +1,6 @@
 <!-- dashboard/src/views/LoginView.vue -->
 <template>
   <AuthLayout>
-    <!-- Logo + wordmark -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center gap-2 mb-3">
         <div class="w-9 h-9 bg-brand-cta/10 border border-brand-cta/20 rounded-xl flex items-center justify-center">
@@ -15,16 +14,14 @@
       <h1 class="text-xl font-bold text-brand-text">Sign in to your account</h1>
     </div>
 
-    <!-- Card -->
-    <div class="bg-surface border border-border rounded-xl p-6">
-      <!-- Error banner -->
-      <div v-if="errorMsg" class="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+    <div class="bg-surface border border-border rounded-xl p-6 space-y-4">
+      <div v-if="errorMsg" class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
         <p class="text-sm text-red-500 leading-snug">{{ errorMsg }}</p>
       </div>
 
-      <!-- GitHub login button -->
+      <!-- GitHub -->
       <button
-        @click="signIn"
+        @click="signInGitHub"
         class="w-full flex items-center justify-center gap-3 bg-brand-text text-surface py-3 px-4 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity cursor-pointer"
       >
         <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
@@ -32,16 +29,45 @@
         </svg>
         Continue with GitHub
       </button>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3">
+        <div class="flex-1 h-px bg-border"></div>
+        <span class="text-xs text-muted">or</span>
+        <div class="flex-1 h-px bg-border"></div>
+      </div>
+
+      <!-- Email form -->
+      <form @submit.prevent="signInEmail" class="space-y-3">
+        <input
+          v-model="email"
+          type="email"
+          placeholder="Email"
+          autocomplete="email"
+          required
+          class="w-full px-3 py-2.5 rounded-lg border border-border bg-transparent text-sm text-brand-text placeholder-muted focus:outline-none focus:ring-1 focus:ring-brand-cta"
+        />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+          class="w-full px-3 py-2.5 rounded-lg border border-border bg-transparent text-sm text-brand-text placeholder-muted focus:outline-none focus:ring-1 focus:ring-brand-cta"
+        />
+        <button
+          type="submit"
+          :disabled="loading"
+          class="w-full py-2.5 px-4 rounded-lg bg-brand-cta text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+        >
+          {{ loading ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
     </div>
 
-    <!-- Footer link -->
     <p class="mt-5 text-center text-xs text-muted">
-      Self-hosted?
-      <a
-        href="https://github.com/ceeyang/share-installs"
-        target="_blank"
-        class="text-brand-cta hover:underline"
-      >Read the docs →</a>
+      Don't have an account?
+      <RouterLink to="/register" class="text-brand-cta hover:underline">Register →</RouterLink>
     </p>
   </AuthLayout>
 </template>
@@ -51,34 +77,49 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth'
+import { login } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
 const errorMsg = ref('')
 
 onMounted(async () => {
-  // Handle OAuth error query params returned by the backend redirect
   if (route.query.error === 'github_not_configured') {
-    errorMsg.value =
-      'GitHub OAuth is not configured on the server. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.'
+    errorMsg.value = 'GitHub OAuth is not configured on the server.'
   } else if (route.query.auth_error) {
     errorMsg.value = `Authentication failed: ${route.query.auth_error}`
   }
-
   if (errorMsg.value) {
-    // Clean up URL without triggering a page reload
     router.replace({ query: {} })
     return
   }
-
-  // Already logged in? Skip straight to apps.
   await auth.init()
   if (auth.isLoggedIn) router.push('/apps')
 })
 
-function signIn() {
+function signInGitHub() {
   const base = import.meta.env.VITE_API_BASE_URL ?? ''
   window.location.href = `${base}/auth/github`
+}
+
+async function signInEmail() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    await login(email.value, password.value)
+    auth.initialized = false
+    await auth.init()
+    router.push('/apps')
+  } catch (err: unknown) {
+    const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+    errorMsg.value = msg ?? 'Sign in failed. Please try again.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>

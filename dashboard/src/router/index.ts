@@ -1,4 +1,3 @@
-// dashboard/src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import { authGuard } from './guards'
 
@@ -6,6 +5,11 @@ const routes = [
   {
     path: '/login',
     component: () => import('@/views/LoginView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/register',
+    component: () => import('@/views/RegisterView.vue'),
     meta: { requiresAuth: false },
   },
   {
@@ -23,7 +27,11 @@ const routes = [
     component: () => import('@/views/PricingView.vue'),
     meta: { requiresAuth: true },
   },
-  // Fallbacks
+  {
+    path: '/profile',
+    component: () => import('@/views/ProfileView.vue'),
+    meta: { requiresAuth: true },
+  },
   { path: '/', redirect: '/apps' },
   { path: '/:pathMatch(.*)*', redirect: '/apps' },
 ]
