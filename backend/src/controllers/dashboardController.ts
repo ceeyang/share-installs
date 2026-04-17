@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { encryptAES, decryptAES, generateApiKey, sha256 } from '../utils/crypto';
 import { logger } from '../utils/logger';
 
@@ -30,9 +31,11 @@ export const getMe = async (req: Request, res: Response) => {
     res.json({
       id: user.id,
       githubLogin: user.githubLogin,
+      displayName: user.displayName,
       email: user.email,
       avatarUrl: user.avatarUrl,
       createdAt: user.createdAt,
+      hasPassword: user.passwordHash !== null,
     });
   } catch (error) {
     logger.error('Failed to get user profile', { error });
@@ -255,5 +258,64 @@ export const getAppStats = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error('Error fetching stats', { error });
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateMe = async (req: Request, res: Response) => {
+  try {
+    const userId = requireUserId(req);
+    const {displayName, avatarUrl, currentPassword, newPassword} = req.body as {
+      displayName?: string;
+      avatarUrl?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    };
+
+    const user = await prisma.user.findUnique({where: {id: userId}});
+    if (!user) return res.status(404).json({error: 'User not found'});
+
+    const updates: {
+      displayName?: string | null;
+      avatarUrl?: string | null;
+      passwordHash?: string;
+    } = {};
+
+    if (displayName !== undefined) {
+      updates.displayName = displayName.trim().slice(0, 50) || null;
+    }
+    if (avatarUrl !== undefined) {
+      updates.avatarUrl = avatarUrl.trim() || null;
+    }
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({error: 'currentPassword is required'});
+      }
+      if (!user.passwordHash) {
+        return res.status(400).json({error: 'Password change not available for OAuth accounts'});
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({error: 'New password must be at least 8 characters'});
+      }
+      const match = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!match) {
+        return res.status(400).json({error: 'Current password is incorrect'});
+      }
+      updates.passwordHash = await bcrypt.hash(newPassword, 12);
+    }
+
+    const updated = await prisma.user.update({where: {id: userId}, data: updates});
+
+    res.json({
+      id: updated.id,
+      githubLogin: updated.githubLogin,
+      displayName: updated.displayName,
+      email: updated.email,
+      avatarUrl: updated.avatarUrl,
+      createdAt: updated.createdAt,
+      hasPassword: updated.passwordHash !== null,
+    });
+  } catch (error) {
+    logger.error('Failed to update user profile', {error});
+    res.status(500).json({error: 'Internal server error'});
   }
 };

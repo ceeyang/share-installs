@@ -21,6 +21,7 @@ import {FingerprintService} from '../services/fingerprintService';
 import {ApiKeyService} from '../services/apiKeyService';
 import {QuotaService} from '../services/quotaService';
 import {createGitHubAuthRouter} from '../auth/github';
+import {createEmailAuthRouter} from '../auth/email';
 import {createRequireSession} from '../auth/session';
 import * as dashboardController from '../controllers/dashboardController';
 import {
@@ -99,6 +100,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
 
   // ---- Auth routes (/auth/*) ----
   router.use('/auth', createGitHubAuthRouter(prisma, config.JWT_SECRET || ''));
+  router.use('/auth', createEmailAuthRouter(prisma, config.JWT_SECRET || '', redis));
 
   // ---- Dashboard routes (/dashboard/*) ----
   // All dashboard routes require a valid session cookie.
@@ -109,6 +111,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   
   // User profile & Quota
   dashboard.get('/me', dashboardController.getMe);
+  dashboard.patch('/me', dashboardController.updateMe);
   dashboard.get('/quota', dashboardController.getQuota);
 
   // App management
