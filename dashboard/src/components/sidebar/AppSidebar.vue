@@ -39,18 +39,22 @@
     <!-- User section -->
     <div class="px-2 py-3 border-t border-border space-y-1">
       <!-- User info row -->
-      <div v-if="auth.user" class="flex items-center gap-2 px-2 py-1.5 mb-1">
+      <RouterLink
+        v-if="auth.user"
+        to="/profile"
+        class="flex items-center gap-2 px-2 py-1.5 mb-1 rounded-lg hover:bg-brand-cta/5 transition-colors"
+      >
         <img
-          :src="auth.user.avatarUrl ?? undefined"
-          :alt="auth.user.displayName ?? auth.user.githubLogin ?? auth.user.email ?? ''"
-          class="w-7 h-7 rounded-full border border-border flex-shrink-0"
+          :src="auth.user.avatarUrl ?? 'https://api.dicebear.com/7.x/identicon/svg?seed=default'"
+          :alt="displayName"
+          class="w-7 h-7 rounded-full border border-border flex-shrink-0 object-cover"
         />
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-brand-text truncate">{{ auth.user.displayName ?? auth.user.githubLogin ?? auth.user.email }}</p>
+          <p class="text-xs font-semibold text-brand-text truncate">{{ displayName }}</p>
           <p class="text-[10px] uppercase tracking-wider text-muted font-medium">{{ auth.planName }}</p>
         </div>
         <ThemeToggle />
-      </div>
+      </RouterLink>
 
       <!-- Sign out -->
       <button
@@ -68,9 +72,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import SidebarNavItem from './SidebarNavItem.vue'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const auth = useAuthStore()
+
+const displayName = computed(() =>
+  auth.user?.displayName ?? auth.user?.githubLogin ?? 'User'
+)
 </script>
