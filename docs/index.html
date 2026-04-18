@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script>if(localStorage.getItem('si-theme')==='dark')document.documentElement.classList.add('dark');</script>
+  <script>(function(){var s=localStorage.getItem('si-theme');var dark=s?s==='dark':window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;if(dark)document.documentElement.classList.add('dark');})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>share-installs — Deferred Deep Link Attribution</title>
   <meta name="description" content="Open-source invite & deferred deep link attribution. When a user clicks your invite link and installs the app, the invite code resolves automatically on first launch." />
@@ -628,6 +628,16 @@
     const dark = document.documentElement.classList.contains('dark');
     document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
     document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
+    // Follow OS theme changes only when user hasn't set a manual preference
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('si-theme')) {
+          document.documentElement.classList.toggle('dark', e.matches);
+          document.getElementById('icon-sun').style.display = e.matches ? 'block' : 'none';
+          document.getElementById('icon-moon').style.display = e.matches ? 'none' : 'block';
+        }
+      });
+    }
   })();
 
   function toggleFaq(el) {

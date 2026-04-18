@@ -55,6 +55,12 @@
       @confirm="handleDelete"
       @cancel="deleteTarget = null"
     />
+
+    <NewAppKeyModal
+      :open="!!newAppKey"
+      :api-key="newAppKey ?? ''"
+      @close="newAppKey = null"
+    />
   </AppLayout>
 </template>
 
@@ -65,6 +71,7 @@ import { useAppsStore } from '@/stores/apps'
 import { useNotificationsStore } from '@/stores/notifications'
 import AppCard from '@/components/apps/AppCard.vue'
 import CreateAppModal from '@/components/apps/CreateAppModal.vue'
+import NewAppKeyModal from '@/components/apps/NewAppKeyModal.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -74,14 +81,15 @@ const notifs = useNotificationsStore()
 
 const showCreate = ref(false)
 const deleteTarget = ref<string | null>(null)
+const newAppKey = ref<string | null>(null)
 
 onMounted(() => appsStore.fetchApps())
 
 async function handleCreate(name: string) {
   try {
-    await appsStore.createApp(name)
+    const created = await appsStore.createApp(name)
     showCreate.value = false
-    notifs.notify('Application created', 'success')
+    newAppKey.value = created.defaultApiKey.key
   } catch {
     notifs.notify('Failed to create application', 'error')
   }

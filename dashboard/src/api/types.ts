@@ -22,6 +22,15 @@ export interface App {
   createdAt: string
 }
 
+export interface CreatedApp extends App {
+  defaultApiKey: {
+    id: string
+    name: string
+    prefix: string
+    key: string
+  }
+}
+
 export interface ApiKey {
   id: string
   name: string

@@ -100,8 +100,18 @@ export const createApp = async (req: Request, res: Response) => {
     const app = await prisma.app.create({
       data: { name, userId }
     });
-    res.status(201).json(app);
+
+    const { key, prefix } = generateApiKey();
+    const apiKey = await prisma.apiKey.create({
+      data: { appId: app.id, name: 'Default Key', keyHash: sha256(key), keyEncrypted: encryptAES(key), prefix }
+    });
+
+    res.status(201).json({
+      ...app,
+      defaultApiKey: { id: apiKey.id, name: apiKey.name, prefix: apiKey.prefix, key }
+    });
   } catch (error) {
+    logger.error('Failed to create app', { error });
     res.status(500).json({ error: 'Internal server error' });
   }
 };

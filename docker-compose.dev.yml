@@ -1,9 +1,30 @@
-# share-installs – Dev override (hot-reload)
+# share-installs – Dev Overrides (Local Development)
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+#
+# This file adds local development features:
+#   - Direct port access (bypass Traefik)
+#   - Source code mounting (hot-reload)
+#   - Local API connectivity
 
 services:
+  traefik:
+    scale: 0
+
+  dashboard:
+    build:
+      context: ./dashboard
+      target: builder
+    environment:
+      - VITE_API_PROXY_TARGET=http://backend:6066
+    volumes:
+      - ./dashboard:/app
+      - /app/node_modules # Prevent host node_modules from overriding container's
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+
   backend:
     build:
       context: ./backend
@@ -13,7 +34,18 @@ services:
       LOG_LEVEL: debug
       CORS_ORIGINS: "*"
     volumes:
-      # Mount source for hot-reload (ts-node-dev)
       - ./backend/src:/app/src:ro
       - ./backend/prisma:/app/prisma:ro
+      - ./examples:/app/examples:ro
+      - ./sdk/js/dist:/app/sdk/js/dist:ro
+    ports:
+      - "${BACKEND_PORT:-6066}:6066"
     command: npm run dev
+
+  db:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"

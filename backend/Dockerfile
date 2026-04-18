@@ -27,7 +27,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json tsconfig.json ./
 COPY prisma ./prisma/
 COPY src ./src/
-EXPOSE 5050
+EXPOSE 6066
 CMD ["npm", "run", "dev"]
 
 # ── Stage 3: builder (compile TypeScript) ─────────────────────────────────────
@@ -62,10 +62,10 @@ COPY prisma ./prisma/
 RUN chown -R appuser:nodejs /app
 USER appuser
 
-EXPOSE 3000
+EXPOSE 6066
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:3000/health || exit 1
+  CMD wget -qO- http://127.0.0.1:6066/health || exit 1
 
 # Run DB migrations then start server
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
