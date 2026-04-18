@@ -10,10 +10,16 @@ export interface User {
   hasPassword?: boolean
 }
 
+export interface QuotaPeriod {
+  limit: number | null
+  used: number
+  resetAt: string
+}
+
 export interface Quota {
   plan: 'FREE' | 'PRO' | 'UNLIMITED'
-  used: number
-  limit: number
+  monthly: QuotaPeriod
+  daily: QuotaPeriod
 }
 
 export interface App {

@@ -1,0 +1,400 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "share-installs API",
+    "description": "Open-source, self-hosted invite & deferred deep link attribution system.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ceeyang",
+      "url": "https://github.com/ceeyang/share-installs"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:6066/api",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "System is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "timestamp": { "type": "string", "format": "date-time" },
+                    "version": { "type": "string" },
+                    "mode": { "type": "string", "enum": ["saas", "self-hosted"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register new account (Email)",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 8 },
+                  "displayName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully registered and logged in" },
+          "400": { "description": "Invalid input" },
+          "409": { "description": "Email already exists" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login (Email)",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successfully logged in" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/github": {
+      "get": {
+        "summary": "GitHub OAuth Login",
+        "tags": ["Auth"],
+        "description": "Redirects to GitHub authorization page.",
+        "responses": {
+          "302": { "description": "Redirect to GitHub" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "summary": "Logout",
+        "tags": ["Auth"],
+        "description": "Clears the session cookie.",
+        "responses": {
+          "302": { "description": "Redirect to frontend" }
+        }
+      }
+    },
+    "/v1/clicks": {
+      "post": {
+        "summary": "Record a web click/fingerprint",
+        "description": "Called by the Web SDK when a user visits an invite landing page.",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CollectClickRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "eventId": { "type": "string", "example": "clx..." }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/resolutions": {
+      "post": {
+        "summary": "Resolve invite code",
+        "description": "Called by mobile SDK on first launch to match fingerprint and retrieve invite code.",
+        "security": [{ "ApiKeyAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ResolveRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ResolveResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/v1/projects": {
+      "get": {
+        "summary": "List all projects (Admin)",
+        "security": [{ "AdminAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of projects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "projects": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/App" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new project (Admin)",
+        "security": [{ "AdminAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "userId"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "userId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "project": { "$ref": "#/components/schemas/App" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "security": [{ "SessionAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/apps": {
+      "get": {
+        "summary": "List current user's apps",
+        "security": [{ "SessionAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of apps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/App" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CollectClickRequest": {
+        "type": "object",
+        "required": ["inviteCode", "fingerprint"],
+        "properties": {
+          "inviteCode": { "type": "string" },
+          "customData": { "type": "object", "nullable": true },
+          "fingerprint": { "$ref": "#/components/schemas/WebFingerprint" },
+          "referrer": { "type": "string", "nullable": true }
+        }
+      },
+      "WebFingerprint": {
+        "type": "object",
+        "properties": {
+          "languages": { "type": "array", "items": { "type": "string" } },
+          "timezone": { "type": "string" },
+          "screen": {
+            "type": "object",
+            "properties": {
+              "w": { "type": "integer" },
+              "h": { "type": "integer" },
+              "dpr": { "type": "number" },
+              "depth": { "type": "integer" }
+            }
+          },
+          "ua": { "type": "string" },
+          "canvas": { "type": "string", "description": "SHA-256 hash" },
+          "webgl": { "type": "string" },
+          "audio": { "type": "string" }
+        }
+      },
+      "ResolveRequest": {
+        "type": "object",
+        "required": ["channel", "fingerprint"],
+        "properties": {
+          "channel": { "type": "string", "enum": ["ios", "android"] },
+          "fingerprint": { "type": "object" },
+          "clipboardCode": { "type": "string", "nullable": true }
+        }
+      },
+      "ResolveResponse": {
+        "type": "object",
+        "properties": {
+          "matched": { "type": "boolean" },
+          "inviteCode": { "type": "string" },
+          "customData": { "type": "object", "nullable": true },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "confidence": { "type": "number" },
+              "channel": { "type": "string", "enum": ["exact", "fuzzy", "clipboard"] }
+            }
+          }
+        }
+      },
+      "App": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "userId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "displayName": { "type": "string", "nullable": true },
+          "plan": { "type": "string", "enum": ["FREE", "PRO", "UNLIMITED"] }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid argument",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 400 },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthenticated",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 401 },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API Key used in SaaS mode (sk_live_...)"
+      },
+      "AdminAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Admin secret used for project management"
+      },
+      "SessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session",
+        "description": "JWT session cookie used for dashboard routes"
+      }
+    }
+  }
+}

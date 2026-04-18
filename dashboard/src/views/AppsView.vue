@@ -1,7 +1,7 @@
 <!-- dashboard/src/views/AppsView.vue -->
 <template>
   <AppLayout>
-    <div class="p-8 max-w-6xl">
+    <div class="p-8">
       <!-- Page header -->
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-xl font-bold text-brand-text">Applications</h1>
@@ -65,16 +65,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { useAppsStore } from '@/stores/apps'
-import { useNotificationsStore } from '@/stores/notifications'
 import AppCard from '@/components/apps/AppCard.vue'
 import CreateAppModal from '@/components/apps/CreateAppModal.vue'
 import NewAppKeyModal from '@/components/apps/NewAppKeyModal.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAppsStore } from '@/stores/apps'
+import { useNotificationsStore } from '@/stores/notifications'
+import { onMounted, ref } from 'vue'
 
 const appsStore = useAppsStore()
 const notifs = useNotificationsStore()

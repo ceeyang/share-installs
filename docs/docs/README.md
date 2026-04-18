@@ -8,7 +8,7 @@
 
 用户点击邀请链接并安装 App 后，邀请码在首次启动时自动识别回填。
 
-- 无需用户授权剪贴板
+- 无需用户授权剪贴板 (Android 提供兜底支持)
 - 无需用户登录
 - 无需第三方 SDK 绑定
 - 数据完全由你掌控
@@ -42,6 +42,17 @@
 - [Web SDK](sdk/web.md) — 落地页接入
 - [iOS SDK](sdk/ios.md) — Swift 接入
 - [Android SDK](sdk/android.md) — Kotlin 接入
-- [归因接口](api/resolutions.md) — `/v1/clicks` 和 `/v1/resolutions`
-- [项目管理](api/projects.md) — API Key 管理（管理员）
-- [认证](api/auth.md) — GitHub OAuth
+- [核心归因 API](api/core.md) — `/v1/clicks` 和 `/api/v1/resolutions`
+- [控制台 API](api/dashboard.md) — 应用管理、密钥管理与统计
+- [认证与安全](api/auth.md) — GitHub OAuth 与 API Key
+
+## Postman 接口文件
+
+为了方便调试，我们提供了两种格式的接口文件：
+
+1.  👉 **[下载原生 Postman Collection (推荐)](share-installs-collection.json)** — 包含预设变量、文件夹分类及请求示例，支持直接导入 Postman。
+2.  👉 **[下载 OpenAPI 3.0 Spec](share-installs-api.json)** — 标准 OpenAPI 规范文件。
+
+---
+
+**开源地址**: [GitHub/ceeyang/share-installs](https://github.com/ceeyang/share-installs)

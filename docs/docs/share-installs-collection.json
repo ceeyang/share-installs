@@ -1,0 +1,196 @@
+{
+	"info": {
+		"name": "share-installs API",
+		"description": "Native Postman collection for share-installs system.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "GitHub Login (OAuth Redirect)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/github",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "github"]
+						},
+						"description": "Open this URL in a browser to initiate GitHub OAuth flow."
+					}
+				},
+				{
+					"name": "Email Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"displayName\": \"Test User\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Email Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Public / Core",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						}
+					}
+				},
+				{
+					"name": "Collect Click (Web SDK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{apiKey}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"inviteCode\": \"ABC12345\",\n  \"customData\": { \"campaign\": \"summer2024\" },\n  \"fingerprint\": {\n    \"languages\": [\"zh-CN\", \"en\"],\n    \"timezone\": \"Asia/Shanghai\",\n    \"screen\": { \"w\": 390, \"h\": 844, \"dpr\": 3 },\n    \"ua\": \"Mozilla/5.0...\"\n  }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/clicks",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "clicks"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Invite (Mobile SDK)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{apiKey}}", "type": "text" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"channel\": \"ios\",\n  \"fingerprint\": {\n    \"osVersion\": \"17.2\",\n    \"screen\": { \"w\": 390, \"h\": 844, \"scale\": 3 },\n    \"languages\": [\"zh-CN\"],\n    \"timezone\": \"Asia/Shanghai\"\n  }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/resolutions",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "resolutions"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard / User",
+			"item": [
+				{
+					"name": "Get Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Cookie", "value": "session={{sessionJwt}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "me"]
+						}
+					}
+				},
+				{
+					"name": "List Apps",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Cookie", "value": "session={{sessionJwt}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/apps",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "apps"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "List All Projects",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{adminSecret}}", "type": "text" }
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/projects",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "projects"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": { "type": "text/javascript", "exec": [""] }
+		},
+		{
+			"listen": "test",
+			"script": { "type": "text/javascript", "exec": [""] }
+		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:6066/api", "type": "string" },
+		{ "key": "apiKey", "value": "your_api_key_here", "type": "string" },
+		{ "key": "adminSecret", "value": "your_admin_secret_here", "type": "string" },
+		{ "key": "sessionJwt", "value": "your_session_jwt_here", "type": "string" }
+	]
+}

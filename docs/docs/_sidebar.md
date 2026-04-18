@@ -9,6 +9,8 @@
   - [Android](sdk/android.md)
 
 - **API 参考**
-  - [归因接口](api/resolutions.md)
-  - [项目管理](api/projects.md)
-  - [认证](api/auth.md)
+  - [核心归因 API (Core)](api/core.md)
+  - [控制台 API (Dashboard)](api/dashboard.md)
+  - [认证与安全](api/auth.md)
+  - [Postman Collection](share-installs-collection.json)
+  - [OpenAPI Spec](share-installs-api.json)

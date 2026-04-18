@@ -13,8 +13,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => user.value !== null)
   const planName = computed(() => quota.value?.plan ?? 'FREE')
   const usagePercent = computed(() => {
-    if (!quota.value || quota.value.limit <= 0) return 0
-    return Math.min(Math.round((quota.value.used / quota.value.limit) * 100), 100)
+    if (!quota.value || quota.value.monthly.limit === null) return 0
+    return Math.min(Math.round((quota.value.monthly.used / quota.value.monthly.limit) * 100), 100)
   })
 
   /** Fetches user + quota from the backend. Idempotent — skips if already initialized. */

@@ -1,7 +1,7 @@
 <!-- dashboard/src/views/AppDetailView.vue -->
 <template>
   <AppLayout>
-    <div class="p-8 max-w-5xl">
+    <div class="p-8">
 
       <!-- Back + App name header -->
       <div class="flex items-center gap-3 mb-6">
@@ -110,20 +110,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { useAppsStore } from '@/stores/apps'
-import { useNotificationsStore } from '@/stores/notifications'
-import { listKeys, createKey, revokeKey } from '@/api/keys'
+import { createKey, listKeys, revokeKey } from '@/api/keys'
 import { getStats } from '@/api/stats'
 import type { ApiKey, AppStats } from '@/api/types'
-import StatsGrid from '@/components/stats/StatsGrid.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ApiKeyTable from '@/components/keys/ApiKeyTable.vue'
 import CreateKeyModal from '@/components/keys/CreateKeyModal.vue'
 import RevealKeyModal from '@/components/keys/RevealKeyModal.vue'
-import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import StatsGrid from '@/components/stats/StatsGrid.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { useAppsStore } from '@/stores/apps'
+import { useNotificationsStore } from '@/stores/notifications'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const appsStore = useAppsStore()

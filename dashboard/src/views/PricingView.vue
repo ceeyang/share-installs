@@ -1,7 +1,7 @@
 <!-- dashboard/src/views/PricingView.vue -->
 <template>
   <AppLayout>
-    <div class="p-8 max-w-5xl">
+    <div class="p-8">
       <div class="mb-8">
         <h1 class="text-xl font-bold text-brand-text mb-1">Pricing</h1>
         <p class="text-sm text-muted">Choose the plan that fits your scale.</p>
@@ -17,8 +17,8 @@
             </p>
           </div>
           <p class="text-sm font-mono text-muted">
-            {{ auth.quota.used.toLocaleString() }} /
-            {{ auth.quota.limit < 0 ? '∞' : auth.quota.limit.toLocaleString() }}
+            {{ auth.quota.monthly.used.toLocaleString() }} /
+            {{ auth.quota.monthly.limit === null ? '∞' : auth.quota.monthly.limit.toLocaleString() }}
             <span class="text-xs ml-1">resolutions</span>
           </p>
         </div>
@@ -140,46 +140,46 @@ const plans = [
     popular: false,
     cta: 'Get Started',
     features: [
-      { label: '10 resolutions / minute', dim: false },
+      { label: '500 monthly installs', dim: false },
       { label: '1 project', dim: false },
-      { label: 'GitHub OAuth login', dim: false },
-      { label: 'Basic dashboard', dim: false },
-      { label: 'All platform SDKs', dim: false },
-      { label: 'No priority support', dim: true },
+      { label: '2 API keys per project', dim: false },
+      { label: '7-day data retention', dim: false },
+      { label: 'Basic dashboard & stats', dim: false },
+      { label: 'Priority support', dim: true },
     ],
   },
   {
     id: 'PRO' as const,
     name: 'Pro',
     price: '$9',
-    description: 'For growing product teams that need higher throughput and priority support.',
+    description: 'For growing product teams that need higher throughput and longer data history.',
     color: 'text-purple-500',
     popular: true,
     cta: 'Upgrade to Pro',
     features: [
-      { label: '60 resolutions / minute', dim: false },
+      { label: '10,000 monthly installs', dim: false },
       { label: 'Up to 5 projects', dim: false },
-      { label: 'Advanced analytics & funnel', dim: false },
-      { label: 'Multiple API keys per project', dim: false },
+      { label: '10 API keys per project', dim: false },
+      { label: '90-day data retention', dim: false },
+      { label: 'Advanced analytics & Funnels', dim: false },
       { label: 'Priority email support', dim: false },
-      { label: 'Everything in Free', dim: false },
     ],
   },
   {
     id: 'UNLIMITED' as const,
     name: 'Unlimited',
     price: '$29',
-    description: 'For high-traffic apps and enterprise teams that need unlimited scale.',
+    description: 'For high-traffic apps and enterprise teams that need unlimited scale and data history.',
     color: 'text-amber-500',
     popular: false,
     cta: 'Upgrade Now',
     features: [
-      { label: '600 resolutions / minute', dim: false },
+      { label: 'Unlimited monthly installs', dim: false },
       { label: 'Unlimited projects', dim: false },
+      { label: 'Unlimited API keys', dim: false },
+      { label: '365-day data retention', dim: false },
       { label: 'Dedicated support & SLA', dim: false },
-      { label: 'Custom quota configuration', dim: false },
-      { label: 'Everything in Pro', dim: false },
-      { label: 'Invoicing & team billing', dim: false },
+      { label: 'Custom branding & Invoicing', dim: false },
     ],
   },
 ]

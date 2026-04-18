@@ -1,149 +1,82 @@
-# 认证
+# 认证 (Authentication)
 
-share-installs 控制台使用 GitHub OAuth 认证。核心 API（`/v1/clicks`、`/v1/resolutions`）的认证使用 API Key，与登录无关。
-
----
-
-## 控制台登录流程
-
-```
-用户 → GET /auth/github → 跳转 GitHub OAuth 授权页
-                               ↓ 用户点击授权
-GitHub → GET /auth/github/callback?code=xxx → 服务端换取 access_token
-                               ↓
-                        写入 Session Cookie（HTTP Only）
-                               ↓
-                        重定向到控制台首页
-```
+share-installs 控制台支持两种认证方式：**GitHub OAuth** 和 **邮箱/密码登录**。
 
 ---
 
-## 接口列表
+## 1. 认证机制 (Session)
 
-### GET /auth/github
+认证成功后，服务端会下发一个名为 `session` 的 HttpOnly Cookie。该 Cookie 包含一个 7 天有效期的 JWT，用于后续访问 `/api/dashboard/*` 接口。
 
-发起 GitHub OAuth 授权。浏览器访问此地址会跳转到 GitHub 授权页。
-
-```
-https://console.share-installs.com/api/auth/github
-```
+- **Cookie 名称**: `session`
+- **有效期**: 7 天
+- **安全性**: `HttpOnly`, `Secure` (仅 HTTPS), `SameSite: Lax/None`
 
 ---
 
-### GET /auth/github/callback
+## 2. GitHub OAuth (推荐)
 
-GitHub 授权完成后的回调地址（在 GitHub OAuth App 中配置）。
+最快速的登录方式。
 
-```
-https://console.share-installs.com/api/auth/github/callback
-```
+### Step 1: 发起登录
+- **Method**: `GET`
+- **Path**: `/api/auth/github`
+- **说明**: 浏览器重定向到此地址，系统会自动引导跳转至 GitHub 授权页。
 
-处理成功后重定向到控制台首页，同时设置 Session Cookie。
-
----
-
-### GET /auth/me
-
-获取当前登录用户信息（需要有效 Session Cookie）。
-
-```bash
-curl https://console.share-installs.com/api/auth/me \
-  -H "Cookie: session=<jwt_token>"
-```
-
-**响应：**
-
-```json
-{
-  "id": "clxyz...",
-  "githubLogin": "your-username",
-  "email": "you@example.com",
-  "avatarUrl": "https://avatars.githubusercontent.com/u/...",
-  "plan": "FREE"
-}
-```
-
-**未登录时返回 `401`：**
-
-```json
-{ "error": "UNAUTHORIZED", "message": "Not authenticated." }
-```
+### Step 2: 退出登录
+- **Method**: `GET`
+- **Path**: `/api/auth/logout`
+- **说明**: 清除会话 Cookie 并重定向至首页。
 
 ---
 
-### POST /auth/logout
+## 3. 邮箱与密码认证 (Email Auth)
 
-退出登录，清除 Session Cookie。
+如果你不想使用 GitHub，可以使用邮箱注册并登录。
 
-```bash
-curl -X POST https://console.share-installs.com/api/auth/logout \
-  -H "Cookie: session=<jwt_token>"
-```
+### 用户注册
+- **Method**: `POST`
+- **Path**: `/api/auth/register`
+- **请求体 (JSON)**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "strongpassword123",
+    "displayName": "My Name"
+  }
+  ```
+- **验证要求**:
+  - `password`: 至少 8 位。
+  - `email`: 必须是合法的邮箱格式。
 
-**响应：**
-
-```json
-{ "ok": true }
-```
-
----
-
-## Session Cookie
-
-登录成功后，服务端设置一个 HTTP Only 的 `session` Cookie：
-
-| 属性 | 值 |
-|------|-----|
-| 名称 | `session` |
-| 类型 | JWT（`HS256`，`JWT_SECRET` 签名） |
-| 有效期 | 7 天 |
-| `HttpOnly` | 是（JS 无法读取） |
-| `Secure` | 是（HTTPS 环境下） |
-| `SameSite` | `None`（HTTPS）或 `Lax`（HTTP） |
-
----
-
-## 自建部署配置 GitHub OAuth
-
-**1. 创建 GitHub OAuth App**
-
-前往 [github.com/settings/developers](https://github.com/settings/developers) → **New OAuth App**：
-
-| 字段 | 填写内容 |
-|------|----------|
-| Application name | 随意（如 `My Share Installs`） |
-| Homepage URL | `https://your-domain.com` |
-| Authorization callback URL | `https://your-domain.com/api/auth/github/callback` |
-
-**2. 复制 Client ID 和 Client Secret**
-
-**3. 填写 `.env`**
-
-```env
-GITHUB_CLIENT_ID=Ov23li...
-GITHUB_CLIENT_SECRET=abc123def456...
-JWT_SECRET=<64字符随机字符串>
-ENCRYPTION_KEY=<64位十六进制字符串>
-FRONTEND_URL=https://your-domain.com
-```
+### 用户登录
+- **Method**: `POST`
+- **Path**: `/api/auth/login`
+- **请求体 (JSON)**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "strongpassword123"
+  }
+  ```
+- **响应**: 成功后会写入 `session` Cookie。
 
 ---
 
-## API Key 认证
+## 4. 获取当前会话状态
 
-核心 API 使用 API Key 而非 Session Cookie 认证。
-
-```bash
-# SaaS 模式（必须携带 API Key）
-curl -X POST https://console.share-installs.com/api/v1/clicks \
-  -H "Authorization: Bearer sk_live_xxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '...'
-
-# 自建模式（无需认证）
-curl -X POST https://your-domain.com/api/v1/clicks \
-  -H "Content-Type: application/json" \
-  -d '...'
-```
-
-API Key 以 `sk_live_` 为前缀，通过控制台或管理员接口创建。详见[项目管理](projects.md)。
+### 获取当前用户信息
+- **Method**: `GET`
+- **Path**: `/api/dashboard/me`
+- **认证**: 需要有效 Session Cookie。
+- **响应 (JSON)**:
+  ```json
+  {
+    "id": "clxyz...",
+    "githubLogin": "someone",
+    "displayName": "My Name",
+    "email": "user@example.com",
+    "avatarUrl": "...",
+    "hasPassword": true
+  }
+  ```
