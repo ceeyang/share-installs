@@ -139,7 +139,12 @@ export function createGitHubAuthRouter(prisma: PrismaClient, jwtSecret: string):
 
   // Step 3: Logout
   router.get('/logout', (_req: Request, res: Response) => {
-    res.clearCookie('session', {path: '/'});
+    const isHttps = config.FRONTEND_URL.startsWith('https://');
+    res.clearCookie('session', {
+      path: '/',
+      secure: isHttps,
+      sameSite: isHttps ? 'none' : 'lax',
+    });
     res.redirect(config.FRONTEND_URL);
   });
 
