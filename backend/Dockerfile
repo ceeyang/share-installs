@@ -13,7 +13,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 # Prisma's migration engine requires OpenSSL (not included in Alpine by default)
 RUN apk add --no-cache openssl
-COPY package*.json ./
+COPY package*.json prisma.config.ts* ./
 COPY prisma ./prisma/
 # Install all deps (including devDeps needed for build & prisma generate)
 RUN npm ci --ignore-scripts && npx prisma generate
@@ -24,7 +24,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 ENV NODE_ENV=development
 COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json tsconfig.json ./
+COPY package*.json tsconfig.json prisma.config.ts* ./
 COPY prisma ./prisma/
 COPY src ./src/
 EXPOSE 6066
@@ -34,7 +34,7 @@ CMD ["npm", "run", "dev"]
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json tsconfig.json ./
+COPY package*.json tsconfig.json prisma.config.ts* ./
 COPY prisma ./prisma/
 COPY src ./src/
 RUN npm run build
@@ -50,7 +50,7 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs && adduser -S appuser -u 1001
 
 # Production-only node_modules
-COPY package*.json ./
+COPY package*.json prisma.config.ts* ./
 RUN npm ci --omit=dev --ignore-scripts
 
 # Compiled output + Prisma artifacts
