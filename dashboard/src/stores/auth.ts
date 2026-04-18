@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
-    const base = import.meta.env.VITE_API_BASE_URL ?? ''
+    const base = import.meta.env.VITE_API_BASE_URL ?? '/api'
     window.location.href = `${base}/auth/logout`
   }
 
