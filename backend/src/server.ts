@@ -3,17 +3,13 @@
  * Initializes database and cache connections, then starts the HTTP server.
  */
 
-import {PrismaClient} from '@prisma/client';
 import {Redis} from 'ioredis';
 import {config} from './config/index';
 import {logger} from './utils/logger';
 import {createApp} from './app';
+import {prisma} from './lib/prisma';
 
 async function bootstrap(): Promise<void> {
-  // Initialize Prisma
-  const prisma = new PrismaClient({
-    log: config.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  });
 
   // Initialize Redis
   const redis = new Redis(config.REDIS_URL, {

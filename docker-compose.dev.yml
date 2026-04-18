@@ -36,6 +36,7 @@ services:
     volumes:
       - ./backend/src:/app/src:ro
       - ./backend/prisma:/app/prisma:ro
+      - ./backend/prisma.config.ts:/app/prisma.config.ts:ro
       - ./examples:/app/examples:ro
       - ./sdk/js/dist:/app/sdk/js/dist:ro
     ports:

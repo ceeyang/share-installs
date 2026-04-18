@@ -2,7 +2,7 @@
 <template>
   <BaseModal :open="open" title="Application Created" @close="$emit('close')">
     <p class="text-xs text-muted mb-3 leading-relaxed">
-      Your app was created with a default API key. Copy it now — it will not be shown again.
+      Your app was created with a default API key. Copy it now.
     </p>
     <div class="flex gap-2">
       <input
@@ -21,8 +21,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import BaseModal from '@/components/common/BaseModal.vue'
+import BaseModal from '@/components/common/BaseModal.vue';
+import { ref } from 'vue';
 
 const props = defineProps<{ open: boolean; apiKey: string }>()
 defineEmits<{ close: [] }>()

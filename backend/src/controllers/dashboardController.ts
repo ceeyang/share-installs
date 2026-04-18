@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { encryptAES, decryptAES, generateApiKey, sha256 } from '../utils/crypto';
 import { logger } from '../utils/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 // In SaaS mode (Module 4), req.userId will be injected by the auth middleware (Module 2).
 // We assume it's available via an extension of the Express Request.
