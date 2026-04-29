@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import { encryptAES, decryptAES, generateApiKey, sha256 } from '../utils/crypto';
 import { logger } from '../utils/logger';
 import { prisma } from '../lib/prisma';
+import type { QuotaService } from '../services/quotaService';
+import { PLAN_LIMITS } from '../services/quotaService';
 
 // In SaaS mode (Module 4), req.userId will be injected by the auth middleware (Module 2).
 // We assume it's available via an extension of the Express Request.
@@ -41,39 +43,44 @@ export const getMe = async (req: Request, res: Response) => {
   }
 };
 
-export const getQuota = async (req: Request, res: Response) => {
-  try {
-    const userId = requireUserId(req);
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+export const createGetQuota = (quotaService?: QuotaService) =>
+  async (req: Request, res: Response) => {
+    try {
+      const userId = requireUserId(req);
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Dummy logic for now until Module 3 integrates limit bounds
-    const limits: Record<string, { daily: number | null, monthly: number | null }> = {
-      FREE: { daily: 20, monthly: 500 },
-      PRO: { daily: null, monthly: 10000 },
-      UNLIMITED: { daily: null, monthly: null }
-    };
-    
-    const limitArgs = limits[user.plan] || limits.FREE;
+      const limits = PLAN_LIMITS[user.plan];
+      const usage = quotaService
+        ? await quotaService.getUserUsage(userId)
+        : { daily: 0, monthly: 0 };
 
-    res.json({
-      plan: user.plan.toLowerCase(),
-      planExpiresAt: user.planExpiresAt,
-      monthly: {
-        limit: limitArgs.monthly,
-        used: 0, // Placeholder
-        resetAt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
-      },
-      daily: {
-        limit: limitArgs.daily,
-        used: 0, // Placeholder
-        resetAt: new Date(new Date().setHours(24, 0, 0, 0)).toISOString(),
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+      const monthlyLimit = limits.monthlyInstalls === Infinity ? null : limits.monthlyInstalls;
+      const dailyLimit = limits.dailyInstalls === Infinity ? null : limits.dailyInstalls;
+
+      const now = new Date();
+      const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+      const nextDay = new Date(now);
+      nextDay.setUTCHours(24, 0, 0, 0);
+
+      res.json({
+        plan: user.plan,
+        planExpiresAt: user.planExpiresAt,
+        monthly: {
+          limit: monthlyLimit,
+          used: usage.monthly,
+          resetAt: nextMonth.toISOString(),
+        },
+        daily: {
+          limit: dailyLimit,
+          used: usage.daily,
+          resetAt: nextDay.toISOString(),
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
 
 export const listApps = async (req: Request, res: Response) => {
   try {

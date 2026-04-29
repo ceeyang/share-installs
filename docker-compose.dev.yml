@@ -15,7 +15,7 @@ services:
   dashboard:
     build:
       context: ./dashboard
-      target: builder
+      target: development
     environment:
       - VITE_API_PROXY_TARGET=http://backend:6066
     volumes:

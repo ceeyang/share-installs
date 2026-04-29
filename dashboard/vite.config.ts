@@ -17,22 +17,11 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       proxy: {
-        // Proxy API calls to the backend so cookies stay same-origin.
-        // The browser sees everything as localhost:5173 → no cross-port cookie issues.
-        //
-        // OAuth flow:
-        //   /auth/github           → backend → GitHub → backend callback (direct, port 6066)
-        //                         → backend sets cookie, redirects to localhost:5173
-        //   /dashboard/*           → backend (cookie forwarded by Vite)
-        '/auth': {
+        // Forward all /api/* requests to the backend so cookies stay same-origin.
+        // Client baseURLs already include /api, so no path rewriting is needed.
+        '/api': {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:6066',
           changeOrigin: true,
-          rewrite: (path: string) => `/api${path}`,
-        },
-        '/dashboard': {
-          target: env.VITE_API_PROXY_TARGET || 'http://localhost:6066',
-          changeOrigin: true,
-          rewrite: (path: string) => `/api${path}`,
         },
       },
     },

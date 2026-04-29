@@ -112,7 +112,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   // User profile & Quota
   dashboard.get('/me', dashboardController.getMe);
   dashboard.patch('/me', dashboardController.updateMe);
-  dashboard.get('/quota', dashboardController.getQuota);
+  dashboard.get('/quota', dashboardController.createGetQuota(quotaService));
 
   // App management
   dashboard.get('/apps', dashboardController.listApps);

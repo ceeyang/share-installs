@@ -40,8 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function logout() {
-    const base = import.meta.env.VITE_API_BASE_URL ?? '/api'
-    window.location.href = `${base}/auth/logout`
+    const base = import.meta.env.VITE_API_BASE_URL ?? ''
+    window.location.href = `${base}/api/auth/logout`
   }
 
   return { user, quota, initialized, isLoggedIn, planName, usagePercent, init, refresh, logout }

@@ -157,4 +157,18 @@ export class QuotaService {
       monthly: monthlyRaw ? parseInt(monthlyRaw, 10) : 0,
     };
   }
+
+  /** Aggregates daily + monthly install counts across all apps owned by a user. */
+  async getUserUsage(userId: string): Promise<{daily: number; monthly: number}> {
+    const apps = await this.prisma.app.findMany({
+      where: {userId},
+      select: {id: true},
+    });
+    if (apps.length === 0) return {daily: 0, monthly: 0};
+    const usages = await Promise.all(apps.map(app => this.getUsage(app.id)));
+    return usages.reduce(
+      (acc, u) => ({daily: acc.daily + u.daily, monthly: acc.monthly + u.monthly}),
+      {daily: 0, monthly: 0},
+    );
+  }
 }
