@@ -73,14 +73,58 @@ export class PaddleService {
     }
 
     const paddle = getPaddle();
-    const customer = await paddle.customers.create({
-      email: opts.email ?? `user_${opts.userId}@placeholder.local`,
-      name: opts.displayName ?? undefined,
-      customData: {userId: opts.userId},
-    });
+    let customerId: string;
 
-    logger.info('Created Paddle customer', {userId: opts.userId, paddleCustomerId: customer.id});
-    return customer.id;
+    try {
+      const customer = await paddle.customers.create({
+        email: opts.email ?? `user_${opts.userId}@placeholder.local`,
+        name: opts.displayName ?? undefined,
+        customData: {userId: opts.userId},
+      });
+      customerId = customer.id;
+      logger.info('Created Paddle customer', {userId: opts.userId, paddleCustomerId: customerId});
+    } catch (err: any) {
+      if ((err.code === 'conflict' || err.code === 'customer_already_exists') && opts.email) {
+        logger.info('Customer email conflicts in Paddle, resolving customer ID', {
+          email: opts.email,
+          errorCode: err.code,
+          errorMessage: err.message,
+          errorDetail: err.detail,
+        });
+
+        // 1. Try to extract from error message/detail using regex (avoids extra API request)
+        const errorText = `${err.message || ''} ${err.detail || ''}`;
+        const match = errorText.match(/ctm_[a-zA-Z0-9]+/);
+        if (match) {
+          customerId = match[0];
+          logger.info('Reused existing Paddle customer (extracted from conflict error)', {
+            userId: opts.userId,
+            paddleCustomerId: customerId,
+          });
+        } else {
+          // 2. Fallback: Search for customer using list API
+          const customers = paddle.customers.list({email: [opts.email]});
+          let existingCustomer: any = null;
+          for await (const c of customers) {
+            existingCustomer = c;
+            break;
+          }
+          if (existingCustomer) {
+            customerId = existingCustomer.id;
+            logger.info('Reused existing Paddle customer (retrieved from list query fallback)', {
+              userId: opts.userId,
+              paddleCustomerId: customerId,
+            });
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        throw err;
+      }
+    }
+
+    return customerId;
   }
 
   /**

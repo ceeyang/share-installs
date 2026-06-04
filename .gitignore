@@ -636,3 +636,5 @@ COLLABORATION_PROTOCOL.md
 
 sdk/flutter
 docs/superpowers
+.env.*
+!.env.example

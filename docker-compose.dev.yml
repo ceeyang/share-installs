@@ -18,6 +18,12 @@ services:
       target: development
     environment:
       - VITE_API_PROXY_TARGET=http://backend:6066
+      - VITE_PADDLE_ENV=${PADDLE_ENV:-sandbox}
+      - VITE_PADDLE_CLIENT_TOKEN=${PADDLE_CLIENT_TOKEN:-}
+      - VITE_PADDLE_PRICE_PRO_MONTHLY=${PADDLE_PRICE_PRO_MONTHLY:-}
+      - VITE_PADDLE_PRICE_PRO_YEARLY=${PADDLE_PRICE_PRO_YEARLY:-}
+      - VITE_PADDLE_PRICE_UNLIMITED_MONTHLY=${PADDLE_PRICE_UNLIMITED_MONTHLY:-}
+      - VITE_PADDLE_PRICE_UNLIMITED_YEARLY=${PADDLE_PRICE_UNLIMITED_YEARLY:-}
     volumes:
       - ./dashboard:/app
       - /app/node_modules # Prevent host node_modules from overriding container's

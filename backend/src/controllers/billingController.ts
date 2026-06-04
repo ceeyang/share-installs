@@ -95,8 +95,14 @@ export const createCheckout = async (req: Request, res: Response) => {
     });
 
     res.json({transactionId});
-  } catch (error) {
-    logger.error('Failed to create checkout', {error});
+  } catch (error: any) {
+    console.error("=== PADDLE CHECKOUT ERROR STACK ===");
+    console.error(error);
+    logger.error('Failed to create checkout', {
+      message: error?.message,
+      stack: error?.stack,
+      error
+    });
     res.status(500).json({error: 'Internal server error'});
   }
 };
