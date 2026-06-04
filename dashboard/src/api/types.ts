@@ -18,6 +18,7 @@ export interface QuotaPeriod {
 
 export interface Quota {
   plan: 'FREE' | 'PRO' | 'UNLIMITED'
+  planExpiresAt: string | null
   monthly: QuotaPeriod
   daily: QuotaPeriod
 }
