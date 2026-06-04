@@ -70,6 +70,14 @@ const configSchema = z.object({
 
   // Logging
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+
+  // Paddle Billing
+  PADDLE_API_KEY: z.string().optional(),
+  PADDLE_WEBHOOK_SECRET: z.string().optional(),
+  PADDLE_PRICE_PRO_MONTHLY: z.string().default('pri_placeholder_pro_monthly'),
+  PADDLE_PRICE_PRO_YEARLY: z.string().default('pri_placeholder_pro_yearly'),
+  PADDLE_PRICE_UNLIMITED_MONTHLY: z.string().default('pri_placeholder_unlimited_monthly'),
+  PADDLE_PRICE_UNLIMITED_YEARLY: z.string().default('pri_placeholder_unlimited_yearly'),
 });
 
 type Config = z.infer<typeof configSchema>;

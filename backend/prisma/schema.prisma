@@ -43,6 +43,8 @@ model User {
   passwordHash  String?   @map("password_hash")
   plan          Plan      @default(FREE)
   planExpiresAt DateTime? @map("plan_expires_at")
+  paddleCustomerId     String?   @unique @map("paddle_customer_id")
+  paddleSubscriptionId String?   @unique @map("paddle_subscription_id")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 

@@ -41,11 +41,16 @@
     .nav-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text); text-decoration:none; display:flex; align-items:center; gap:0.5rem; cursor:pointer; }
     .logo-dot { width:8px; height:8px; background:var(--accent); border-radius:50%; display:inline-block; }
     .nav-links { display:flex; gap:1.25rem; align-items:center; }
-    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:0.875rem; transition:color 0.2s; cursor:pointer; }
+    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:0.875rem; transition:color 0.2s; cursor:pointer; display:inline-block; text-align:center; }
     .nav-links a:hover { color:var(--text); }
-    .nav-lang { font-size:0.78rem; color:var(--text-dim); border:1px solid var(--border); padding:0.2rem 0.65rem; border-radius:6px; text-decoration:none; transition:border-color 0.2s,color 0.2s; cursor:pointer; }
+    .nav-features { min-width:68px; }
+    .nav-pricing { min-width:60px; }
+    .nav-quickstart { min-width:84px; }
+    .nav-github { min-width:60px; }
+    .nav-console { min-width:68px; }
+    .nav-lang { font-size:0.78rem; color:var(--text-dim); border:1px solid var(--border); padding:0.2rem 0.65rem; border-radius:6px; text-decoration:none; transition:border-color 0.2s,color 0.2s; cursor:pointer; display:inline-block; min-width:48px; text-align:center; }
     .nav-lang:hover { border-color:var(--accent); color:var(--accent); }
-    .nav-btn { background:var(--accent); color:#0F172A; padding:0.4rem 1.1rem; border-radius:8px; font-size:0.875rem; font-weight:700; text-decoration:none; transition:background 0.2s; cursor:pointer; display:flex; align-items:center; gap:0.4rem; }
+    .nav-btn { background:var(--accent); color:#0F172A; padding:0.4rem 1.1rem; border-radius:8px; font-size:0.875rem; font-weight:700; text-decoration:none; transition:background 0.2s; cursor:pointer; display:flex; align-items:center; gap:0.4rem; min-width:160px; justify-content:center; }
     .nav-btn:hover { background:var(--accent-dark); }
     .theme-toggle { background:none; border:1px solid var(--border); border-radius:6px; padding:0.3rem 0.5rem; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; transition:border-color 0.2s,color 0.2s,background 0.2s; }
     .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
@@ -131,6 +136,7 @@
     .price-tier { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); font-family:'Space Grotesk',sans-serif; margin-bottom:0.75rem; }
     .price-amount { font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:700; line-height:1; color:var(--text); margin-bottom:0.3rem; }
     .price-amount span { font-size:1rem; font-weight:500; color:var(--text-muted); }
+    .price-amount #pro-price, .price-amount #unl-price { font-size:inherit; font-weight:inherit; color:inherit; }
     .price-desc { font-size:0.84rem; color:var(--text-muted); margin-bottom:1.75rem; line-height:1.6; min-height:2.8rem; }
     .price-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; margin-bottom:2rem; flex:1; }
     .price-list li { display:flex; align-items:flex-start; gap:0.6rem; font-size:0.84rem; color:var(--text-muted); }
@@ -144,6 +150,17 @@
     .price-btn.solid:hover { background:var(--accent-dark); transform:translateY(-1px); }
     .price-btn.ghost { background:var(--surface-2); color:var(--text-muted); border:1.5px solid transparent; }
     .price-btn.ghost:hover { color:var(--text); transform:translateY(-1px); }
+    .pricing-toggle { display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:3rem; }
+    .pricing-toggle span { font-size:0.88rem; color:var(--text-muted); font-weight:500; transition:color 0.2s; }
+    .pricing-toggle span.active { color:var(--text); font-weight:600; }
+    .toggle-switch { position:relative; width:48px; height:26px; background:var(--surface-2); border:1px solid var(--border); border-radius:13px; cursor:pointer; transition:background 0.2s,border-color 0.2s; flex-shrink:0; }
+    .toggle-switch.on { background:var(--accent); border-color:var(--accent); }
+    .toggle-switch .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:transform 0.2s; }
+    .toggle-switch.on .knob { transform:translateX(22px); }
+    .save-badge { background:rgba(34,197,94,0.12); color:var(--accent); border:1px solid rgba(34,197,94,0.28); font-size:0.7rem; font-weight:700; padding:0.15rem 0.6rem; border-radius:20px; letter-spacing:0.04em; white-space:nowrap; }
+    .price-yearly { visibility:hidden; font-size:0.75rem; color:var(--accent); font-weight:600; margin-top:0.2rem; }
+    .yearly-mode .price-monthly-label { display:none; }
+    .price-monthly-label { }
     .pricing-note { text-align:center; margin-top:2rem; font-size:0.82rem; color:var(--text-dim); }
     .pricing-note a { color:var(--accent); text-decoration:none; }
     .pricing-note a:hover { text-decoration:underline; }
@@ -201,11 +218,11 @@
     <span class="logo-dot"></span>share-installs
   </a>
   <div class="nav-links">
-    <a href="#features" class="hide-sm">Features</a>
-    <a href="#pricing" class="hide-sm">Pricing</a>
-    <a href="#quickstart" class="hide-sm">Quick Start</a>
-    <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm">GitHub</a>
-    <a href="https://console.share-installs.com" class="hide-sm" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">Console</a>
+    <a href="#features" class="hide-sm nav-features">Features</a>
+    <a href="#pricing" class="hide-sm nav-pricing">Pricing</a>
+    <a href="#quickstart" class="hide-sm nav-quickstart">Quick Start</a>
+    <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm nav-github">GitHub</a>
+    <a href="https://console.share-installs.com" class="hide-sm nav-console">Console</a>
     <a href="index.zh.html" class="nav-lang">中文</a>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
       <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -397,7 +414,17 @@
     <div class="sec-label">Pricing</div>
     <h2 class="sec-title">Start free,<br>scale when ready.</h2>
     <p class="sec-sub">Whether you're a solo developer or a growing team, there's a plan for you. Self-hosted is always free.</p>
-    <div class="pricing-grid">
+
+    <!-- Billing cycle toggle -->
+    <div class="pricing-toggle">
+      <span id="label-monthly" class="active">Monthly</span>
+      <div id="billing-toggle" class="toggle-switch" role="switch" aria-checked="false" tabindex="0" onclick="toggleBilling()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleBilling()" aria-label="Toggle yearly billing">
+        <div class="knob"></div>
+      </div>
+      <span id="label-yearly">Yearly <span class="save-badge">Save ~17%</span></span>
+    </div>
+
+    <div id="pricing-grid" class="pricing-grid">
 
       <!-- Self-hosted -->
       <div class="price-card">
@@ -405,11 +432,11 @@
         <div class="price-amount">Free<span> / forever</span></div>
         <p class="price-desc">Deploy on your own server. Full control, no usage limits, zero cost.</p>
         <ul class="price-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited projects & API calls</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited projects &amp; API calls</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Data never leaves your server</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>One-command Docker Compose deploy</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>PostgreSQL + Redis included</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0 — fork & modify freely</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0 — fork &amp; modify freely</li>
         </ul>
         <a class="price-btn ghost" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">View on GitHub</a>
       </div>
@@ -434,12 +461,13 @@
       <div class="price-card popular">
         <div class="popular-badge">Most Popular</div>
         <div class="price-tier">Pro</div>
-        <div class="price-amount">$9<span> / month</span></div>
+        <div class="price-amount"><span id="pro-price">$4.99</span><span class="price-monthly-label"> / month</span><span id="pro-yearly-label" style="display:none"> / year</span></div>
+        <p class="price-yearly" id="pro-yearly-note">~$4.17/mo billed annually</p>
         <p class="price-desc">For growing product teams that need higher throughput and priority support.</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>60 resolutions / minute</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Up to 5 projects</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Advanced analytics & funnel</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Advanced analytics &amp; funnel</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Multiple API keys per project</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Priority email support</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Free</li>
@@ -450,15 +478,16 @@
       <!-- Unlimited -->
       <div class="price-card">
         <div class="price-tier">Unlimited</div>
-        <div class="price-amount">$29<span> / month</span></div>
+        <div class="price-amount"><span id="unl-price">$9.99</span><span class="price-monthly-label"> / month</span><span id="unl-yearly-label" style="display:none"> / year</span></div>
+        <p class="price-yearly" id="unl-yearly-note">~$8.33/mo billed annually</p>
         <p class="price-desc">For high-traffic apps and enterprise teams that need unlimited scale.</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>600 resolutions / minute</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited projects</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dedicated support & SLA</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dedicated support &amp; SLA</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Custom quota configuration</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Pro</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Invoicing & team billing</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Invoicing &amp; team billing</li>
         </ul>
         <a class="price-btn outline" href="https://console.share-installs.com">Upgrade now</a>
       </div>
@@ -471,7 +500,31 @@
   </div>
 </section>
 
+<script>
+function toggleBilling() {
+  var toggle = document.getElementById('billing-toggle');
+  var grid = document.getElementById('pricing-grid');
+  var isYearly = toggle.getAttribute('aria-checked') === 'true';
+  isYearly = !isYearly;
+  toggle.setAttribute('aria-checked', isYearly);
+  toggle.classList.toggle('on', isYearly);
+  document.getElementById('label-monthly').classList.toggle('active', !isYearly);
+  document.getElementById('label-yearly').classList.toggle('active', isYearly);
+  grid.classList.toggle('yearly-mode', isYearly);
+  // Pro
+  document.getElementById('pro-price').textContent = isYearly ? '$50' : '$4.99';
+  document.getElementById('pro-yearly-label').style.display = isYearly ? '' : 'none';
+  document.getElementById('pro-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
+  document.querySelectorAll('.price-monthly-label') && document.querySelectorAll('.price-monthly-label').forEach(function(el){ el.style.display = isYearly ? 'none' : ''; });
+  // Unlimited
+  document.getElementById('unl-price').textContent = isYearly ? '$100' : '$9.99';
+  document.getElementById('unl-yearly-label').style.display = isYearly ? '' : 'none';
+  document.getElementById('unl-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
+}
+</script>
+
 <!-- DEPLOY MODES -->
+
 <section class="sec" id="deploy">
   <div class="container">
     <div class="sec-label">Deployment</div>

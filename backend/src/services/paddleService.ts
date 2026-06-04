@@ -1,0 +1,170 @@
+/**
+ * @fileoverview Paddle Billing service (Paddle Billing new version).
+ *
+ * Encapsulates all Paddle API interactions:
+ *   - Create/get customers
+ *   - Generate checkout transactions (Overlay mode)
+ *   - Cancel subscriptions
+ *   - Map Paddle Plan → internal Plan enum
+ *
+ * Paddle Billing docs: https://developer.paddle.com/api-reference/overview
+ */
+
+import {Paddle, Environment} from '@paddle/paddle-node-sdk';
+import {Plan} from '@prisma/client';
+import {config} from '../config/index';
+import {logger} from '../utils/logger';
+
+// ---- Price ID → Plan mapping ----
+
+export const PRICE_TO_PLAN: Record<string, {plan: Plan; billing: 'monthly' | 'yearly'}> = {
+  [config.PADDLE_PRICE_PRO_MONTHLY]: {plan: 'PRO', billing: 'monthly'},
+  [config.PADDLE_PRICE_PRO_YEARLY]: {plan: 'PRO', billing: 'yearly'},
+  [config.PADDLE_PRICE_UNLIMITED_MONTHLY]: {plan: 'UNLIMITED', billing: 'monthly'},
+  [config.PADDLE_PRICE_UNLIMITED_YEARLY]: {plan: 'UNLIMITED', billing: 'yearly'},
+};
+
+// ---- Pricing constants (for frontend display) ----
+
+export const PRICING = {
+  PRO: {
+    monthly: {priceId: config.PADDLE_PRICE_PRO_MONTHLY, amount: 4.99},
+    yearly: {priceId: config.PADDLE_PRICE_PRO_YEARLY, amount: 50},
+  },
+  UNLIMITED: {
+    monthly: {priceId: config.PADDLE_PRICE_UNLIMITED_MONTHLY, amount: 9.99},
+    yearly: {priceId: config.PADDLE_PRICE_UNLIMITED_YEARLY, amount: 100},
+  },
+} as const;
+
+// ---- Paddle SDK client (singleton) ----
+
+let paddleInstance: Paddle | null = null;
+
+function getPaddle(): Paddle {
+  if (!paddleInstance) {
+    if (!config.PADDLE_API_KEY) {
+      throw new Error('PADDLE_API_KEY is not configured');
+    }
+    paddleInstance = new Paddle(config.PADDLE_API_KEY, {
+      environment:
+        config.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
+    });
+  }
+  return paddleInstance;
+}
+
+// ---- Service class ----
+
+export class PaddleService {
+  /**
+   * Ensures a Paddle customer exists for the given user.
+   * If already linked (paddleCustomerId set), returns that ID.
+   * Otherwise creates a new Paddle customer and returns the new ID.
+   */
+  async ensureCustomer(opts: {
+    userId: string;
+    email: string | null;
+    displayName: string | null;
+    existingPaddleCustomerId?: string | null;
+  }): Promise<string> {
+    if (opts.existingPaddleCustomerId) {
+      return opts.existingPaddleCustomerId;
+    }
+
+    const paddle = getPaddle();
+    const customer = await paddle.customers.create({
+      email: opts.email ?? `user_${opts.userId}@placeholder.local`,
+      name: opts.displayName ?? undefined,
+      customData: {userId: opts.userId},
+    });
+
+    logger.info('Created Paddle customer', {userId: opts.userId, paddleCustomerId: customer.id});
+    return customer.id;
+  }
+
+  /**
+   * Creates a Paddle checkout transaction for Overlay mode.
+   * Returns the transaction ID that the frontend passes to Paddle.js.
+   *
+   * Paddle Overlay docs:
+   *   https://developer.paddle.com/build/checkout/build-overlay-checkout
+   */
+  async createCheckoutTransaction(opts: {
+    priceId: string;
+    paddleCustomerId: string;
+    userId: string;
+    successUrl: string;
+  }): Promise<{transactionId: string}> {
+    const paddle = getPaddle();
+
+    const transaction = await paddle.transactions.create({
+      items: [{priceId: opts.priceId, quantity: 1}],
+      customerId: opts.paddleCustomerId,
+      customData: {userId: opts.userId},
+      checkout: {url: opts.successUrl},
+    });
+
+    logger.info('Created Paddle checkout transaction', {
+      userId: opts.userId,
+      transactionId: transaction.id,
+      priceId: opts.priceId,
+    });
+
+    return {transactionId: transaction.id};
+  }
+
+  /**
+   * Cancels an active Paddle subscription.
+   * Cancellation is effective at end of current billing period.
+   */
+  async cancelSubscription(subscriptionId: string): Promise<void> {
+    const paddle = getPaddle();
+    await paddle.subscriptions.cancel(subscriptionId, {effectiveFrom: 'next_billing_period'});
+    logger.info('Cancelled Paddle subscription', {subscriptionId});
+  }
+
+  /**
+   * Fetches current subscription details from Paddle.
+   */
+  async getSubscription(subscriptionId: string) {
+    const paddle = getPaddle();
+    return paddle.subscriptions.get(subscriptionId);
+  }
+
+  /**
+   * Verifies the Paddle webhook signature using the SDK's built-in helper.
+   * Throws if the signature is invalid.
+   */
+  async verifyWebhookSignature(rawBody: string, signatureHeader: string): Promise<void> {
+    if (!config.PADDLE_WEBHOOK_SECRET) {
+      throw new Error('PADDLE_WEBHOOK_SECRET is not configured');
+    }
+    const paddle = getPaddle();
+    const isValid = await paddle.webhooks.isSignatureValid(
+      rawBody,
+      config.PADDLE_WEBHOOK_SECRET,
+      signatureHeader,
+    );
+    if (!isValid) {
+      throw new Error('Invalid Paddle webhook signature');
+    }
+  }
+
+  /**
+   * Parses a raw webhook body using the Paddle SDK.
+   */
+  async unmarshalWebhook(rawBody: string, signatureHeader: string) {
+    if (!config.PADDLE_WEBHOOK_SECRET) {
+      throw new Error('PADDLE_WEBHOOK_SECRET is not configured');
+    }
+    const paddle = getPaddle();
+    return paddle.webhooks.unmarshal(
+      rawBody,
+      config.PADDLE_WEBHOOK_SECRET,
+      signatureHeader,
+    );
+  }
+}
+
+export const paddleService = new PaddleService();

@@ -18,6 +18,7 @@ import {config} from './config/index';
 import {logger} from './utils/logger';
 import {createRouter} from './routes/index';
 import {errorHandler, notFoundHandler} from './middleware/errorHandler';
+import {paddleWebhookHandler} from './webhooks/paddle';
 
 export function createApp(prisma: PrismaClient, redis: Redis): Application {
   const app = express();
@@ -59,6 +60,14 @@ export function createApp(prisma: PrismaClient, redis: Redis): Application {
 
   // Request compression
   app.use(compression());
+
+  // Paddle webhook – must receive raw body for signature verification.
+  // Registered BEFORE express.json() so body is not pre-parsed.
+  app.use(
+    '/api/webhooks/paddle',
+    express.raw({type: 'application/json'}),
+    paddleWebhookHandler,
+  );
 
   // Request body parsing
   app.use(express.json({limit: '1mb'}));

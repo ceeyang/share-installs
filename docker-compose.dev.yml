@@ -31,8 +31,19 @@ services:
       target: development
     environment:
       NODE_ENV: development
-      LOG_LEVEL: debug
-      CORS_ORIGINS: "*"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      MULTI_TENANT: ${MULTI_TENANT:-true}
+      ADMIN_SECRET: ${ADMIN_SECRET:-05d92ec1489cf6120dc8072686437e0eb8300a493337908ba25ace0a6ee1273b}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET:-d5913a7ec4a1669da9f06dbdace2666f52ed795cf8a091167667e6a50d85602e}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0e70d6723080a0d9d98d3c80ae9e89359e59e10a99fa0fb12b275452198acde6}
+      PADDLE_API_KEY: ${PADDLE_API_KEY:-}
+      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET:-}
+      PADDLE_PRICE_PRO_MONTHLY: ${PADDLE_PRICE_PRO_MONTHLY:-pri_placeholder_pro_monthly}
+      PADDLE_PRICE_PRO_YEARLY: ${PADDLE_PRICE_PRO_YEARLY:-pri_placeholder_pro_yearly}
+      PADDLE_PRICE_UNLIMITED_MONTHLY: ${PADDLE_PRICE_UNLIMITED_MONTHLY:-pri_placeholder_unlimited_monthly}
+      PADDLE_PRICE_UNLIMITED_YEARLY: ${PADDLE_PRICE_UNLIMITED_YEARLY:-pri_placeholder_unlimited_yearly}
     volumes:
       - ./backend/src:/app/src:ro
       - ./backend/prisma:/app/prisma:ro

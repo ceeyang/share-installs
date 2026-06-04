@@ -84,6 +84,12 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      PADDLE_API_KEY: ${PADDLE_API_KEY:-}
+      PADDLE_WEBHOOK_SECRET: ${PADDLE_WEBHOOK_SECRET:-}
+      PADDLE_PRICE_PRO_MONTHLY: ${PADDLE_PRICE_PRO_MONTHLY:-pri_placeholder_pro_monthly}
+      PADDLE_PRICE_PRO_YEARLY: ${PADDLE_PRICE_PRO_YEARLY:-pri_placeholder_pro_yearly}
+      PADDLE_PRICE_UNLIMITED_MONTHLY: ${PADDLE_PRICE_UNLIMITED_MONTHLY:-pri_placeholder_unlimited_monthly}
+      PADDLE_PRICE_UNLIMITED_YEARLY: ${PADDLE_PRICE_UNLIMITED_YEARLY:-pri_placeholder_unlimited_yearly}
     depends_on:
       db:
         condition: service_healthy

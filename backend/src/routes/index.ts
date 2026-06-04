@@ -30,6 +30,7 @@ import {
 } from '../middleware/auth';
 import {createRateLimiters, createPlanRateLimiter} from '../middleware/rateLimit';
 import {config} from '../config/index';
+import * as billingController from '../controllers/billingController';
 
 export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   const router = Router();
@@ -127,6 +128,12 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
 
   // Stats
   dashboard.get('/apps/:appId/stats', dashboardController.getAppStats);
+
+  // Billing (Paddle)
+  dashboard.get('/billing/prices', billingController.getPrices);
+  dashboard.post('/billing/checkout', billingController.createCheckout);
+  dashboard.post('/billing/cancel', billingController.cancelSubscription);
+  dashboard.get('/billing/subscription', billingController.getSubscription);
 
   router.use('/dashboard', dashboard);
 

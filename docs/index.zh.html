@@ -41,11 +41,16 @@
     .nav-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text); text-decoration:none; display:flex; align-items:center; gap:0.5rem; cursor:pointer; }
     .logo-dot { width:8px; height:8px; background:var(--accent); border-radius:50%; display:inline-block; }
     .nav-links { display:flex; gap:1.25rem; align-items:center; }
-    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:0.875rem; transition:color 0.2s; cursor:pointer; }
+    .nav-links a { color:var(--text-muted); text-decoration:none; font-size:0.875rem; transition:color 0.2s; cursor:pointer; display:inline-block; text-align:center; }
     .nav-links a:hover { color:var(--text); }
-    .nav-lang { font-size:0.78rem; color:var(--text-dim); border:1px solid var(--border); padding:0.2rem 0.65rem; border-radius:6px; text-decoration:none; transition:border-color 0.2s,color 0.2s; cursor:pointer; }
+    .nav-features { min-width:68px; }
+    .nav-pricing { min-width:60px; }
+    .nav-quickstart { min-width:84px; }
+    .nav-github { min-width:60px; }
+    .nav-console { min-width:68px; }
+    .nav-lang { font-size:0.78rem; color:var(--text-dim); border:1px solid var(--border); padding:0.2rem 0.65rem; border-radius:6px; text-decoration:none; transition:border-color 0.2s,color 0.2s; cursor:pointer; display:inline-block; min-width:48px; text-align:center; }
     .nav-lang:hover { border-color:var(--accent); color:var(--accent); }
-    .nav-btn { background:var(--accent); color:#0F172A; padding:0.4rem 1.1rem; border-radius:8px; font-size:0.875rem; font-weight:700; text-decoration:none; transition:background 0.2s; cursor:pointer; display:flex; align-items:center; gap:0.4rem; }
+    .nav-btn { background:var(--accent); color:#0F172A; padding:0.4rem 1.1rem; border-radius:8px; font-size:0.875rem; font-weight:700; text-decoration:none; transition:background 0.2s; cursor:pointer; display:flex; align-items:center; gap:0.4rem; min-width:160px; justify-content:center; }
     .nav-btn:hover { background:var(--accent-dark); }
     .theme-toggle { background:none; border:1px solid var(--border); border-radius:6px; padding:0.3rem 0.5rem; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; transition:border-color 0.2s,color 0.2s,background 0.2s; }
     .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
@@ -132,6 +137,7 @@
     .price-tier { font-size:0.72rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); font-family:'Space Grotesk',sans-serif; margin-bottom:0.75rem; }
     .price-amount { font-family:'Space Grotesk',sans-serif; font-size:2.5rem; font-weight:700; line-height:1; color:var(--text); margin-bottom:0.3rem; }
     .price-amount span { font-size:1rem; font-weight:500; color:var(--text-muted); }
+    .price-amount #pro-price, .price-amount #unl-price { font-size:inherit; font-weight:inherit; color:inherit; }
     .price-desc { font-size:0.84rem; color:var(--text-muted); margin-bottom:1.75rem; line-height:1.6; min-height:2.8rem; }
     .price-list { list-style:none; display:flex; flex-direction:column; gap:0.65rem; margin-bottom:2rem; flex:1; }
     .price-list li { display:flex; align-items:flex-start; gap:0.6rem; font-size:0.84rem; color:var(--text-muted); }
@@ -145,6 +151,16 @@
     .price-btn.solid:hover { background:var(--accent-dark); transform:translateY(-1px); }
     .price-btn.ghost { background:var(--surface-2); color:var(--text-muted); border:1.5px solid transparent; }
     .price-btn.ghost:hover { color:var(--text); transform:translateY(-1px); }
+    .pricing-toggle { display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-bottom:3rem; }
+    .pricing-toggle span { font-size:0.88rem; color:var(--text-muted); font-weight:500; transition:color 0.2s; }
+    .pricing-toggle span.active { color:var(--text); font-weight:600; }
+    .toggle-switch { position:relative; width:48px; height:26px; background:var(--surface-2); border:1px solid var(--border); border-radius:13px; cursor:pointer; transition:background 0.2s,border-color 0.2s; flex-shrink:0; }
+    .toggle-switch.on { background:var(--accent); border-color:var(--accent); }
+    .toggle-switch .knob { position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:transform 0.2s; }
+    .toggle-switch.on .knob { transform:translateX(22px); }
+    .save-badge { background:rgba(34,197,94,0.12); color:var(--accent); border:1px solid rgba(34,197,94,0.28); font-size:0.7rem; font-weight:700; padding:0.15rem 0.6rem; border-radius:20px; letter-spacing:0.04em; white-space:nowrap; }
+    .price-yearly { visibility:hidden; font-size:0.75rem; color:var(--accent); font-weight:600; margin-top:0.2rem; }
+    .price-monthly-label { }
     .pricing-note { text-align:center; margin-top:2rem; font-size:0.82rem; color:var(--text-dim); }
     .pricing-note a { color:var(--accent); text-decoration:none; }
     .pricing-note a:hover { text-decoration:underline; }
@@ -202,11 +218,11 @@
     <span class="logo-dot"></span>share-installs
   </a>
   <div class="nav-links">
-    <a href="#features" class="hide-sm">功能</a>
-    <a href="#pricing" class="hide-sm">价格</a>
-    <a href="#quickstart" class="hide-sm">快速开始</a>
-    <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm">GitHub</a>
-    <a href="https://console.share-installs.com" class="hide-sm" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;transition:color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">控制台</a>
+    <a href="#features" class="hide-sm nav-features">功能</a>
+    <a href="#pricing" class="hide-sm nav-pricing">价格</a>
+    <a href="#quickstart" class="hide-sm nav-quickstart">快速开始</a>
+    <a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener" class="hide-sm nav-github">GitHub</a>
+    <a href="https://console.share-installs.com" class="hide-sm nav-console">控制台</a>
     <a href="index.html" class="nav-lang">EN</a>
     <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题">
       <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -398,152 +414,112 @@
     <div class="sec-label">价格方案</div>
     <h2 class="sec-title">从免费开始，<br>按需升级。</h2>
     <p class="sec-sub">不管是独立开发者还是成长中的团队，都有适合你的方案。自托管版永久免费开源。</p>
-    <div class="pricing-grid">
 
-      <!-- Self-hosted -->
+    <!-- 计费周期切换 -->
+    <div class="pricing-toggle">
+      <span id="label-monthly" class="active">按月付费</span>
+      <div id="billing-toggle" class="toggle-switch" role="switch" aria-checked="false" tabindex="0" onclick="toggleBilling()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleBilling()" aria-label="切换年付">
+        <div class="knob"></div>
+      </div>
+      <span id="label-yearly">按年付费 <span class="save-badge">省约 17%</span></span>
+    </div>
+
+    <div id="pricing-grid" class="pricing-grid">
+
+      <!-- 自托管 -->
       <div class="price-card">
         <div class="price-tier">自托管</div>
         <div class="price-amount">免费<span> / 永久</span></div>
         <p class="price-desc">部署在你自己的服务器，数据完全自控，无任何使用限制。</p>
         <ul class="price-list">
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            无限项目 & API 调用
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            数据永远不离开你的服务器
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            一键 Docker Compose 部署
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            含 PostgreSQL + Redis
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Apache 2.0 开源协议
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            完整源码可 Fork / 修改
-          </li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>无限项目 &amp; API 调用</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>数据永远不离开你的服务器</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>一键 Docker Compose 部署</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>含 PostgreSQL + Redis</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Apache 2.0 开源协议，可 Fork / 修改</li>
         </ul>
         <a class="price-btn ghost" href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">查看 GitHub 文档</a>
       </div>
 
-      <!-- Free SaaS -->
+      <!-- 免费版 -->
       <div class="price-card">
         <div class="price-tier">免费版</div>
         <div class="price-amount">$0<span> / 月</span></div>
         <p class="price-desc">适合个人开发者和小型项目，无需信用卡，注册即用。</p>
         <ul class="price-list">
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            每分钟 10 次归因解析
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            1 个项目
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            GitHub OAuth 登录
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Dashboard 基础数据
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            全平台 SDK 支持
-          </li>
-          <li class="dim">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            无优先支持
-          </li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>每分钟 10 次归因解析</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>1 个项目</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>GitHub OAuth 登录</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Dashboard 基础数据</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>全平台 SDK 支持</li>
+          <li class="dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>无优先支持</li>
         </ul>
         <a class="price-btn outline" href="https://console.share-installs.com">免费注册</a>
       </div>
 
-      <!-- Pro -->
+      <!-- 基础版 Pro -->
       <div class="price-card popular">
         <div class="popular-badge">最受欢迎</div>
-        <div class="price-tier">Pro</div>
-        <div class="price-amount">$9<span> / 月</span></div>
+        <div class="price-tier">基础版 Pro</div>
+        <div class="price-amount"><span id="pro-price">$4.99</span><span class="price-monthly-label"> / 月</span><span id="pro-yearly-label" style="display:none"> / 年</span></div>
+        <p class="price-yearly" id="pro-yearly-note">约 $4.17/月，按年一次性付清</p>
         <p class="price-desc">适合成长中的产品团队，更高配额与优先支持。</p>
         <ul class="price-list">
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            每分钟 60 次归因解析
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            最多 5 个项目
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            高级数据分析 & 漏斗图
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            API 密钥多密钥管理
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            邮件优先支持
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            免费版全部功能
-          </li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>每分钟 60 次归因解析</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>最多 5 个项目</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>高级数据分析 &amp; 漏斗图</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>API 密钥多密钥管理</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>邮件优先支持</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>免费版全部功能</li>
         </ul>
         <a class="price-btn solid" href="https://console.share-installs.com">立即升级</a>
       </div>
 
-      <!-- Unlimited -->
+      <!-- 无限版 Unlimited -->
       <div class="price-card">
-        <div class="price-tier">Unlimited</div>
-        <div class="price-amount">$29<span> / 月</span></div>
+        <div class="price-tier">无限版 Unlimited</div>
+        <div class="price-amount"><span id="unl-price">$9.99</span><span class="price-monthly-label"> / 月</span><span id="unl-yearly-label" style="display:none"> / 年</span></div>
+        <p class="price-yearly" id="unl-yearly-note">约 $8.33/月，按年一次性付清</p>
         <p class="price-desc">适合高流量应用和企业级团队，无限扩展，专属支持。</p>
         <ul class="price-list">
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            每分钟 600 次归因解析
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            无限项目
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            专属客服 & 响应 SLA
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            自定义配额限制
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            Pro 版全部功能
-          </li>
-          <li>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            发票 & 团队账单管理
-          </li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>每分钟 600 次归因解析</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>无限项目</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>专属客服 &amp; 响应 SLA</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>自定义配额限制</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>基础版全部功能</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>发票 &amp; 团队账单管理</li>
         </ul>
         <a class="price-btn outline" href="https://console.share-installs.com">立即升级</a>
       </div>
 
     </div>
     <p class="pricing-note">
-      需要超出 Unlimited 的定制配额？<a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">联系我们</a> 获取企业方案。
+      需要超出无限版的定制配额？<a href="https://github.com/ceeyang/share-installs/issues" target="_blank" rel="noopener">联系我们</a> 获取企业方案。
       或直接选择<a href="https://github.com/ceeyang/share-installs" target="_blank" rel="noopener">自托管</a>，零成本无限使用。
     </p>
   </div>
 </section>
+
+<script>
+function toggleBilling() {
+  var toggle = document.getElementById('billing-toggle');
+  var isYearly = toggle.getAttribute('aria-checked') === 'true';
+  isYearly = !isYearly;
+  toggle.setAttribute('aria-checked', isYearly);
+  toggle.classList.toggle('on', isYearly);
+  document.getElementById('label-monthly').classList.toggle('active', !isYearly);
+  document.getElementById('label-yearly').classList.toggle('active', isYearly);
+  // Pro
+  document.getElementById('pro-price').textContent = isYearly ? '$50' : '$4.99';
+  document.getElementById('pro-yearly-label').style.display = isYearly ? '' : 'none';
+  document.getElementById('pro-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
+  document.querySelectorAll('.price-monthly-label').forEach(function(el){ el.style.display = isYearly ? 'none' : ''; });
+  // Unlimited
+  document.getElementById('unl-price').textContent = isYearly ? '$100' : '$9.99';
+  document.getElementById('unl-yearly-label').style.display = isYearly ? '' : 'none';
+  document.getElementById('unl-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
+}
+</script>
 
 <!-- DEPLOY MODES -->
 <section class="sec" id="deploy">
