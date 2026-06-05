@@ -21,6 +21,7 @@ import {prisma} from '../lib/prisma';
 import {paddleService, PRICE_TO_PLAN} from '../services/paddleService';
 import {logger} from '../utils/logger';
 import {Plan} from '@prisma/client';
+import {config} from '../config/index';
 
 /**
  * Maps a Paddle price ID to our internal Plan enum.
@@ -148,7 +149,14 @@ export const paddleWebhookHandler = async (req: Request, res: Response): Promise
   try {
     event = await paddleService.unmarshalWebhook(rawBody, signatureHeader);
   } catch (err) {
-    logger.warn('Paddle webhook signature/parse failed', {err});
+    logger.warn('Paddle webhook signature/parse failed', {
+      err,
+      // DEBUG: confirm secret is loaded (shows first 12 chars only, safe to log)
+      secretPrefix: config.PADDLE_WEBHOOK_SECRET
+        ? config.PADDLE_WEBHOOK_SECRET.slice(0, 12) + '...'
+        : '(empty – PADDLE_WEBHOOK_SECRET not set!)',
+      signaturePrefix: signatureHeader.slice(0, 30),
+    });
     res.status(401).json({error: 'Invalid webhook signature'});
     return;
   }
