@@ -87,6 +87,13 @@ export const createCheckout = async (req: Request, res: Response) => {
     }
 
     const successUrl = `${config.FRONTEND_URL}/billing/success`;
+
+    // Warn if FRONTEND_URL is still a local/placeholder address in production.
+    // The domain must be approved in Paddle dashboard: Checkout > Approved Domains.
+    if (config.NODE_ENV === 'production' && (successUrl.includes('localhost') || successUrl.includes('127.0.0.1'))) {
+      logger.warn('FRONTEND_URL appears to be a local address in production – Paddle will reject the checkout.url', {successUrl});
+    }
+
     const {transactionId} = await paddleService.createCheckoutTransaction({
       priceId,
       paddleCustomerId,

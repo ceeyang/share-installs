@@ -8,6 +8,41 @@
         <p class="text-sm text-muted">Choose the plan that fits your scale.</p>
       </div>
 
+      <!-- Payment success banner -->
+      <div
+        v-if="checkoutSuccess"
+        class="mb-8 flex items-start gap-4 bg-brand-cta/10 border border-brand-cta/30 rounded-xl p-5"
+      >
+        <div class="flex-shrink-0 w-9 h-9 rounded-full bg-brand-cta/20 flex items-center justify-center">
+          <svg v-if="auth.planName !== 'FREE'" class="w-5 h-5 text-brand-cta" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+          </svg>
+          <svg v-else class="w-5 h-5 text-brand-cta animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-brand-text">
+            {{ auth.planName !== 'FREE' ? '🎉 Payment successful! Welcome to ' + auth.planName + '.' : 'Payment received — activating your plan…' }}
+          </p>
+          <p class="text-xs text-muted mt-0.5">
+            {{ auth.planName !== 'FREE' ? 'Your quota and features have been updated.' : 'This usually takes a few seconds. Please wait.' }}
+          </p>
+          <p v-if="pollMsg" class="text-xs text-amber-400 mt-1">{{ pollMsg }}</p>
+        </div>
+        <button
+          v-if="auth.planName !== 'FREE'"
+          class="flex-shrink-0 text-muted hover:text-brand-text transition-colors cursor-pointer"
+          @click="checkoutSuccess = false"
+          aria-label="Dismiss"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
       <!-- Current usage bar -->
       <div v-if="auth.quota" class="mb-8 bg-surface border border-border rounded-xl p-5">
         <div class="flex items-center justify-between mb-2">
@@ -209,6 +244,26 @@ const loadingPlanId = ref<string | null>(null)
 const cancelling = ref(false)
 const errorMsg = ref('')
 const subscription = ref<SubscriptionDetails | null>(null)
+// Shown after a successful checkout while we wait for webhook to update the plan
+const checkoutSuccess = ref(false)
+const pollMsg = ref('')
+
+/**
+ * Poll /quota every 2 s (up to ~15 s) after checkout.completed.
+ * Paddle webhooks are async — the plan update may arrive a few seconds after payment.
+ */
+async function pollForPlanUpgrade(prevPlan: string, maxAttempts = 8) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise(r => setTimeout(r, 2000))
+    await auth.refresh()
+    if (auth.planName !== prevPlan && auth.planName !== 'FREE') {
+      pollMsg.value = ''
+      return
+    }
+  }
+  // Timed out – plan may still update via webhook, just inform the user
+  pollMsg.value = 'Your plan will be updated shortly. Refresh the page if it doesn't change within a minute.'
+}
 
 const planColor = computed(() => {
   if (auth.planName === 'PRO') return 'text-purple-500'
@@ -290,10 +345,12 @@ function initPaddle() {
     Paddle.Initialize({
       token,
       eventCallback(data) {
-        // Refresh quota after successful checkout
         const event = data as { name?: string }
         if (event?.name === 'checkout.completed') {
-          auth.refresh()
+          // Show success banner immediately, then poll for webhook-driven plan update
+          checkoutSuccess.value = true
+          const prevPlan = auth.planName
+          pollForPlanUpgrade(prevPlan)
         }
       },
     })
