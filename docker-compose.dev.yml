@@ -7,6 +7,7 @@
 #   - Direct port access (bypass Traefik)
 #   - Source code mounting (hot-reload)
 #   - Local API connectivity
+#   - Docker Compose Watch (press 'w' after up, or use --watch flag)
 
 services:
   traefik:
@@ -32,6 +33,21 @@ services:
     ports:
       - "5173:5173"
     command: npm run dev -- --host 0.0.0.0
+    develop:
+      watch:
+        # Sync source changes → Vite HMR handles the rest, no rebuild needed
+        - action: sync
+          path: ./dashboard/src
+          target: /app/src
+        - action: sync
+          path: ./dashboard/index.html
+          target: /app/index.html
+        - action: sync
+          path: ./dashboard/public
+          target: /app/public
+        # Rebuild if dependencies change
+        - action: rebuild
+          path: ./dashboard/package.json
 
   backend:
     build:
@@ -62,6 +78,18 @@ services:
     ports:
       - "${BACKEND_PORT:-6066}:6066"
     command: npm run dev
+    develop:
+      watch:
+        # Sync source → nodemon/tsx watch picks up changes automatically
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+        - action: sync
+          path: ./backend/prisma
+          target: /app/prisma
+        # Rebuild if dependencies or Prisma schema change
+        - action: rebuild
+          path: ./backend/package.json
 
   db:
     ports:

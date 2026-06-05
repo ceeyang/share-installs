@@ -66,6 +66,17 @@ services:
     restart: unless-stopped
     networks:
       - share-net
+    develop:
+      watch:
+        # Rebuild the dashboard image when source or config changes
+        - action: rebuild
+          path: ./dashboard/src
+        - action: rebuild
+          path: ./dashboard/index.html
+        - action: rebuild
+          path: ./dashboard/public
+        - action: rebuild
+          path: ./dashboard/package.json
 
   backend:
     build:
@@ -114,6 +125,15 @@ services:
       timeout: 5s
       start_period: 40s
       retries: 3
+    develop:
+      watch:
+        # Rebuild the backend image when source or config changes
+        - action: rebuild
+          path: ./backend/src
+        - action: rebuild
+          path: ./backend/prisma
+        - action: rebuild
+          path: ./backend/package.json
 
   db:
     image: postgres:16-alpine

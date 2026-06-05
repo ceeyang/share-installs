@@ -262,7 +262,7 @@ async function pollForPlanUpgrade(prevPlan: string, maxAttempts = 8) {
     }
   }
   // Timed out – plan may still update via webhook, just inform the user
-  pollMsg.value = 'Your plan will be updated shortly. Refresh the page if it doesn't change within a minute.'
+  pollMsg.value = `Your plan will be updated shortly. Refresh the page if it doesn't change within a minute.`
 }
 
 const planColor = computed(() => {
