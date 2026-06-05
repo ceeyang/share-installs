@@ -279,12 +279,12 @@ function formatDate(iso: string) {
 }
 
 // Initialize Paddle.js in sandbox for non-production environments.
-// Replace 'sandbox' with 'production' and set your Paddle client-side token in VITE_PADDLE_CLIENT_TOKEN.
+// Replace 'sandbox' with 'production' and set your Paddle client token in PADDLE_CLIENT_TOKEN (root .env).
 function initPaddle() {
   try {
-    const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN
+    const token = import.meta.env.PADDLE_CLIENT_TOKEN
     if (!token) return
-    if (import.meta.env.VITE_PADDLE_ENV === 'sandbox') {
+    if (import.meta.env.PADDLE_ENV === 'sandbox') {
       Paddle.Environment.set('sandbox')
     }
     Paddle.Initialize({
@@ -312,9 +312,9 @@ async function handlePlanSelect(plan: typeof plans[number]) {
   try {
     // Determine price ID based on billing cycle
     const priceEnvKey = isYearly.value
-      ? `VITE_PADDLE_PRICE_${plan.id}_YEARLY`
-      : `VITE_PADDLE_PRICE_${plan.id}_MONTHLY`
-    // Price IDs come from environment variables (set from Paddle dashboard)
+      ? `PADDLE_PRICE_${plan.id}_YEARLY`
+      : `PADDLE_PRICE_${plan.id}_MONTHLY`
+    // Price IDs come from environment variables (injected at build time from root .env)
     const priceId = (import.meta.env as Record<string, string>)[priceEnvKey] || ''
 
     if (!priceId || priceId.startsWith('pri_placeholder')) {

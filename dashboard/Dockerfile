@@ -13,6 +13,14 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 # Stage 3: builder (compile Vue → dist)
 FROM deps AS builder
 COPY . .
+# Declare build args so Docker passes them through from docker-compose build.args.
+# Vite reads these as regular env vars during `npm run build` (via loadEnv with '' prefix).
+ARG PADDLE_ENV
+ARG PADDLE_CLIENT_TOKEN
+ARG PADDLE_PRICE_PRO_MONTHLY
+ARG PADDLE_PRICE_PRO_YEARLY
+ARG PADDLE_PRICE_UNLIMITED_MONTHLY
+ARG PADDLE_PRICE_UNLIMITED_YEARLY
 RUN npm run build
 
 # Stage 4: production (nginx serving dist)

@@ -37,6 +37,15 @@ services:
   dashboard:
     build:
       context: ./dashboard
+      args:
+        # Paddle vars are passed as build args so Vite can inject them at build time.
+        # Source: root .env – no VITE_ prefix needed.
+        PADDLE_ENV: ${PADDLE_ENV:-sandbox}
+        PADDLE_CLIENT_TOKEN: ${PADDLE_CLIENT_TOKEN:-}
+        PADDLE_PRICE_PRO_MONTHLY: ${PADDLE_PRICE_PRO_MONTHLY:-}
+        PADDLE_PRICE_PRO_YEARLY: ${PADDLE_PRICE_PRO_YEARLY:-}
+        PADDLE_PRICE_UNLIMITED_MONTHLY: ${PADDLE_PRICE_UNLIMITED_MONTHLY:-}
+        PADDLE_PRICE_UNLIMITED_YEARLY: ${PADDLE_PRICE_UNLIMITED_YEARLY:-}
     labels:
       - "traefik.enable=true"
       # HTTP → HTTPS 重定向

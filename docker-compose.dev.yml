@@ -17,13 +17,15 @@ services:
       context: ./dashboard
       target: development
     environment:
+      # Vite dev server proxy target (internal use only, not exposed to frontend code)
       - VITE_API_PROXY_TARGET=http://backend:6066
-      - VITE_PADDLE_ENV=${PADDLE_ENV:-sandbox}
-      - VITE_PADDLE_CLIENT_TOKEN=${PADDLE_CLIENT_TOKEN:-}
-      - VITE_PADDLE_PRICE_PRO_MONTHLY=${PADDLE_PRICE_PRO_MONTHLY:-}
-      - VITE_PADDLE_PRICE_PRO_YEARLY=${PADDLE_PRICE_PRO_YEARLY:-}
-      - VITE_PADDLE_PRICE_UNLIMITED_MONTHLY=${PADDLE_PRICE_UNLIMITED_MONTHLY:-}
-      - VITE_PADDLE_PRICE_UNLIMITED_YEARLY=${PADDLE_PRICE_UNLIMITED_YEARLY:-}
+      # Paddle vars – no VITE_ prefix, matches root .env keys exactly
+      - PADDLE_ENV=${PADDLE_ENV:-sandbox}
+      - PADDLE_CLIENT_TOKEN=${PADDLE_CLIENT_TOKEN:-}
+      - PADDLE_PRICE_PRO_MONTHLY=${PADDLE_PRICE_PRO_MONTHLY:-}
+      - PADDLE_PRICE_PRO_YEARLY=${PADDLE_PRICE_PRO_YEARLY:-}
+      - PADDLE_PRICE_UNLIMITED_MONTHLY=${PADDLE_PRICE_UNLIMITED_MONTHLY:-}
+      - PADDLE_PRICE_UNLIMITED_YEARLY=${PADDLE_PRICE_UNLIMITED_YEARLY:-}
     volumes:
       - ./dashboard:/app
       - /app/node_modules # Prevent host node_modules from overriding container's
