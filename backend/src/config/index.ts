@@ -72,6 +72,9 @@ const configSchema = z.object({
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
 
   // Paddle Billing
+  // Use 'sandbox' for Paddle sandbox environment, 'production' for live.
+  // This is independent of NODE_ENV so you can test in production containers with sandbox keys.
+  PADDLE_ENV: z.enum(['sandbox', 'production']).default('sandbox'),
   PADDLE_API_KEY: z.string().optional(),
   PADDLE_WEBHOOK_SECRET: z.string().optional(),
   PADDLE_PRICE_PRO_MONTHLY: z.string().default('pri_placeholder_pro_monthly'),

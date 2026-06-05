@@ -46,10 +46,11 @@ function getPaddle(): Paddle {
     if (!config.PADDLE_API_KEY) {
       throw new Error('PADDLE_API_KEY is not configured');
     }
-    paddleInstance = new Paddle(config.PADDLE_API_KEY, {
-      environment:
-        config.NODE_ENV === 'production' ? Environment.production : Environment.sandbox,
-    });
+    // Use PADDLE_ENV (not NODE_ENV) so sandbox keys work in production containers.
+    // Set PADDLE_ENV=production in .env only when using live Paddle API keys.
+    const environment =
+      config.PADDLE_ENV === 'production' ? Environment.production : Environment.sandbox;
+    paddleInstance = new Paddle(config.PADDLE_API_KEY, {environment});
   }
   return paddleInstance;
 }
