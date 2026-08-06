@@ -20,7 +20,7 @@ const validResolveBody = {
 describe('Rate limit headers', () => {
   it('includes standard RateLimit headers on every response', async () => {
     const {agent} = buildApp();
-    const res = await agent.get('/health').set('X-Forwarded-For', '192.168.50.1');
+    const res = await agent.get('/api/health').set('X-Forwarded-For', '192.168.50.1');
 
     expect(res.headers['ratelimit-limit']).toBeDefined();
     expect(res.headers['ratelimit-remaining']).toBeDefined();
@@ -31,8 +31,8 @@ describe('Rate limit headers', () => {
   it('decrements remaining count on successive requests', async () => {
     const {agent} = buildApp();
     const testIp = '192.168.50.2';
-    const first = await agent.get('/health').set('X-Forwarded-For', testIp);
-    const second = await agent.get('/health').set('X-Forwarded-For', testIp);
+    const first = await agent.get('/api/health').set('X-Forwarded-For', testIp);
+    const second = await agent.get('/api/health').set('X-Forwarded-For', testIp);
 
     const remaining1 = parseInt(first.headers['ratelimit-remaining'] as string, 10);
     const remaining2 = parseInt(second.headers['ratelimit-remaining'] as string, 10);
@@ -51,7 +51,7 @@ describe('Resolve endpoint rate limit (max 10 per minute)', () => {
     // Make 10 requests (all within limit)
     const responses: number[] = [];
     for (let i = 0; i < 10; i++) {
-       const res = await agent.post('/v1/resolutions')
+       const res = await agent.post('/api/v1/resolutions')
          .set('X-Forwarded-For', testIp)
          .send(validResolveBody);
       responses.push(res.status);
@@ -60,7 +60,7 @@ describe('Resolve endpoint rate limit (max 10 per minute)', () => {
     expect(responses.every(s => s === 200)).toBe(true);
 
     // 11th request should be rate-limited
-    const limitedRes = await agent.post('/v1/resolutions')
+    const limitedRes = await agent.post('/api/v1/resolutions')
       .set('X-Forwarded-For', testIp)
       .send(validResolveBody);
     expect(limitedRes.status).toBe(429);
@@ -73,12 +73,12 @@ describe('Resolve endpoint rate limit (max 10 per minute)', () => {
     const testIp = '192.168.50.4';
     // Exhaust the limit
     for (let i = 0; i < 10; i++) {
-      await agent.post('/v1/resolutions')
+      await agent.post('/api/v1/resolutions')
         .set('X-Forwarded-For', testIp)
         .send(validResolveBody);
     }
 
-    const res = await agent.post('/v1/resolutions')
+    const res = await agent.post('/api/v1/resolutions')
       .set('X-Forwarded-For', testIp)
       .send(validResolveBody);
     expect(res.status).toBe(429);

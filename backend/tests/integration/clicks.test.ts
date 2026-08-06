@@ -21,7 +21,7 @@ const validBody = {
 describe('POST /v1/clicks', () => {
   it('records a click and returns 200 with eventId', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send(validBody);
+    const res = await agent.post('/api/v1/clicks').send(validBody);
 
     expect(res.status).toBe(200);
     expect(typeof res.body.eventId).toBe('string');
@@ -29,14 +29,14 @@ describe('POST /v1/clicks', () => {
 
   it('sets X-Request-Id on the response', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send(validBody);
+    const res = await agent.post('/api/v1/clicks').send(validBody);
 
     expect(res.headers['x-request-id']).toBeDefined();
   });
 
   it('caches the fingerprint in Redis', async () => {
     const {agent, redis} = buildApp();
-    await agent.post('/v1/clicks').send(validBody);
+    await agent.post('/api/v1/clicks').send(validBody);
 
     // Find the fingerprint-specific call (si:click:...)
     const fingerprintCall = (redis.setex.mock.calls as [string, number, string][])
@@ -52,7 +52,7 @@ describe('POST /v1/clicks', () => {
 
   it('returns 400 when inviteCode is missing', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send({fingerprint: {}});
+    const res = await agent.post('/api/v1/clicks').send({fingerprint: {}});
 
     expect(res.status).toBe(400);
     expect(res.body.error.status).toBe('INVALID_ARGUMENT');
@@ -60,7 +60,7 @@ describe('POST /v1/clicks', () => {
 
   it('returns 400 when fingerprint field is missing', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send({inviteCode: 'TESTCODE'});
+    const res = await agent.post('/api/v1/clicks').send({inviteCode: 'TESTCODE'});
 
     expect(res.status).toBe(400);
   });
@@ -69,7 +69,7 @@ describe('POST /v1/clicks', () => {
     // Some YAML/JSON parsers emit numeric values for hex-looking strings.
     // The backend must coerce them to strings rather than rejecting.
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send({
+    const res = await agent.post('/api/v1/clicks').send({
       ...validBody,
       fingerprint: {
         ...validBody.fingerprint,
@@ -82,7 +82,7 @@ describe('POST /v1/clicks', () => {
 
   it('accepts an optional referrer field', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send({
+    const res = await agent.post('/api/v1/clicks').send({
       ...validBody,
       referrer: 'https://example.com/feed',
     });
@@ -92,7 +92,7 @@ describe('POST /v1/clicks', () => {
 
   it('accepts optional customData', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/clicks').send({
+    const res = await agent.post('/api/v1/clicks').send({
       ...validBody,
       customData: {foo: 'bar'},
     });

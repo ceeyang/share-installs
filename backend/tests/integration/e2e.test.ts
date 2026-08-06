@@ -28,7 +28,7 @@ describe('E2E – click → exact match resolve', () => {
     const {agent} = buildApp(prisma, redis);
 
     // Step 1: Web SDK records a click
-    const clickRes = await agent.post('/v1/clicks').send({
+    const clickRes = await agent.post('/api/v1/clicks').send({
       inviteCode: 'TESTCODE',
       fingerprint: {
         ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2)',
@@ -69,7 +69,7 @@ describe('E2E – click → exact match resolve', () => {
       resolvedAt: new Date(),
     } as never);
 
-    const resolveRes = await agent.post('/v1/resolutions').send({
+    const resolveRes = await agent.post('/api/v1/resolutions').send({
       channel: 'ios',
       fingerprint: {
         osVersion: '17.2',
@@ -87,11 +87,11 @@ describe('E2E – click → exact match resolve', () => {
   it('includes X-Request-Id in both click and resolve responses', async () => {
     const {agent} = buildApp();
 
-    const clickRes = await agent.post('/v1/clicks').send({
+    const clickRes = await agent.post('/api/v1/clicks').send({
       inviteCode: 'TESTCODE',
       fingerprint: {timezone: 'UTC'},
     });
-    const resolveRes = await agent.post('/v1/resolutions').send({
+    const resolveRes = await agent.post('/api/v1/resolutions').send({
       channel: 'ios',
       fingerprint: {timezone: 'UTC'},
     });
@@ -109,7 +109,7 @@ describe('E2E – click → exact match resolve', () => {
     const traceId = 'my-trace-id-12345';
 
     const res = await agent
-      .get('/health')
+      .get('/api/health')
       .set('X-Request-Id', traceId);
 
     expect(res.headers['x-request-id']).toBe(traceId);
@@ -160,7 +160,7 @@ describe('E2E – fuzzy match resolve', () => {
       resolvedAt: new Date(),
     } as never);
 
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'ios',
       fingerprint: {
         osVersion: '17.2',
@@ -209,7 +209,7 @@ describe('E2E – fuzzy match resolve', () => {
       },
     ] as never);
 
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'ios',
       fingerprint: {
         timezone: 'Asia/Shanghai',
@@ -226,7 +226,7 @@ describe('E2E – fuzzy match resolve', () => {
 describe('E2E – clipboard resolve', () => {
   it('clipboard resolve (SHAREINSTALLS:CODE)', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'android',
       clipboardCode: 'SHAREINSTALLS:TESTCODE',
       fingerprint: {},

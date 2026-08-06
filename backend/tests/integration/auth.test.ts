@@ -16,7 +16,7 @@ describe('Admin auth', () => {
         delete process.env.ADMIN_SECRET;
         const { buildApp } = require('./helpers');
         const { agent } = buildApp();
-        const res = await agent.post('/v1/projects').send({ name: 'Test Project' });
+        const res = await agent.post('/api/v1/projects').send({ name: 'Test Project' });
         expect(res.status).not.toBe(401);
       });
     });
@@ -26,7 +26,7 @@ describe('Admin auth', () => {
         delete process.env.ADMIN_SECRET;
         const { buildApp } = require('./helpers');
         const { agent } = buildApp();
-        const res = await agent.get('/v1/projects');
+        const res = await agent.get('/api/v1/projects');
         expect(res.status).toBe(200);
       });
     });
@@ -40,7 +40,7 @@ describe('Admin auth', () => {
         process.env.ADMIN_SECRET = SECRET;
         const { buildApp } = require('./helpers');
         const { agent } = buildApp();
-        const res = await agent.get('/v1/projects');
+        const res = await agent.get('/api/v1/projects');
         expect(res.status).toBe(401);
       });
     });
@@ -50,7 +50,7 @@ describe('Admin auth', () => {
         process.env.ADMIN_SECRET = SECRET;
         const { buildApp } = require('./helpers');
         const { agent } = buildApp();
-        const res = await agent.get('/v1/projects').set('Authorization', `Bearer ${SECRET}`);
+        const res = await agent.get('/api/v1/projects').set('Authorization', `Bearer ${SECRET}`);
         expect(res.status).toBe(200);
       });
     });

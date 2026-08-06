@@ -10,19 +10,19 @@ import {buildApp, makeMockPrisma} from './helpers';
 describe('404 – unknown routes', () => {
   it('returns 404 for an unknown GET route', async () => {
     const {agent} = buildApp();
-    const res = await agent.get('/v1/does-not-exist');
+    const res = await agent.get('/api/v1/does-not-exist');
 
     expect(res.status).toBe(404);
     expect(res.body.error).toMatchObject({
       code: 404,
       status: 'NOT_FOUND',
-      message: expect.stringContaining('/v1/does-not-exist'),
+      message: expect.stringContaining('/api/v1/does-not-exist'),
     });
   });
 
   it('returns 404 for an unknown POST route', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/nonexistent').send({});
+    const res = await agent.post('/api/v1/nonexistent').send({});
 
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe(404);
@@ -39,7 +39,7 @@ describe('404 – unknown routes', () => {
 describe('Validation errors – 400', () => {
   it('returns 400 with details array for invalid project creation', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/projects').send({name: ''});  // name required
+    const res = await agent.post('/api/v1/projects').send({name: ''});  // name required
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe(400);
@@ -50,7 +50,7 @@ describe('Validation errors – 400', () => {
 
   it('returns 400 for invalid channel in resolution request', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'unknown-platform',
       fingerprint: {},
     });
@@ -67,7 +67,7 @@ describe('AppError propagation', () => {
     const {agent} = buildApp(prisma);
 
     // POST /v1/projects/:id/api-keys explicitly checks for project existence
-    const res = await agent.post('/v1/projects/proj_nonexistent/api-keys').send({name: 'new-key'});
+    const res = await agent.post('/api/v1/projects/proj_nonexistent/api-keys').send({name: 'new-key'});
 
     expect(res.status).toBe(404);
     expect(res.body.error.status).toBe('NOT_FOUND');
@@ -85,7 +85,7 @@ describe('Prisma error mapping', () => {
     prisma.app.create.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/projects').send({name: 'Broken Project', userId: 'user_1'});
+    const res = await agent.post('/api/v1/projects').send({name: 'Broken Project', userId: 'user_1'});
 
     expect(res.status).toBe(409);
     expect(res.body.error.status).toBe('ALREADY_EXISTS');
@@ -101,7 +101,7 @@ describe('Prisma error mapping', () => {
     prisma.app.findUnique.mockRejectedValueOnce(prismaError);
 
     const {agent} = buildApp(prisma);
-    const res = await agent.post('/v1/projects/proj_missing/api-keys').send({name: 'key'});
+    const res = await agent.post('/api/v1/projects/proj_missing/api-keys').send({name: 'key'});
 
     expect(res.status).toBe(404);
     expect(res.body.error.status).toBe('NOT_FOUND');
@@ -114,7 +114,7 @@ describe('Unhandled errors – 500', () => {
     prisma.app.findMany.mockRejectedValueOnce(new Error('DB connection lost'));
     const {agent} = buildApp(prisma);
 
-    const res = await agent.get('/v1/projects');
+    const res = await agent.get('/api/v1/projects');
 
     expect(res.status).toBe(500);
     expect(res.body.error).toMatchObject({
@@ -131,10 +131,10 @@ describe('Error response structure consistency', () => {
     const {agent} = buildApp();
 
     const results = [
-      await agent.get('/v1/unknown'),                                            // 404
-      await agent.post('/v1/projects').send({name: ''}),                        // 400
-      await agent.post('/v1/clicks').send({fingerprint: {}}),                   // 400 (missing inviteCode)
-      await agent.post('/v1/resolutions').send({channel: 'bad', fingerprint: {}}), // 400
+      await agent.get('/api/v1/unknown'),                                            // 404
+      await agent.post('/api/v1/projects').send({name: ''}),                        // 400
+      await agent.post('/api/v1/clicks').send({fingerprint: {}}),                   // 400 (missing inviteCode)
+      await agent.post('/api/v1/resolutions').send({channel: 'bad', fingerprint: {}}), // 400
     ];
 
     for (const res of results) {

@@ -37,7 +37,7 @@ describe('POST /v1/resolutions', () => {
 
   it('returns 400 for an invalid channel value', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'web',
       fingerprint: {},
     });
@@ -48,7 +48,7 @@ describe('POST /v1/resolutions', () => {
 
   it('returns 400 when fingerprint field is missing', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({channel: 'ios'});
+    const res = await agent.post('/api/v1/resolutions').send({channel: 'ios'});
 
     expect(res.status).toBe(400);
   });
@@ -59,7 +59,7 @@ describe('POST /v1/resolutions', () => {
     // Default mock: redis.get returns null → no exact match
     // Fuzzy matching candidates also empty by default
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send(iosBody);
+    const res = await agent.post('/api/v1/resolutions').send(iosBody);
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(false);
@@ -72,7 +72,7 @@ describe('POST /v1/resolutions', () => {
     const prisma = makeMockPrisma();
     const {agent} = buildApp(prisma);
 
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'android',
       clipboardCode: 'SHAREINSTALLS:TESTCODE',
       fingerprint: {},
@@ -86,7 +86,7 @@ describe('POST /v1/resolutions', () => {
 
   it('ignores clipboard on iOS (falls through to fingerprint matching)', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'ios',
       clipboardCode: 'SHAREINSTALLS:TESTCODE', // must be ignored for iOS
       fingerprint: iosBody.fingerprint,
@@ -99,7 +99,7 @@ describe('POST /v1/resolutions', () => {
 
   it('ignores clipboard without the SHAREINSTALLS: prefix', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send({
+    const res = await agent.post('/api/v1/resolutions').send({
       channel: 'android',
       clipboardCode: 'RANDOMTEXT',
       fingerprint: {},
@@ -131,7 +131,7 @@ describe('POST /v1/resolutions', () => {
     } as never);
 
     const {agent} = buildApp(prisma, redis);
-    const res = await agent.post('/v1/resolutions').send(iosBody);
+    const res = await agent.post('/api/v1/resolutions').send(iosBody);
 
     expect(res.status).toBe(200);
     expect(res.body.matched).toBe(true);
@@ -154,7 +154,7 @@ describe('POST /v1/resolutions', () => {
     } as never);
 
     const {agent} = buildApp(prisma, redis);
-    await agent.post('/v1/resolutions').send(iosBody);
+    await agent.post('/api/v1/resolutions').send(iosBody);
 
     expect(prisma.conversion.create).toHaveBeenCalledTimes(1);
     expect((prisma.conversion.create.mock.calls as unknown[][])[0][0]).toMatchObject({
@@ -179,7 +179,7 @@ describe('POST /v1/resolutions', () => {
     } as never);
 
     const {agent} = buildApp(prisma, redis);
-    await agent.post('/v1/resolutions').send(iosBody);
+    await agent.post('/api/v1/resolutions').send(iosBody);
 
     // The fingerprint cache key must be removed to prevent duplicate matches
     expect(redis.del).toHaveBeenCalled();
@@ -189,7 +189,7 @@ describe('POST /v1/resolutions', () => {
 
   it('accepts Android fingerprint fields', async () => {
     const {agent} = buildApp();
-    const res = await agent.post('/v1/resolutions').send(androidBody);
+    const res = await agent.post('/api/v1/resolutions').send(androidBody);
 
     expect(res.status).toBe(200);
     // No match expected with default mocks, but validation must pass
