@@ -146,6 +146,11 @@ model ClickEvent {
   platform  DevicePlatform @default(UNKNOWN)
   osVersion String?        @map("os_version")
 
+  /// Set once a conversion is attributed to this click; resolved clicks are
+  /// excluded from fuzzy matching so one click cannot credit two installs.
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime? @map("resolved_at")
+
   createdAt DateTime @default(now()) @map("created_at")
 
   app         App?         @relation(fields: [appId], references: [id])

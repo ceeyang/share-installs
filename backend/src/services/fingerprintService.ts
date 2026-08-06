@@ -188,6 +188,15 @@ export class FingerprintService {
           select: {id: true, customData: true},
         });
         await this.checkQuota(projectId);
+        await this.recordConversion(
+          clickEvent?.id ?? null,
+          clipboardResult.inviteCode,
+          platform,
+          signals,
+          'clipboard',
+          1.0,
+          projectId,
+        );
         logger.info({inviteCode: clipboardResult.inviteCode}, 'Clipboard fallback match');
         return {
           clickEventId: clickEvent?.id ?? null,
@@ -259,6 +268,7 @@ export class FingerprintService {
     const clickEvents = await this.prisma.clickEvent.findMany({
       where: {
         id: {in: recentIds},
+        resolved: false,
         ...(projectId ? {appId: projectId} : {}),
       },
       orderBy: {createdAt: 'desc'},
@@ -328,6 +338,13 @@ export class FingerprintService {
       installedAt: new Date(),
     };
     await this.prisma.conversion.create({data: convData});
+
+    // Mark the click consumed so the same click cannot be attributed to a
+    // second install (double-crediting rewards / double-counting quota).
+    await this.prisma.clickEvent.update({
+      where: {id: clickEventId},
+      data: {resolved: true, resolvedAt: new Date()},
+    });
   }
 
   /**
@@ -339,7 +356,7 @@ export class FingerprintService {
     const events = await this.prisma.clickEvent.findMany({
       where: {
         inviteCode,
-        ...(projectId ? {projectId} : {}),
+        ...(projectId ? {appId: projectId} : {}),
       },
       orderBy: {createdAt: 'desc'},
       take: 10,
