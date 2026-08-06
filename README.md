@@ -40,12 +40,9 @@ share-installs/
 │   ├── ios/          # Swift SDK (SPM + CocoaPods)
 │   ├── android/      # Kotlin SDK
 │   └── js/           # TypeScript Web SDK (npm)
-├── landing/          # Next.js invite landing page (optional)
+├── dashboard/        # Vue 3 SaaS console (apps, API keys, stats, billing)
 ├── docs/             # Architecture & integration guides
-├── infrastructure/
-│   ├── k8s/          # Kubernetes manifests
-│   └── terraform/    # AWS infrastructure (EKS + RDS + ElastiCache)
-├── test/             # Local test server & test page
+├── examples/         # Flutter demo app + web demo pages
 ├── docker-compose.yml
 └── docker-compose.dev.yml
 ```
@@ -71,7 +68,7 @@ cp backend/.env.example backend/.env
 # 3. Start all services (backend + PostgreSQL + Redis)
 docker compose up --build
 
-# Backend is now available at http://localhost:3000
+# Backend is now available at http://localhost:6066
 # PostgreSQL at localhost:5432
 # Redis at localhost:6379
 ```
@@ -100,7 +97,7 @@ Environment variables can be set directly in `docker-compose.yml` or via a `.env
 
 ```env
 # .env (project root, loaded by docker compose automatically)
-ADMIN_SECRET=your-secret-here   # protects /v1/projects endpoints; leave empty for open access
+ADMIN_SECRET=your-secret-here   # protects /api/v1/projects endpoints; leave empty for open access
 CORS_ORIGINS=https://yourapp.com
 ```
 
@@ -204,24 +201,10 @@ npm run build
 npm start
 ```
 
-### 5. Kubernetes (Production)
+### 5. Other Platforms
 
-Full AWS infrastructure via Terraform + Kubernetes:
-
-```bash
-# Provision AWS infrastructure
-cd infrastructure/terraform
-terraform init
-terraform apply \
-  -var="environment=production" \
-  -var="domain_name=api.yourapp.com" \
-  -var="db_password=<secure-password>"
-
-# Deploy via GitHub Actions (push to main triggers CD pipeline)
-git push origin main
-```
-
-See [`docs/deployment-k8s.md`](docs/deployment-k8s.md) for detailed steps.
+Bare metal (PM2/systemd) and PaaS (Railway / Render / Fly.io) instructions are
+in [`docs/deployment.md`](docs/deployment.md).
 
 ---
 
@@ -229,29 +212,29 @@ See [`docs/deployment-k8s.md`](docs/deployment-k8s.md) for detailed steps.
 
 > **职责边界**：share-installs 只负责指纹收集和匹配。邀请码由你的系统生成和管理，你传给我们，我们存储并在匹配成功时原样返回。跳转商店、邀请码校验、使用次数统计等逻辑由你的系统处理。
 
-All endpoints are prefixed with `/v1`.
+All endpoints are prefixed with `/api/v1`.
 
 ### Core Endpoints
 
 | Mode | Auth | Method | Path | Description |
 |------|------|--------|------|-------------|
-| 自部署 | 无 | `POST` | `/v1/clicks` | Web SDK：提交浏览器指纹 |
-| 自部署 | 无 | `POST` | `/v1/resolutions` | 移动 SDK：匹配指纹，返回邀请码 |
-| SaaS | `Bearer <api_key>` | `POST` | `/v1/clicks` | 同上，需要 API key |
-| SaaS | `Bearer <api_key>` | `POST` | `/v1/resolutions` | 同上，需要 API key |
-| 两种 | — | `GET` | `/health` | 健康检查 |
+| 自部署 | 无 | `POST` | `/api/v1/clicks` | Web SDK：提交浏览器指纹 |
+| 自部署 | 无 | `POST` | `/api/v1/resolutions` | 移动 SDK：匹配指纹，返回邀请码 |
+| SaaS | `Bearer <api_key>` | `POST` | `/api/v1/clicks` | 同上，需要 API key |
+| SaaS | `Bearer <api_key>` | `POST` | `/api/v1/resolutions` | 同上，需要 API key |
+| 两种 | — | `GET` | `/api/health` | 健康检查 |
 
 ### SaaS 项目管理（需要 `ADMIN_SECRET`）
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/v1/projects` | 创建项目 |
-| `GET` | `/v1/projects` | 列出所有项目 |
-| `POST` | `/v1/projects/:id/api-keys` | 为项目创建 API key |
-| `GET` | `/v1/projects/:id/api-keys` | 列出项目的 API keys |
-| `DELETE` | `/v1/projects/:id/api-keys/:keyId` | 撤销 API key |
+| `POST` | `/api/v1/projects` | 创建项目 |
+| `GET` | `/api/v1/projects` | 列出所有项目 |
+| `POST` | `/api/v1/projects/:id/api-keys` | 为项目创建 API key |
+| `GET` | `/api/v1/projects/:id/api-keys` | 列出项目的 API keys |
+| `DELETE` | `/api/v1/projects/:id/api-keys/:keyId` | 撤销 API key |
 
-### POST /v1/clicks — Web SDK 提交指纹
+### POST /api/v1/clicks — Web SDK 提交指纹
 
 用户点击邀请链接后，由你的落地页调用，记录浏览器指纹。`inviteCode` 是你系统中的邀请码，我们原样存储。
 
@@ -276,7 +259,7 @@ Response:
 { "eventId": "clx..." }
 ```
 
-### POST /v1/resolutions — 移动 SDK 匹配指纹
+### POST /api/v1/resolutions — 移动 SDK 匹配指纹
 
 App 首次启动时调用，匹配成功后返回对应的邀请码。
 
@@ -422,28 +405,18 @@ cd sdk/ios
 swift test
 ```
 
-### Cross-Platform Validation
-A specialized script is available to verify fingerprint consistency across signals from different platforms:
-```bash
-npx ts-node scripts/validate_signals.ts
-```
-
----
-
 ## Local Testing
 
-A lightweight in-memory test server (no PostgreSQL/Redis required) and a test page are included in `test/`:
+In non-production mode the backend serves the demo pages in `examples/`:
 
 ```bash
-# Start the test server
-node test/server.mjs
-# Listening on http://localhost:3000
-
-# Open the test page in your browser
-open test/test.html
+# With the backend running (docker compose up, or npm run dev):
+open http://localhost:6066/examples/web/fingerprint-demo.html   # upload a browser fingerprint
+open http://localhost:6066/examples/web/api-playground.html     # exercise the full API
 ```
 
-The test page lets you upload a browser fingerprint, inspect the result, and simulate a mobile SDK resolve.
+The fingerprint demo lets you submit a click, inspect the stored signals, and
+simulate a mobile SDK resolve. A Flutter demo app lives in `examples/demo_app/`.
 
 ---
 

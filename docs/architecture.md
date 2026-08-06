@@ -4,8 +4,8 @@
 
 share-installs 只做两件事：
 
-1. **Web 端收集指纹**：用户点击邀请链接时，落地页调用 `POST /v1/clicks`，上报浏览器指纹 + 你系统中的邀请码。
-2. **移动端匹配指纹**：App 首次启动时，移动 SDK 调用 `POST /v1/resolutions`，上报设备指纹，后端匹配后返回对应的邀请码。
+1. **Web 端收集指纹**：用户点击邀请链接时，落地页调用 `POST /api/v1/clicks`，上报浏览器指纹 + 你系统中的邀请码。
+2. **移动端匹配指纹**：App 首次启动时，移动 SDK 调用 `POST /api/v1/resolutions`，上报设备指纹，后端匹配后返回对应的邀请码。
 
 **不在我们职责范围内：**
 - 邀请码的生成、存储、校验、过期管理（由你的系统负责）
@@ -22,7 +22,7 @@ share-installs 只做两件事：
         ▼
 落地页 yourdomain.com/invite/ABC123
         │
-        ├─ Web SDK 调用 POST /v1/clicks
+        ├─ Web SDK 调用 POST /api/v1/clicks
         │    { inviteCode: "ABC123", customData: {...}, fingerprint: {...} }
         │    ← 我们存储指纹，返回 { eventId }
         │
@@ -35,13 +35,13 @@ share-installs 只做两件事：
 移动 SDK（iOS/Android）
         │
         ├─ 收集设备指纹信号
-        ├─ 调用 POST /v1/resolutions { channel, fingerprint }
+        ├─ 调用 POST /api/v1/resolutions { channel, fingerprint }
         │
         ▼
 后端匹配策略（按优先级）：
-  1. Clipboard（Android 专属，置信度 1.0）
-  2. 精确哈希匹配（Redis 快速路径，置信度 1.0）
-  3. 模糊相似度匹配（DB 扫描，置信度 ≥ 阈值）
+  1. 精确哈希匹配（Redis 快速路径，置信度 1.0）
+  2. 模糊相似度匹配（DB 扫描，置信度 ≥ 阈值）
+  3. Clipboard 兜底（Android 专属，置信度 1.0）
         │
         ← { matched: true, inviteCode: "ABC123", customData: {...}, meta: { confidence, channel } }
         │
@@ -58,8 +58,8 @@ share-installs 只做两件事：
 用户自己部署整套服务，传入自有域名，无需 API key。
 
 ```
-你的落地页 → POST https://your-backend.com/v1/clicks
-你的移动 SDK → POST https://your-backend.com/v1/resolutions
+你的落地页 → POST https://your-backend.com/api/v1/clicks
+你的移动 SDK → POST https://your-backend.com/api/v1/resolutions
 ```
 
 ### SaaS（MULTI_TENANT=true）
@@ -67,9 +67,9 @@ share-installs 只做两件事：
 使用我们的托管服务，每个项目需要 API key。
 
 ```
-你的落地页 → POST https://api.share-installs.com/v1/clicks
+你的落地页 → POST https://api.share-installs.com/api/v1/clicks
              Authorization: Bearer sk_live_xxx
-你的移动 SDK → POST https://api.share-installs.com/v1/resolutions
+你的移动 SDK → POST https://api.share-installs.com/api/v1/resolutions
               Authorization: Bearer sk_live_xxx
 ```
 
@@ -79,11 +79,11 @@ share-installs 只做两件事：
 
 | Method | Path | 调用方 | 说明 |
 |--------|------|--------|------|
-| `POST` | `/v1/clicks` | Web SDK（落地页） | 采集浏览器指纹 |
-| `POST` | `/v1/resolutions` | 移动 SDK（App） | 匹配指纹，返回邀请码 |
-| `GET` | `/health` | 监控 | 健康检查 |
-| `POST` | `/v1/projects` | 超级管理员 | SaaS：创建项目 |
-| `POST` | `/v1/projects/:id/api-keys` | 超级管理员 | SaaS：颁发 API key |
+| `POST` | `/api/v1/clicks` | Web SDK（落地页） | 采集浏览器指纹 |
+| `POST` | `/api/v1/resolutions` | 移动 SDK（App） | 匹配指纹，返回邀请码 |
+| `GET` | `/api/health` | 监控 | 健康检查 |
+| `POST` | `/api/v1/projects` | 超级管理员 | SaaS：创建项目 |
+| `POST` | `/api/v1/projects/:id/api-keys` | 超级管理员 | SaaS：颁发 API key |
 
 ---
 
@@ -108,8 +108,9 @@ share-installs 只做两件事：
 ## 数据模型
 
 ```
-Project（SaaS 模式）
-  └── ApiKey
+User（SaaS 模式，GitHub OAuth / 邮箱登录）
+  └── App
+        └── ApiKey
 
 ClickEvent（核心）
   ├── inviteCode   string  你系统中的邀请码，原样存储
@@ -135,7 +136,7 @@ Conversion（匹配记录）
 │  │  (Web SDK)  │  │  (Swift SDK) │  │(Kotlin SDK) │ │
 │  └──────┬──────┘  └──────┬───────┘  └──────┬──────┘ │
 └─────────┼────────────────┼─────────────────┼─────────┘
-          │ POST /v1/clicks │ POST /v1/resolutions
+          │ POST /api/v1/clicks │ POST /api/v1/resolutions
           └────────────────┴─────────────────┘
                            │
           ┌────────────────▼────────────────┐
@@ -155,6 +156,6 @@ Conversion（匹配记录）
 - API key 以 SHA-256 哈希存储，明文只在创建时返回一次
 - 管理端点（项目管理）由 `ADMIN_SECRET` 保护
 - 自部署模式：公开端点无需鉴权（适合私有网络）
-- Redis 和 DB 限流防止暴力攻击（`/v1/resolutions` 单独限流：10次/分钟）
+- Redis 和 DB 限流防止暴力攻击（`/api/v1/resolutions` 单独限流：10次/分钟）
 - 指纹哈希不可逆（SHA-256）
 - 容器以非 root 用户运行

@@ -1,5 +1,7 @@
 # Android SDK Integration Guide
 
+> 📘 完整文档见 [docs/docs/sdk/android.md](../docs/sdk/android.md)。本页为快速集成摘要。
+
 ## Requirements
 
 - Android 5.0+ (minSdk 21)
@@ -8,134 +10,89 @@
 
 ## Installation
 
-### Gradle (GitHub Packages)
-
-Add to `settings.gradle.kts`:
 ```kotlin
-dependencyResolutionManagement {
-    repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/yourorg/share-installs")
-            credentials {
-                username = providers.gradleProperty("gpr.user").orNull
-                    ?: System.getenv("GITHUB_ACTOR")
-                password = providers.gradleProperty("gpr.token").orNull
-                    ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
-}
-```
-
-Add to your app's `build.gradle.kts`:
-```kotlin
+// app/build.gradle.kts
 dependencies {
-    implementation("com.share-installs:share-installs-sdk-android:1.0.0")
+    implementation("io.github.share-installs:sdk-android:0.0.4")
 }
 ```
+
+Published to Maven Central (and GitHub Packages as a mirror).
 
 ## Setup
 
-### 1. Configure Android App Links
-
-In `AndroidManifest.xml`, add to your launcher Activity:
-```xml
-<intent-filter android:autoVerify="true">
-    <action android:name="android.intent.action.VIEW"/>
-    <category android:name="android.intent.category.DEFAULT"/>
-    <category android:name="android.intent.category.BROWSABLE"/>
-    <data
-        android:scheme="https"
-        android:host="yourdomain.com"
-        android:pathPrefix="/invite/"/>
-</intent-filter>
-```
-
-Ensure your backend serves `/.well-known/assetlinks.json`:
-```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.yourapp",
-    "sha256_cert_fingerprints": ["YOUR:CERT:FINGERPRINT"]
-  }
-}]
-```
-
-### 2. Initialize in Application
+### 1. Initialize in Application
 
 ```kotlin
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        // SaaS (hosted service): pass your API key
         ShareInstallsSDK.configure(
-            context = applicationContext,
+            context = this,
             configuration = ShareInstallsConfiguration(
-                apiBaseUrl = "https://api.yourdomain.com",
+                apiKey = "sk_live_xxx",
                 debugLoggingEnabled = BuildConfig.DEBUG
             )
         )
+
+        // Self-hosted: pass your backend URL instead (note the /api suffix)
+        // ShareInstallsSDK.configure(
+        //     context = this,
+        //     configuration = ShareInstallsConfiguration(
+        //         apiBaseUrl = "https://your-server.com/api"
+        //     )
+        // )
     }
 }
 ```
 
-### 3. Handle Deep Links in Activity
+`apiKey` 和 `apiBaseUrl` 至少填写一项，否则初始化抛出 `IllegalArgumentException`。
+
+### 2. Resolve Deferred Invite (once, after registration/onboarding)
 
 ```kotlin
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Handle direct deep link (app already installed)
-        intent?.let { handleIncomingIntent(it) }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        intent?.let { handleIncomingIntent(it) }
-    }
-
-    private fun handleIncomingIntent(intent: Intent) {
-        val code = ShareInstallsSDK.instance.handleIntent(intent)
-        if (code != null) {
-            viewModel.applyInviteCode(code)
-        }
-    }
-}
-```
-
-### 4. Resolve Deferred Invite
-
-```kotlin
-// In ViewModel or after user registration:
+// In a ViewModel, after user registration:
 viewModelScope.launch {
     try {
         val invite = ShareInstallsSDK.instance.resolveDeferred()
         if (invite != null) {
-            Log.d("Invite", "Code: ${invite.code}, confidence: ${invite.confidence}")
+            Log.d("Invite", "code=${invite.code} confidence=${invite.confidence} channel=${invite.channel}")
             applyInviteCode(invite.code)
+        } else {
+            // No match — user did not arrive via an invite link
         }
-    } catch (e: ShareInstallsResolveException.AlreadyResolved) {
-        // Skip — already resolved in a previous session
-    } catch (e: Exception) {
+    } catch (e: ShareInstallsResolveException) {
+        // SdkNotConfigured — configure() was not called
         Log.e("Invite", "Resolution failed", e)
+    } catch (e: Exception) {
+        Log.e("Invite", "Network error", e)
     }
 }
 ```
 
-### 5. Handle Account Reset
+Notes:
 
-```kotlin
-fun onUserLoggedOut() {
-    ShareInstallsSDK.instance.clearCachedResolution()
-}
-```
+- **Must be called from the foreground** — clipboard access on Android 10+
+  requires the app to be visible. The SDK checks the clipboard first
+  (`SHAREINSTALLS:<code>`, confidence 1.0), then falls back to fingerprint
+  matching.
+- `resolveDeferred()` returns `null` when no match is found.
+- The SDK does not persist the result — deduplicate calls in your own logic
+  (e.g. store a flag after the first successful resolution).
+
+### 3. Direct deep links (app already installed)
+
+The SDK only handles **deferred** resolution. When the app is already
+installed, handle App Links yourself (intent filters + `assetlinks.json`) and
+parse the invite code from your landing-page URL — no SDK call needed.
 
 ## ProGuard / R8
 
-Add to `proguard-rules.pro`:
+The SDK ships with its own consumer rules; no extra configuration is required.
+If you shrink aggressively, keep the SDK's models:
+
 ```
 -keep class com.invitesdk.** { *; }
--keepattributes *Annotation*
 ```

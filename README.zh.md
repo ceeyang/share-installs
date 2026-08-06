@@ -40,12 +40,9 @@ share-installs/
 │   ├── ios/          # Swift SDK（SPM + CocoaPods）
 │   ├── android/      # Kotlin SDK
 │   └── js/           # TypeScript Web SDK（npm）
-├── landing/          # Next.js 邀请落地页（可选）
+├── dashboard/        # Vue 3 SaaS 控制台（应用、API key、统计、计费）
 ├── docs/             # 架构说明 & 集成指南
-├── infrastructure/
-│   ├── k8s/          # Kubernetes 配置
-│   └── terraform/    # AWS 基础设施（EKS + RDS + ElastiCache）
-├── test/             # 本地测试服务器 & 测试页面
+├── examples/         # Flutter 示例 App + Web 演示页面
 ├── docker-compose.yml
 └── docker-compose.dev.yml
 ```
@@ -70,7 +67,7 @@ cp backend/.env.example backend/.env
 # 3. 启动所有服务（后端 + PostgreSQL + Redis）
 docker compose up --build
 
-# 后端地址：http://localhost:3000
+# 后端地址：http://localhost:6066
 # PostgreSQL：localhost:5432
 # Redis：localhost:6379
 ```
@@ -99,7 +96,7 @@ docker compose down -v     # 停止 + 删除所有数据卷
 
 ```env
 # .env（项目根目录）
-ADMIN_SECRET=your-secret-here   # 保护 /v1/projects 端点；留空则不鉴权
+ADMIN_SECRET=your-secret-here   # 保护 /api/v1/projects 端点；留空则不鉴权
 CORS_ORIGINS=https://yourapp.com
 ```
 
@@ -201,24 +198,10 @@ npm run build
 npm start
 ```
 
-### 5. Kubernetes（生产环境）
+### 5. 其他平台
 
-通过 Terraform + Kubernetes 部署完整 AWS 基础设施：
-
-```bash
-# 初始化 AWS 基础设施
-cd infrastructure/terraform
-terraform init
-terraform apply \
-  -var="environment=production" \
-  -var="domain_name=api.yourapp.com" \
-  -var="db_password=<secure-password>"
-
-# 通过 GitHub Actions 部署（push 到 main 自动触发 CD）
-git push origin main
-```
-
-详细步骤见 [`docs/deployment.md`](docs/deployment.md)。
+裸机部署（PM2 / systemd）和 PaaS（Railway / Render / Fly.io）步骤见
+[`docs/deployment.md`](docs/deployment.md)。
 
 ---
 
@@ -232,23 +215,23 @@ git push origin main
 
 | 模式 | 鉴权 | 方法 | 路径 | 说明 |
 |------|------|------|------|------|
-| 自部署 | 无 | `POST` | `/v1/clicks` | Web SDK：提交浏览器指纹 |
-| 自部署 | 无 | `POST` | `/v1/resolutions` | 移动 SDK：匹配指纹，返回邀请码 |
-| SaaS | `Bearer <api_key>` | `POST` | `/v1/clicks` | 同上，需要 API key |
-| SaaS | `Bearer <api_key>` | `POST` | `/v1/resolutions` | 同上，需要 API key |
-| 两种 | — | `GET` | `/health` | 健康检查 |
+| 自部署 | 无 | `POST` | `/api/v1/clicks` | Web SDK：提交浏览器指纹 |
+| 自部署 | 无 | `POST` | `/api/v1/resolutions` | 移动 SDK：匹配指纹，返回邀请码 |
+| SaaS | `Bearer <api_key>` | `POST` | `/api/v1/clicks` | 同上，需要 API key |
+| SaaS | `Bearer <api_key>` | `POST` | `/api/v1/resolutions` | 同上，需要 API key |
+| 两种 | — | `GET` | `/api/health` | 健康检查 |
 
 ### SaaS 项目管理（需要 `ADMIN_SECRET`）
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `POST` | `/v1/projects` | 创建项目 |
-| `GET` | `/v1/projects` | 列出所有项目 |
-| `POST` | `/v1/projects/:id/api-keys` | 为项目创建 API key |
-| `GET` | `/v1/projects/:id/api-keys` | 列出项目的 API keys |
-| `DELETE` | `/v1/projects/:id/api-keys/:keyId` | 撤销 API key |
+| `POST` | `/api/v1/projects` | 创建项目 |
+| `GET` | `/api/v1/projects` | 列出所有项目 |
+| `POST` | `/api/v1/projects/:id/api-keys` | 为项目创建 API key |
+| `GET` | `/api/v1/projects/:id/api-keys` | 列出项目的 API keys |
+| `DELETE` | `/api/v1/projects/:id/api-keys/:keyId` | 撤销 API key |
 
-### POST /v1/clicks — Web SDK 提交指纹
+### POST /api/v1/clicks — Web SDK 提交指纹
 
 用户点击邀请链接后，由你的落地页调用，记录浏览器指纹。`inviteCode` 是你系统中的邀请码，我们原样存储。
 
@@ -273,7 +256,7 @@ curl -X POST http://localhost:6066/api/v1/clicks \
 { "eventId": "clx..." }
 ```
 
-### POST /v1/resolutions — 移动 SDK 匹配指纹
+### POST /api/v1/resolutions — 移动 SDK 匹配指纹
 
 App 首次启动时调用，匹配成功后返回对应的邀请码。
 
@@ -419,28 +402,19 @@ cd sdk/ios
 swift test
 ```
 
-### 跨平台信号验证
-验证不同平台指纹信号一致性的专用脚本：
-```bash
-npx ts-node scripts/validate_signals.ts
-```
-
----
-
 ## 本地测试
 
-`test/` 目录包含一个轻量内存测试服务器（无需 PostgreSQL/Redis）和测试页面：
+非生产模式下，后端会直接托管 `examples/` 中的演示页面：
 
 ```bash
-# 启动测试服务器
-node test/server.mjs
-# 监听在 http://localhost:3000
+# 先启动后端（docker compose up 或 npm run dev），然后：
+open http://localhost:6066/examples/web/fingerprint-demo.html   # 上传浏览器指纹
+open http://localhost:6066/examples/web/api-playground.html     # 完整 API 演练
 
-# 在浏览器中打开测试页面
-open test/test.html
+# Flutter 示例 App 位于 examples/demo_app/
 ```
 
-测试页面支持上传浏览器指纹、查看响应，以及模拟移动端 SDK resolve 流程。
+指纹演示页支持提交点击、查看存储的信号，以及模拟移动端 SDK resolve 流程。
 
 ---
 

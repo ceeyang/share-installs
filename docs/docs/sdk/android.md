@@ -12,7 +12,7 @@ Kotlin 接入指南。在 App 首次启动时调用 resolve，获取邀请码和
 
 ```kotlin
 dependencies {
-  implementation("com.share-installs:sdk-android:1.0.0")
+  implementation("io.github.share-installs:sdk-android:0.0.4")
 }
 ```
 

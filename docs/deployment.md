@@ -5,39 +5,36 @@
 1. [Docker (Recommended)](#1-docker-recommended)
 2. [Development Mode (Hot-reload)](#2-development-mode)
 3. [Bare Metal](#3-bare-metal)
-4. [Kubernetes / AWS EKS](#4-kubernetes--aws-eks)
-5. [PaaS (Railway / Render / Fly.io)](#5-paas-quick-options)
-6. [Environment Variables Reference](#6-environment-variables-reference)
-7. [Database Migrations](#7-database-migrations)
-8. [Monitoring & Logs](#8-monitoring--logs)
+4. [PaaS (Railway / Render / Fly.io)](#4-paas-quick-options)
+5. [Environment Variables Reference](#5-environment-variables-reference)
+6. [Database Migrations](#6-database-migrations)
+7. [Monitoring & Logs](#7-monitoring--logs)
 
 ---
 
 ## 1. Docker (Recommended)
 
-The simplest way to self-host share-installs.
+The simplest way to self-host share-installs. Compose starts Traefik (HTTPS),
+the dashboard, the backend (`:6066`), PostgreSQL 16, and Redis 7.
 
 ### Prerequisites
 
 - Docker Desktop (Mac/Windows) or Docker Engine + Compose plugin (Linux)
-- Ports 3000, 5432, 6379 available on your host
+- Ports 6066, 5432, 6379 available on your host
+  (override with `BACKEND_PORT` / `DB_PORT` / `REDIS_PORT` in `.env`)
 
 ### Steps
 
 ```bash
 # Clone
-git clone https://github.com/yourorg/share-installs.git
+git clone https://github.com/ceeyang/share-installs.git
 cd share-installs
 
 # (Optional) create a .env file in the project root for overrides
 cat > .env <<'EOF'
-INVITE_LINK_BASE_URL=https://yourapp.com
-IOS_APP_STORE_URL=https://apps.apple.com/app/id123456789
-ANDROID_PLAY_STORE_URL=https://play.google.com/store/apps/details?id=com.yourapp
-IOS_URI_SCHEME=yourapp
-ANDROID_URI_SCHEME=yourapp
 CORS_ORIGINS=https://yourapp.com
-# ADMIN_SECRET=change-me-to-a-random-secret
+# ADMIN_SECRET=change-me-to-a-random-secret   # protects /api/v1/projects
+# DB_PORT=15432                               # if 5432 is taken on the host
 EOF
 
 # Start (first run builds the image, ~2-3 min)
@@ -50,12 +47,13 @@ docker compose logs -f backend
 ### Verify
 
 ```bash
-curl http://localhost:3000/health
-# {"status":"ok","version":"1.0.0","uptime":12.3}
+curl http://localhost:6066/api/health
+# {"status":"ok","timestamp":"...","version":"1.0.0","mode":"self-hosted"}
 
-curl -X POST http://localhost:3000/v1/invites \
+curl -X POST http://localhost:6066/api/v1/clicks \
   -H "Content-Type: application/json" \
-  -d '{"inviterId":"test_user"}'
+  -d '{"inviteCode":"TEST123","fingerprint":{"timezone":"Asia/Shanghai"}}'
+# {"eventId":"..."}
 ```
 
 ### Update
@@ -79,13 +77,17 @@ docker compose exec -T db psql -U postgres share_installs < backup.sql
 
 ## 2. Development Mode
 
-Hot-reload via `ts-node-dev`. Source changes restart the server automatically.
+Hot-reload via Docker Compose Watch. Source changes sync into the container
+and restart the server automatically; the dev overlay also bypasses Traefik
+for direct port access.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-`backend/src/` is mounted into the container as read-only. Edit files locally, changes are picked up instantly.
+Edit files under `backend/src/` or `dashboard/src/` locally — changes are
+picked up automatically. `package.json` or Prisma schema changes trigger an
+image rebuild.
 
 ---
 
@@ -157,119 +159,17 @@ systemctl enable --now share-installs
 
 ---
 
-## 4. Kubernetes / AWS EKS
-
-### Infrastructure Provisioning (Terraform)
-
-```bash
-cd infrastructure/terraform
-
-# Initialize
-terraform init -backend-config="bucket=your-tf-state-bucket"
-
-# Plan
-terraform plan \
-  -var="environment=production" \
-  -var="domain_name=api.yourapp.com" \
-  -var="db_password=$(openssl rand -base64 32)"
-
-# Apply (~15 min)
-terraform apply
-```
-
-Resources created:
-- VPC with public/private subnets (2 AZs)
-- EKS cluster with managed node group
-- RDS PostgreSQL 16 (Multi-AZ in production)
-- ElastiCache Redis 7
-- ACM certificate (DNS validated)
-- ECR repositories for Docker images
-
-### Application Deployment
-
-#### Option A: GitHub Actions (CI/CD)
-
-Push to `main` triggers the deploy pipeline (`.github/workflows/deploy-backend.yml`):
-
-1. Build Docker image
-2. Push to ECR
-3. Run `prisma migrate deploy`
-4. `kubectl rollout` with zero-downtime rolling update
-
-Required GitHub Secrets:
-```
-AWS_DEPLOY_ROLE_ARN   # IAM role ARN with ECR + EKS permissions
-DATABASE_URL          # Full PostgreSQL connection string
-```
-
-#### Option B: Manual deploy
-
-```bash
-# Configure kubectl
-aws eks update-kubeconfig --name share-installs-production --region us-east-1
-
-# Create namespace
-kubectl create namespace share-installs
-
-# Create secrets
-kubectl create secret generic share-installs-backend-secrets \
-  --namespace share-installs \
-  --from-literal=database-url="$DATABASE_URL" \
-  --from-literal=redis-url="$REDIS_URL" \
-  --from-literal=admin-secret="$ADMIN_SECRET"
-
-# Create configmap
-kubectl create configmap share-installs-backend-config \
-  --namespace share-installs \
-  --from-literal=invite-link-base-url="https://yourapp.com" \
-  --from-literal=ios-app-store-url="$IOS_APP_STORE_URL" \
-  --from-literal=android-play-store-url="$ANDROID_PLAY_STORE_URL" \
-  --from-literal=ios-uri-scheme="yourapp" \
-  --from-literal=android-uri-scheme="yourapp" \
-  --from-literal=cors-origins="https://yourapp.com"
-
-# Deploy
-kubectl apply -f infrastructure/k8s/backend-deployment.yaml
-kubectl apply -f infrastructure/k8s/ingress.yaml
-
-# Check status
-kubectl get pods -n share-installs
-kubectl get ingress -n share-installs
-```
-
-### Scaling
-
-The HPA (Horizontal Pod Autoscaler) is pre-configured:
-- Min replicas: 2
-- Max replicas: 10
-- Scale up at: 70% CPU or 80% memory
-
-Manual override:
-```bash
-kubectl scale deployment share-installs-backend \
-  --replicas=4 -n share-installs
-```
-
----
-
-## 5. PaaS Quick Options
+## 4. PaaS Quick Options
 
 ### Railway
 
 ```bash
-# Install Railway CLI
 npm install -g @railway/cli
 railway login
-
-# Create project
 railway init
 
-# Add PostgreSQL and Redis plugins in Railway dashboard, then:
-railway variables set \
-  INVITE_LINK_BASE_URL=https://yourapp.com \
-  IOS_APP_STORE_URL=https://apps.apple.com/app/id123 \
-  ANDROID_PLAY_STORE_URL=https://play.google.com/store/...
-
+# Add PostgreSQL and Redis plugins in the Railway dashboard, then:
+railway variables set CORS_ORIGINS=https://yourapp.com
 railway up --detach
 ```
 
@@ -291,41 +191,62 @@ fly postgres create --name share-installs-db
 fly redis create --name share-installs-redis
 fly secrets set \
   DATABASE_URL="<postgres-connection-string>" \
-  REDIS_URL="<redis-connection-string>" \
-  INVITE_LINK_BASE_URL="https://yourapp.com"
+  REDIS_URL="<redis-connection-string>"
 fly deploy
 ```
 
 ---
 
-## 6. Environment Variables Reference
+## 5. Environment Variables Reference
+
+Matches `backend/src/config/index.ts` (see `backend/.env.example`).
+
+### Core
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | ✓ | — | `postgresql://user:pass@host:5432/share_installs` |
-| `REDIS_URL` | ✓ | — | `redis://host:6379` or `rediss://` (TLS) |
-| `INVITE_LINK_BASE_URL` | ✓ | — | Base URL of invite landing pages |
-| `PORT` | — | `3000` | HTTP listen port |
+| `REDIS_URL` | — | `redis://localhost:6379` | `redis://` or `rediss://` (TLS) |
+| `PORT` | — | `3000` (compose sets `6066`) | HTTP listen port |
 | `HOST` | — | `0.0.0.0` | HTTP bind address |
-| `NODE_ENV` | — | `production` | `development` / `production` |
-| `ADMIN_SECRET` | — | _(open)_ | Protects `POST/GET/DELETE /v1/invites` |
-| `IOS_APP_STORE_URL` | — | — | Returned to iOS users after click |
-| `ANDROID_PLAY_STORE_URL` | — | — | Returned to Android users after click |
-| `IOS_URI_SCHEME` | — | — | e.g. `yourapp` → `yourapp://invite?code=X` |
-| `ANDROID_URI_SCHEME` | — | — | Same for Android |
+| `NODE_ENV` | — | `development` | `development` / `test` / `production` |
 | `CORS_ORIGINS` | — | `*` | Comma-separated allowed origins |
-| `LOG_LEVEL` | — | `info` | `fatal`/`error`/`warn`/`info`/`debug`/`trace` |
-| `INVITE_CODE_LENGTH` | — | `8` | Length of generated invite codes |
-| `INVITE_DEFAULT_TTL_DAYS` | — | `30` | Default invite expiry |
-| `FINGERPRINT_MATCH_THRESHOLD` | — | `0.85` | Fuzzy match min score (0.0–1.0) |
-| `FINGERPRINT_MATCH_TTL_HOURS` | — | `24` | Click event match window |
+| `LOG_LEVEL` | — | `info` | `trace`…`fatal` |
 | `REDIS_KEY_PREFIX` | — | `si:` | Prefix for all Redis keys |
-| `RATE_LIMIT_WINDOW_MS` | — | `900000` | Rate limit window (15 min) |
+
+### Deployment mode & auth
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MULTI_TENANT` | — | `false` | `false` = self-hosted (no API keys); `true` = SaaS (API keys required) |
+| `ADMIN_SECRET` | — | _(open)_ | Protects `/api/v1/projects` admin endpoints |
+| `JWT_SECRET` | SaaS | — | Signs dashboard session cookies |
+| `ENCRYPTION_KEY` | SaaS | — | Encrypts stored API keys for one-time reveal |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | SaaS | — | GitHub OAuth login |
+| `FRONTEND_URL` | SaaS | `http://localhost:5173` | Dashboard URL (OAuth redirects, Paddle success page) |
+
+### Fingerprint matching & rate limiting
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `FINGERPRINT_MATCH_TTL_HOURS` | — | `72` | Click-event match window |
+| `FINGERPRINT_MATCH_THRESHOLD` | — | `0.75` | Fuzzy match min score (0.0–1.0) |
+| `RATE_LIMIT_WINDOW_MS` | — | `900000` | Global rate-limit window (15 min) |
 | `RATE_LIMIT_MAX_REQUESTS` | — | `100` | Max requests per window |
+| `RATE_LIMIT_RESOLVE_MAX` | — | `10` | `/api/v1/resolutions` per-minute cap (self-hosted) |
+
+### Billing (SaaS only, Paddle)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `PADDLE_ENV` | — | `sandbox` | `sandbox` / `production` (independent of NODE_ENV) |
+| `PADDLE_API_KEY` | SaaS billing | — | Paddle Billing API key |
+| `PADDLE_WEBHOOK_SECRET` | SaaS billing | — | Verifies `/api/webhooks/paddle` signatures |
+| `PADDLE_PRICE_PRO_MONTHLY` 等 4 个 | SaaS billing | placeholders | Paddle price IDs for PRO/UNLIMITED × monthly/yearly |
 
 ---
 
-## 7. Database Migrations
+## 6. Database Migrations
 
 Migrations are managed by Prisma Migrate.
 
@@ -338,9 +259,6 @@ npx prisma migrate dev --name add_new_field
 
 # View migration status
 npx prisma migrate status
-
-# Reset database (DESTRUCTIVE – dev only)
-npx prisma migrate reset
 ```
 
 In Docker, migrations run automatically at container startup via `CMD`:
@@ -350,7 +268,7 @@ CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
 
 ---
 
-## 8. Monitoring & Logs
+## 7. Monitoring & Logs
 
 ### Structured Logs (Pino)
 
@@ -363,34 +281,26 @@ npm run dev | npx pino-pretty
 In production, logs are readable by any log aggregator (Datadog, CloudWatch, Loki, etc.):
 
 ```bash
-# Docker
 docker compose logs -f backend | jq '.'
-
-# Kubernetes
-kubectl logs -f deployment/share-installs-backend -n share-installs | jq '.'
 ```
+
+Every response carries an `X-Request-Id` header (propagated from the incoming
+request or generated) for cross-service correlation.
 
 ### Health Check
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:6066/api/health
 ```
 
 Response:
 ```json
 {
   "status": "ok",
+  "timestamp": "2026-01-15T10:30:00.000Z",
   "version": "1.0.0",
-  "uptime": 3600.2,
-  "timestamp": "2024-01-15T10:30:00.000Z"
+  "mode": "self-hosted"
 }
 ```
 
-### Metrics
-
-Prometheus scrape is pre-annotated in the Kubernetes manifests:
-```yaml
-prometheus.io/scrape: "true"
-prometheus.io/port: "3000"
-prometheus.io/path: "/metrics"
-```
+The Docker Compose healthcheck polls this endpoint every 30 s.
