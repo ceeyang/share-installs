@@ -638,3 +638,7 @@ sdk/flutter
 docs/superpowers
 .env.*
 !.env.example
+graphify-out/
+.playwright-cli/
+**/.gradle/
+sdk/android/local.properties
