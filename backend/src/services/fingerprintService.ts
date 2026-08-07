@@ -146,7 +146,7 @@ export class FingerprintService {
     if (exactResult) {
       await this.checkQuota(projectId);
       await this.recordConversion(exactResult.clickEventId, exactResult.inviteCode, platform, signals, 'exact', 1.0, projectId);
-      
+
       // Delete the cache entry after match to prevent re-use
       const redisKey = `${config.REDIS_KEY_PREFIX}click:${fingerprint}`;
       await this.redis.del(redisKey);

@@ -109,7 +109,7 @@ export function createRouter(prisma: PrismaClient, redis: Redis): Router {
   // Until then, returns 501 so the middleware chain is verified.
   const dashboard = Router();
   dashboard.use(requireSession);
-  
+
   // User profile & Quota
   dashboard.get('/me', dashboardController.getMe);
   dashboard.patch('/me', dashboardController.updateMe);

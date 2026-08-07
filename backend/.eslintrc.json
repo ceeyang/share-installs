@@ -1,0 +1,42 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint-config-google",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "rules": {
+    "require-jsdoc": "off",
+    "valid-jsdoc": "off",
+    "max-len": ["warn", {"code": 120}],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-unused-vars": ["error", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}],
+    "indent": "off",
+    "object-curly-spacing": "off",
+    "arrow-parens": "off",
+    "comma-dangle": "off",
+    "operator-linebreak": "off",
+    "new-cap": "off",
+    "brace-style": "off",
+    "block-spacing": "off",
+    "no-multi-spaces": "off",
+    "quotes": "off",
+    "padded-blocks": "off",
+    "semi": ["error", "always"],
+    "no-trailing-spaces": "error"
+  },
+  "ignorePatterns": ["dist/", "node_modules/", "*.js"]
+}

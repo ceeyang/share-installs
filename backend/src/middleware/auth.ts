@@ -61,7 +61,7 @@ function extractBearerToken(req: Request): string | null {
  */
 export function adminAuth(req: Request, res: Response, next: NextFunction): void {
   const adminSecret = config.ADMIN_SECRET;
-  
+
   if (!adminSecret) {
     next();
     return;

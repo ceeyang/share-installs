@@ -125,7 +125,7 @@ export const deleteApp = async (req: Request, res: Response) => {
   try {
     const userId = requireUserId(req);
     const { appId } = req.params;
-    
+
     // Ownership check
     const app = await prisma.app.findFirst({ where: { id: appId, userId } });
     if (!app) return res.status(404).json({ error: 'App not found' });
@@ -143,7 +143,7 @@ export const listApiKeys = async (req: Request, res: Response) => {
   try {
     const userId = requireUserId(req);
     const { appId } = req.params;
-    
+
     const app = await prisma.app.findFirst({ where: { id: appId, userId } });
     if (!app) return res.status(404).json({ error: 'App not found' });
 
@@ -243,20 +243,20 @@ export const getAppStats = async (req: Request, res: Response) => {
       where: { appId },
       _count: { matchChannel: true }
     });
-    
+
     // Map aggregation
     const byChannel: Record<string, number> = { exact: 0, fuzzy: 0, clipboard: 0 };
     channels.forEach(ch => {
       if (ch.matchChannel) byChannel[ch.matchChannel] = ch._count.matchChannel;
     });
-    
+
     // For iOS and Android platform split
     const platforms = await prisma.conversion.groupBy({
       by: ['platform'],
       where: { appId },
       _count: { platform: true }
     });
-    
+
     const byPlatform: Record<string, number> = { ios: 0, android: 0 };
     platforms.forEach(pl => {
       if (pl.platform === 'IOS') byPlatform['ios'] = pl._count.platform;
