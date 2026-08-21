@@ -1,0 +1,30 @@
+{
+  "config_api_url_input": {
+    "file": "lib/main.dart",
+    "line": 325,
+    "type": "input",
+    "screen": "DemoHomePage",
+    "label": "API Base URL"
+  },
+  "config_submit_btn": {
+    "file": "lib/main.dart",
+    "line": 350,
+    "type": "button",
+    "screen": "DemoHomePage",
+    "label": "Configure SDK"
+  },
+  "actions_resolve_btn": {
+    "file": "lib/main.dart",
+    "line": 402,
+    "type": "button",
+    "screen": "DemoHomePage",
+    "label": "Resolve"
+  },
+  "result_json_text": {
+    "file": "lib/main.dart",
+    "line": 471,
+    "type": "text",
+    "screen": "DemoHomePage",
+    "label": "Resolution Result JSON"
+  }
+}

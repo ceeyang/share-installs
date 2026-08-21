@@ -1,0 +1,30 @@
+# C2 — 无点击时不得凭空匹配（见 .smoke/plan.md）
+# 前置：run_core_smoke.sh 已清空本设备近期未解析的 click，否则会误匹配到上一轮残留
+appId: com.shareinstalls.demo_app
+tags:
+  - mutates-conversions
+  - core
+---
+- launchApp:
+    appId: com.shareinstalls.demo_app
+    clearState: true
+- assertVisible:
+    id: "config_submit_btn"
+- tapOn:
+    id: "config_submit_btn"
+- extendedWaitUntil:
+    visible: ".*SDK configured successfully.*"
+    timeout: 15000
+
+- tapOn:
+    id: "actions_resolve_btn"
+
+# 断言：明确的「无匹配」，而不是随便给一个邀请码
+# 结果卡片渲染在可滚动区域下方 —— 边等边滚，再断言结果本身
+- scrollUntilVisible:
+    element:
+      id: "result_json_text"
+    direction: DOWN
+    timeout: 25000
+- assertVisible: ".*matched.*false.*"
+- assertNotVisible: ".*Invite resolved.*"

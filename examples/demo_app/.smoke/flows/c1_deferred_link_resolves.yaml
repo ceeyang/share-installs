@@ -1,0 +1,40 @@
+# C1 — 同设备点击后可解析（见 .smoke/plan.md）
+# 需要环境变量：PAGE_URL（落地页地址，从设备视角）、API_BASE（后端 /api 地址）、CODE（本轮唯一邀请码）
+appId: com.shareinstalls.demo_app
+tags:
+  - mutates-conversions
+  - core
+---
+# --- Step 1: 在这台设备的浏览器里点邀请链接，真实采集浏览器指纹并上报 ---
+- openLink: "${PAGE_URL}?api=${API_BASE}&code=${CODE}&auto=1"
+# 落地页的成功提示是动态插入的 DOM 节点，Chrome 不把它稳定暴露给无障碍树，
+# 断在那里是断在实现细节上。点击是否上报成功由下面的业务断言反向保证：
+# 没上报成功，App 就不可能解析出这个邀请码。
+- waitForAnimationToEnd:
+    timeout: 8000
+
+# --- Step 2: 同一台设备上冷启动 App，走原生 SDK 解析 ---
+- launchApp:
+    appId: com.shareinstalls.demo_app
+    clearState: true
+- assertVisible:
+    id: "config_submit_btn"
+- tapOn:
+    id: "config_submit_btn"
+# 状态徽标不进无障碍树，改断控制台里那条真实成功日志（同一事实，稳定节点）
+- extendedWaitUntil:
+    visible: ".*SDK configured successfully.*"
+    timeout: 15000
+
+- tapOn:
+    id: "actions_resolve_btn"
+
+# --- 断言：拿回的必须是本轮点的那个邀请码 ---
+# 结果卡片渲染在可滚动区域下方，解析是异步的 —— 边等边滚
+- scrollUntilVisible:
+    element:
+      id: "result_json_text"
+    direction: DOWN
+    timeout: 25000
+- assertVisible: ".*${CODE}.*"
+- assertNotVisible: ".*No matching invite found.*"

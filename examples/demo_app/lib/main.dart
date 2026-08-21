@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,9 +39,22 @@ class DemoHomePage extends StatefulWidget {
 class _DemoHomePageState extends State<DemoHomePage> {
   static const _channel = MethodChannel('com.shareinstalls/sdk');
 
-  final _apiUrlController = TextEditingController(
-    text: 'http://192.168.9.251:6066/api',
-  );
+  // Override without editing this file:
+  //   flutter run --dart-define=SI_API_BASE_URL=http://192.168.1.20:6066/api
+  // Default targets a locally running backend: 10.0.2.2 is the host loopback as
+  // seen from the Android emulator; iOS simulators share the host's network.
+  static const _envApiBaseUrl = String.fromEnvironment('SI_API_BASE_URL');
+
+  // 10.0.2.2 is the host loopback as seen from an Android emulator; iOS
+  // simulators share the host's own network stack, so localhost works there.
+  // On a physical device neither applies — pass the LAN address via dart-define.
+  static String get _defaultApiBaseUrl => _envApiBaseUrl.isNotEmpty
+      ? _envApiBaseUrl
+      : (Platform.isAndroid
+            ? 'http://10.0.2.2:6066/api'
+            : 'http://localhost:6066/api');
+
+  final _apiUrlController = TextEditingController(text: _defaultApiBaseUrl);
   final _apiKeyController = TextEditingController();
 
   bool _isConfigured = false;
@@ -307,7 +321,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
+            Semantics(
+              identifier: 'config_api_url_input',
+              child: TextField(
               controller: _apiUrlController,
               decoration: const InputDecoration(
                 labelText: 'API Base URL',
@@ -315,6 +331,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.link),
               ),
+            ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -329,10 +346,13 @@ class _DemoHomePageState extends State<DemoHomePage> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: Semantics(
+                identifier: 'config_submit_btn',
+                child: FilledButton.icon(
                 onPressed: _isLoading ? null : _configureSDK,
                 icon: const Icon(Icons.settings),
                 label: Text(_isLoading ? 'Configuring…' : 'Configure SDK'),
+              ),
               ),
             ),
           ],
@@ -378,7 +398,9 @@ class _DemoHomePageState extends State<DemoHomePage> {
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.icon(
+                  child: Semantics(
+                    identifier: 'actions_resolve_btn',
+                    child: FilledButton.icon(
                     onPressed: (!_isConfigured || _isLoading)
                         ? null
                         : _resolveDeferred,
@@ -387,6 +409,7 @@ class _DemoHomePageState extends State<DemoHomePage> {
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                     ),
+                  ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -444,13 +467,16 @@ class _DemoHomePageState extends State<DemoHomePage> {
                 color: Colors.black26,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: SelectableText(
+              child: Semantics(
+                identifier: 'result_json_text',
+                child: SelectableText(
                 _resolveResult ?? '',
                 style: TextStyle(
                   fontFamily: 'monospace',
                   fontSize: 13,
                   color: theme.colorScheme.onSurface.withOpacity(0.9),
                 ),
+              ),
               ),
             ),
           ],

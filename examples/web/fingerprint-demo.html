@@ -107,13 +107,13 @@
     <!-- Testing Configuration -->
     <div class="config-box">
       <label>API Base URL</label>
-      <input type="text" id="apiUrlCtx" value="http://192.168.9.251:6066/api" />
+      <input type="text" id="apiUrlCtx" />
 
       <label>API Key (Optional, for SaaS)</label>
       <input type="text" id="apiKeyCtx" placeholder="sk_live_..." />
 
       <label>Invite Code</label>
-      <input type="text" id="inviteCodeCtx" value="ABC12345" style="margin-bottom: 0;" />
+      <input type="text" id="inviteCodeCtx" style="margin-bottom: 0;" />
     </div>
 
     <!-- When clicking download, we track the click then redirect -->
@@ -124,6 +124,23 @@
   </div>
 
   <script>
+    // Defaults come from where this page is served, so the demo works as-is on a
+    // laptop, an emulator (10.0.2.2) or a phone on the LAN — no editing required.
+    // Query params override them, which is what the smoke harness drives:
+    //   ?api=http://10.0.2.2:6066/api&code=SMOKE123&auto=1
+    (function initFromQuery() {
+      const q = new URLSearchParams(location.search);
+      document.getElementById('apiUrlCtx').value =
+        q.get('api') || `${location.origin}/api`;
+      document.getElementById('apiKeyCtx').value = q.get('key') || '';
+      document.getElementById('inviteCodeCtx').value = q.get('code') || 'ABC12345';
+
+      // auto=1 fires the click without a tap so the flow can be driven from adb/CI.
+      if (q.get('auto') === '1') {
+        window.addEventListener('load', () => onDownloadApp());
+      }
+    })();
+
     async function onDownloadApp() {
       const btn = document.getElementById('downloadBtn');
       const log = document.getElementById('log');

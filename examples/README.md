@@ -37,6 +37,16 @@ Full deferred deep link flow demo:
 http://localhost:6066/examples/web/fingerprint-demo.html
 ```
 
+API Base URL defaults to wherever the page is served from, so it works as-is from a
+laptop, an emulator, or a phone on the LAN. Query params override it — this is also
+how the automated smoke suite drives the page:
+
+```
+?api=http://10.0.2.2:6066/api&code=SMOKE123&auto=1
+```
+
+`auto=1` fires the click on page load instead of waiting for a tap.
+
 ### API Playground (`web/api-playground.html`)
 
 Postman-like API explorer with all available endpoints:
@@ -92,6 +102,21 @@ Flutter UI (Dart)
 ```
 
 ---
+
+## Automated Smoke Suite
+
+The full chain above is covered by a Maestro suite that runs against a real device
+and a real backend — no mocks:
+
+```bash
+cd examples/demo_app
+bash .smoke/run_core_smoke.sh --case all                      # emulator / simulator
+bash .smoke/run_core_smoke.sh --case all --host <your LAN IP> # physical device
+bash .smoke/contract_probe.sh                                 # fingerprint contract only
+```
+
+See [docs/core-flow-testing.md](../docs/core-flow-testing.md) for the signal weights,
+toolchain gotchas, and how to debug "same device, no match".
 
 ## Testing the Full Flow
 
