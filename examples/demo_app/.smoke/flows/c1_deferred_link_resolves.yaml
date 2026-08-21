@@ -17,6 +17,8 @@ tags:
 - launchApp:
     appId: com.shareinstalls.demo_app
     clearState: true
+# 后端地址由安装时的 --dart-define=SI_API_BASE_URL 烧入，用例不碰输入框：
+# Maestro 在 Android 上 inputText 含 "://" 的串会吞字符，eraseText 也不可靠。
 - assertVisible:
     id: "config_submit_btn"
 - tapOn:

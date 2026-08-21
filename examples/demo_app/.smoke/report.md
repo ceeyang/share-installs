@@ -70,6 +70,25 @@ if (match) return match[2] === '0' ? match[1] : `${match[1]}.${match[2]}`;
 **已修复**：落地页默认取 `location.origin`，并支持 `?api=&code=&key=&auto=1`；
 demo app 改为 `--dart-define=SI_API_BASE_URL` 覆盖，缺省按平台取模拟器可达地址。
 
+## 真机尝试（2026-08-21 16:30–16:45，Redmi 220333QAG / Android 13）
+
+设备已连接（`b88b74e7`），但**未能完成真机验证**，卡在两个设备侧限制上，均非代码可修：
+
+1. **MIUI 禁止 adb 安装** —— `adb install` 与 `pm install` 均返回
+   `INSTALL_FAILED_USER_RESTRICTED`。需在 开发者选项 里打开「USB 安装」，且**设备须处于解锁状态**。
+2. **设备锁屏** —— `mDreamingLockscreen=true`，页面不会真正运行、Maestro 也点不到元素。
+
+途中确认了两件对真机测试有用的事实：
+
+- **局域网不通**：手机 `192.168.89.79/23` 与开发机 `192.168.88.233/23` 属同一网段，
+  Mac 防火墙已关、node 监听 `*:6066`，但手机 Chrome 报 `ERR_ADDRESS_UNREACHABLE`
+  —— 路由器开启了 AP 客户端隔离。**已改用 `adb reverse tcp:6066 tcp:6066` 走 USB 隧道绕开**，
+  实测真机 Chrome 能正常加载落地页。runner 在 `--host localhost` 时会自动建立该隧道。
+- 真机参数：Android 13、720×1650 @320dpi（dp 360×825）、时区 `Asia/Phnom_Penh`。
+
+解开上述两项后一条命令即可：
+`bash .smoke/run_core_smoke.sh --case all --device b88b74e7 --host localhost`
+
 ## 自愈记录
 
 四轮修复全部针对**测试自身的技术缺陷**，未放宽任何业务断言：
@@ -79,6 +98,10 @@ demo app 改为 `--dart-define=SI_API_BASE_URL` 覆盖，缺省按平台取模�
    删掉该中间断言，改为等待；点击是否成功由「App 必须拿回该邀请码」这条业务断言反向保证。
 3. `assertVisible` 是整串正则匹配而非子串，带时间戳前缀的控制台日志匹配不上 → 改写为 `.*…*.`。
 4. 结果卡片渲染在可滚动区域下方 → 补 `scrollUntilVisible`。
+5. 为适配真机，一度让用例往输入框里填后端地址，连踩三个坑：`hideKeyboard` 在 Android 上
+   发的是 BACK 键会退出 App；`eraseText` 清不干净；`inputText` 含 `://` 的串会吞字符
+   （实测填成 `http://10.0.2.2:6066/api6066/api`）。**最终放弃输入框**，改由安装时
+   `--dart-define=SI_API_BASE_URL` 烧入，用例只负责点击 —— 少 4 个易碎步骤。
 
 业务断言自始至终未变：C1 断言「拿回的邀请码等于本轮点击的那个」，C2 断言「明确返回未匹配」。
 

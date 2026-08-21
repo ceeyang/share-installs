@@ -11,6 +11,7 @@ CASE=all
 HOST=10.0.2.2          # Android 模拟器看到的宿主 loopback
 BACKEND=http://localhost:6066   # 本脚本自己访问后端用的地址
 DEVICE=""
+SKIP_BUILD=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -18,6 +19,7 @@ while [[ $# -gt 0 ]]; do
     --host)    HOST="$2"; shift 2;;
     --backend) BACKEND="$2"; shift 2;;
     --device)  DEVICE="--device $2"; shift 2;;
+    --skip-build) SKIP_BUILD=1; shift;;
     *) echo "unknown arg: $1" >&2; exit 2;;
   esac
 done
@@ -29,9 +31,37 @@ API_BASE="http://$HOST:6066/api"
 PAGE_URL="http://$HOST:6066/examples/web/fingerprint-demo.html"
 FLOWS="$(cd "$(dirname "$0")" && pwd)/flows"
 
+ADB="adb"
+[[ -n "$DEVICE" ]] && ADB="adb -s ${DEVICE#--device }"
+
 echo "== 前置检查 =="
 curl -sf "$BACKEND/api/health" >/dev/null || { echo "后端未运行：$BACKEND"; exit 1; }
+
+# 真机常见情况：路由器开了 AP 客户端隔离，手机和开发机同网段也互相不可达。
+# --host localhost 时用 USB 反向隧道绕开，不依赖局域网。
+if [[ "$HOST" == "localhost" || "$HOST" == "127.0.0.1" ]]; then
+  $ADB reverse tcp:6066 tcp:6066 >/dev/null || { echo "adb reverse 失败"; exit 1; }
+  echo "已建立 USB 反向隧道 tcp:6066"
+fi
+
+# 设备必须解锁且保持唤醒，否则页面不会真正运行、Maestro 也点不到东西
+$ADB shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+if $ADB shell dumpsys window 2>/dev/null | grep -q "mDreamingLockscreen=true"; then
+  echo "❌ 设备处于锁屏状态，请先解锁（建议同时开启开发者选项里的「不锁定屏幕」）"; exit 1
+fi
+
 echo "backend ok, 设备侧地址 = $API_BASE"
+
+# 后端地址在构建期烧进 App —— 用例不去点输入框（Maestro 输入 "://" 会吞字符）。
+if [[ "$SKIP_BUILD" == "0" ]]; then
+  echo "== 构建并安装（SI_API_BASE_URL=${API_BASE}）=="
+  ( cd "$(dirname "$0")/.." && flutter build apk --debug --dart-define=SI_API_BASE_URL="$API_BASE" >/dev/null ) \
+    || { echo "构建失败"; exit 1; }
+  APK="$(cd "$(dirname "$0")/.." && pwd)/build/app/outputs/flutter-apk/app-debug.apk"
+  $ADB install -r -d "$APK" >/dev/null 2>&1 || {
+    echo "❌ 安装失败。小米/红米需在 开发者选项 里打开「USB 安装」；设备也必须处于解锁状态。"; exit 1; }
+  echo "installed"
+fi
 
 # 清空本设备近期未解析的 click，否则 C2 会匹配到上一轮残留，C1 也可能匹配到旧码。
 reset_clicks () {
@@ -45,6 +75,8 @@ reset_clicks () {
 
 run_c1 () {
   reset_clicks
+  # Chrome 会把已有标签页拉到前台而不重新导航，导致 auto=1 不触发。强制冷启。
+  $ADB shell am force-stop com.android.chrome >/dev/null 2>&1 || true
   local code="SMOKE$(date +%H%M%S)"
   echo "== C1 同设备点击后可解析 (code=$code) =="
   maestro test $DEVICE "$FLOWS/c1_deferred_link_resolves.yaml" \
@@ -61,7 +93,7 @@ run_c1 () {
 run_c2 () {
   reset_clicks
   echo "== C2 无点击不得凭空匹配 =="
-  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml"
+  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml" --env API_BASE="$API_BASE"
   echo "✅ C2 通过"
 }
 

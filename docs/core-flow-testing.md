@@ -63,12 +63,30 @@ bash .smoke/contract_probe.sh                                   # 只验跨端�
 
 ### 真机步骤
 
-1. 手机与开发机连同一 WiFi，确认 `curl http://<LAN IP>:6066/api/health` 在手机浏览器里能通。
-2. 装 App：
+**先过设备侧三关**，否则一定失败：
+
+1. **解锁并保持唤醒** —— 锁屏状态下页面不会真正运行，Maestro 也点不到元素。
+   建议开 开发者选项 →「不锁定屏幕」（充电时常亮）。
+2. **允许 adb 安装** —— 小米/红米（MIUI）默认禁止，报 `INSTALL_FAILED_USER_RESTRICTED`。
+   开发者选项 →「USB 安装」；部分机型还需「USB 调试（安全设置）」，且要求登录小米账号。
+3. **确认设备能连到后端** —— 在手机浏览器里打开 `http://<LAN IP>:6066/api/health`。
+   打不开且确认同一 WiFi、Mac 防火墙已关，多半是**路由器的 AP 客户端隔离**。
+   此时不必折腾路由器，走 USB 隧道即可：
+
    ```bash
-   flutter run -d <device-id> --dart-define=SI_API_BASE_URL=http://<LAN IP>:6066/api
+   adb -s <device-id> reverse tcp:6066 tcp:6066
+   bash .smoke/run_core_smoke.sh --case all --device <device-id> --host localhost
    ```
-3. 跑冒烟：`bash .smoke/run_core_smoke.sh --case all --host <LAN IP>`。
+   runner 在 `--host localhost` 时会自动建立该隧道。
+
+局域网可达时直接：
+
+```bash
+bash .smoke/run_core_smoke.sh --case all --device <device-id> --host <LAN IP>
+```
+
+runner 每轮会按 `--host` 重新构建并安装（`--dart-define=SI_API_BASE_URL`），
+地址已在包里，用例不碰输入框。已装好且地址没变时可加 `--skip-build` 省掉构建。
 
 手工验证走同样的路径：手机浏览器打开落地页 → 填邀请码 → Download App →
 打开 demo app → Configure SDK → Resolve，结果卡片应显示同一个邀请码。
@@ -85,6 +103,9 @@ bash .smoke/contract_probe.sh                                   # 只验跨端�
 - **Chrome 首次运行向导**会挡住落地页，模拟器上手动过一次即可，之后持久生效。
 - **明文 HTTP**：Android 侧靠 `usesCleartextTraffic="true"`，iOS 侧靠
   `NSAllowsLocalNetworking`，demo app 两者都已配置。
+- **Maestro 输入不可靠**：Android 上 `hideKeyboard` 发的是 BACK 键（会退出 App）、
+  `eraseText` 清不干净、`inputText` 会吞掉 `://` 这类字符。需要给 App 传参一律走
+  `--dart-define`，别让用例去填输入框。
 - **非安全上下文**：http 下 `navigator.userAgentData` 不可用，web 侧 `osVersion` 恒为空。
   这会**掩盖** D1 类缺陷 —— http 下测试全绿不代表 https 生产环境没问题。
 
