@@ -95,9 +95,34 @@ languages=["en-US","en","zh-CN"]  hardware_concurrency=8  touch_points=5
 —— 与生产 https 落地页行为一致。模拟器走 `10.0.2.2` 属非安全上下文，UA-CH 不可用，
 才恰好绕开这个坑。**这解释了为什么模拟器全绿而真机会坏。**
 
-### ⛔ 原生 SDK 侧未能在真机上跑（设备限制，非代码问题）
+### ✅ 原生 SDK 侧已在真机上跑通 —— 但只靠剪贴板兜底
 
-卡在 MIUI 的安全限制上，**根因单一**：开发者选项里的
+`bash .smoke/run_device_adb.sh b88b74e7` 连续两轮通过，App 确实拿回了本轮邀请码。
+**但每一轮的 `match_channel` 都是 `clipboard`：**
+
+```
+ invite_code | match_channel | confidence | platform
+-------------+---------------+------------+----------
+ REAL181556  | clipboard     |          1 | ANDROID
+ REAL181003  | clipboard     |          1 | ANDROID
+```
+
+后端的解析顺序是 exact → fuzzy → clipboard（`fingerprintService.resolveInvite`）。
+落到第三通道，等于**前两条指纹通道在真机上双双失败** —— 这就是 D1 在真机上的实证。
+链路之所以没断，是因为 JS SDK 在 `trackClick` 时把 `SHAREINSTALLS:<code>` 写进了剪贴板
+（`sdk/js/src/InviteSDK.ts:135`），Android 专有的兜底通道救了场。
+
+**这件事的严重性被剪贴板掩盖了：**
+
+- **iOS 没有 clipboard 通道**（`resolveInvite` 里该分支限定 `platform === 'android'`），
+  所以同样的 osVersion 差异会让 iOS 直接归因失败，无任何兜底。
+- 剪贴板本身很脆：用户在"点链接"和"装完打开 App"之间复制过任何东西，兜底即失效。
+- 也就是说，**Android 目前的归因成功率实际上取决于用户有没有复制别的东西**，
+  而不是取决于指纹匹配 —— 这与设计意图不符。
+
+### 之前遇到的设备限制（已全部解决）
+
+MIUI 的安全限制，**根因单一**：开发者选项里的
 **「USB 调试（安全设置）」未开启**，它同时管两件事：
 
 1. **模拟输入被拒** —— `adb shell input tap/swipe` 报
@@ -106,7 +131,12 @@ languages=["en-US","en","zh-CN"]  hardware_concurrency=8  touch_points=5
    实测每装一个新包都需要在设备上手动点确认，而 Maestro 每次会话结束会卸载自己的驱动包，
    于是每轮都要人工介入一次，无法无人值守。
 
-该开关**必须登录小米账号才能打开**，无可靠绕过方案（社区专门讨论过）。
+该开关**必须登录小米账号才能打开**，无可靠绕过方案（社区专门讨论过）。开启后模拟输入恢复正常。
+
+**Maestro 在本机型上仍不可用**：它每次会话结束会卸载自己的驱动包，下轮重装即"新装应用"，
+被 MIUI 的安装确认框拦下（勾了 "Remember my choice" 也不解决）。因此真机改走
+`.smoke/run_device_adb.sh` —— 纯 adb（`am start` / `input tap` / `uiautomator dump`），
+零驱动包依赖。模拟器仍走 Maestro（`run_core_smoke.sh`）。
 参考：<https://medium.com/@kierantully/theres-an-extra-security-restriction-on-xiaomi-miui-devices-which-prevents-usb-debugging-assigning-54e5f8719ac7>
 、<https://medium.com/@resulcay/how-to-fix-the-install-failed-user-restricted-error-on-miui-hyperos-7675156e40d4>
 
