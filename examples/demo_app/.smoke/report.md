@@ -70,15 +70,47 @@ if (match) return match[2] === '0' ? match[1] : `${match[1]}.${match[2]}`;
 **已修复**：落地页默认取 `location.origin`，并支持 `?api=&code=&key=&auto=1`；
 demo app 改为 `--dart-define=SI_API_BASE_URL` 覆盖，缺省按平台取模拟器可达地址。
 
-## 真机尝试（2026-08-21 16:30–16:45，Redmi 220333QAG / Android 13）
+## 真机结果（2026-08-21，Redmi 220333QAG「fog」/ Android 13 / MIUI）
 
-设备已连接（`b88b74e7`），但**未能完成真机验证**，卡在两个设备侧限制上，均非代码可修：
+### ✅ 浏览器侧已在真机上验证通过
 
-1. **MIUI 禁止 adb 安装** —— `adb install` 与 `pm install` 均返回
-   `INSTALL_FAILED_USER_RESTRICTED`。需在 开发者选项 里打开「USB 安装」，且**设备须处于解锁状态**。
-2. **设备锁屏** —— `mDreamingLockscreen=true`，页面不会真正运行、Maestro 也点不到元素。
+真机 Chrome 打开落地页、采集真实指纹并成功上报（`/v1/debug/clicks` 可查）。实际信号：
 
-途中确认了两件对真机测试有用的事实：
+```
+os_version=13.0  screen=360x825  pixel_ratio=2.0  timezone=Asia/Phnom_Penh
+languages=["en-US","en","zh-CN"]  hardware_concurrency=8  touch_points=5
+```
+
+### ❗ D1 在这台真机上被真实触发
+
+真机上报的 `os_version` 是 **`13.0`**，而本机 `Build.VERSION.RELEASE` 是 **`13`** —— 正是 D1。
+用这台设备的真实数值重放（`.smoke/contract_probe.sh` 同款请求）：
+
+| 场景 | web osVersion | 结果 |
+|---|---|---|
+| 真机实况 | `"13.0"` | **`matched:false`** |
+| 对照：osVersion 置空 | `null` | `matched:true` fuzzy 1.0 |
+
+**关键**：真机走的是 `http://localhost`（USB 隧道），浏览器视其为**安全上下文**，UA-CH 可用
+—— 与生产 https 落地页行为一致。模拟器走 `10.0.2.2` 属非安全上下文，UA-CH 不可用，
+才恰好绕开这个坑。**这解释了为什么模拟器全绿而真机会坏。**
+
+### ⛔ 原生 SDK 侧未能在真机上跑（设备限制，非代码问题）
+
+卡在 MIUI 的安全限制上，**根因单一**：开发者选项里的
+**「USB 调试（安全设置）」未开启**，它同时管两件事：
+
+1. **模拟输入被拒** —— `adb shell input tap/swipe` 报
+   `SecurityException: Injecting input events requires ... INJECT_EVENTS permission`；
+2. **adb 安装被拒** —— `INSTALL_FAILED_USER_RESTRICTED`。MIUI 弹不出授权框时会当作用户拒绝；
+   实测每装一个新包都需要在设备上手动点确认，而 Maestro 每次会话结束会卸载自己的驱动包，
+   于是每轮都要人工介入一次，无法无人值守。
+
+该开关**必须登录小米账号才能打开**，无可靠绕过方案（社区专门讨论过）。
+参考：<https://medium.com/@kierantully/theres-an-extra-security-restriction-on-xiaomi-miui-devices-which-prevents-usb-debugging-assigning-54e5f8719ac7>
+、<https://medium.com/@resulcay/how-to-fix-the-install-failed-user-restricted-error-on-miui-hyperos-7675156e40d4>
+
+其余已解决的真机适配（均已固化进 runner）：
 
 - **局域网不通**：手机 `192.168.89.79/23` 与开发机 `192.168.88.233/23` 属同一网段，
   Mac 防火墙已关、node 监听 `*:6066`，但手机 Chrome 报 `ERR_ADDRESS_UNREACHABLE`
@@ -86,7 +118,11 @@ demo app 改为 `--dart-define=SI_API_BASE_URL` 覆盖，缺省按平台取模�
   实测真机 Chrome 能正常加载落地页。runner 在 `--host localhost` 时会自动建立该隧道。
 - 真机参数：Android 13、720×1650 @320dpi（dp 360×825）、时区 `Asia/Phnom_Penh`。
 
-解开上述两项后一条命令即可：
+另有两项 MIUI 行为已在 runner 里绕开：Maestro 的 `launchApp` 在 MIUI 上返回成功但
+App 起不来（改由 adb `am start` 冷启并轮询前台）；`am start -d` 的 URL 必须在**设备侧**
+加引号，否则 `&` 被设备 shell 截断、`code`/`auto` 参数丢失，页面静默使用默认邀请码。
+
+开启「USB 调试（安全设置）」后一条命令即可：
 `bash .smoke/run_core_smoke.sh --case all --device b88b74e7 --host localhost`
 
 ## 自愈记录

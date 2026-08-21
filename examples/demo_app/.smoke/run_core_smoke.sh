@@ -64,6 +64,23 @@ if [[ "$SKIP_BUILD" == "0" ]]; then
 fi
 
 # 清空本设备近期未解析的 click，否则 C2 会匹配到上一轮残留，C1 也可能匹配到旧码。
+# Maestro 每次会话结束会卸载自己的驱动包，下一轮用 `adb install` 重装。
+# 小米/红米（MIUI）拒绝 adb install（INSTALL_FAILED_USER_RESTRICTED），但设备 shell 里的
+# `pm install` 是通的 —— 所以每轮跑之前先用后者把驱动装好，Maestro 就不必自己装了。
+MAESTRO_JAR="$HOME/.maestro/lib/maestro-client.jar"
+DRIVER_DIR="$HOME/.maestro/driver-apks"
+ensure_maestro_driver () {
+  [[ -f "$MAESTRO_JAR" ]] || return 0
+  if [[ ! -f "$DRIVER_DIR/maestro-app.apk" ]]; then
+    mkdir -p "$DRIVER_DIR"
+    unzip -o -q "$MAESTRO_JAR" maestro-app.apk maestro-server.apk -d "$DRIVER_DIR" || return 0
+  fi
+  for f in maestro-app.apk maestro-server.apk; do
+    ${ADB} push "$DRIVER_DIR/$f" "/data/local/tmp/$f" >/dev/null 2>&1 || return 0
+    ${ADB} shell pm install -r -t "/data/local/tmp/$f" >/dev/null 2>&1 || true
+  done
+}
+
 reset_clicks () {
   echo "-- 重置未解析 click --"
   docker exec share-installs-db-1 psql -U postgres -d share_installs -qtAc \
@@ -74,6 +91,7 @@ reset_clicks () {
 }
 
 run_c1 () {
+  ensure_maestro_driver
   reset_clicks
   # Chrome 会把已有标签页拉到前台而不重新导航，导致 auto=1 不触发。强制冷启。
   $ADB shell am force-stop com.android.chrome >/dev/null 2>&1 || true
@@ -91,6 +109,7 @@ run_c1 () {
 }
 
 run_c2 () {
+  ensure_maestro_driver
   reset_clicks
   echo "== C2 无点击不得凭空匹配 =="
   maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml" --env API_BASE="$API_BASE"
