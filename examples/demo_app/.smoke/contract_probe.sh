@@ -46,4 +46,5 @@ probe "A. https 落地页（UA-CH 生效）"  "PROBE_A_$$" '"17.0"' '"17"'
 probe "B. 两侧 osVersion 一致"          "PROBE_B_$$" '"17"'   '"17"'
 probe "C. http 落地页（UA-CH 不可用）"  "PROBE_C_$$" 'null'   '"17"'
 echo
-echo "期望：B、C 匹配；A 目前不匹配 —— 见 .smoke/report.md 缺陷 D1。"
+echo "期望：三组全部 matched:true（A、B 走 exact，C 因 web 侧无 osVersion 走 fuzzy）。"
+echo "A 组曾经恒不匹配，即缺陷 D1；见 .smoke/report.md。"

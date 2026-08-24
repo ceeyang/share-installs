@@ -15,6 +15,11 @@ tags:
 # Maestro 在 Android 上 inputText 含 "://" 的串会吞字符，eraseText 也不可靠。
 # 等 App 真正到前台（MIUI 上 launchApp 返回后界面可能还没切过来），
 # 再滚动定位按钮 —— 真机 720x1650 比模拟器矮，Configure 按钮不在首屏。
+# runner 已用 adb 冷启动本 App（MIUI 会拦截 Maestro 驱动进程发起的**启动**）。
+# 这里只是把已存在的任务拉回前台 —— Maestro 起会话时会把自己的驱动顶到前台，
+# 模拟器上本 App 首绘要 5s+，不拉回来就会被挤到后台甚至回收。
+- launchApp:
+    appId: com.shareinstalls.demo_app
 - extendedWaitUntil:
     visible: ".*ShareInstalls Demo.*"
     timeout: 25000

@@ -3,10 +3,22 @@
 被测对象：**延迟深链归因主链路** —— 浏览器指纹上报 → 后端匹配 → 原生 SDK `resolveDeferred()`。
 真实运行，无 mock：真 Chrome、真 JS SDK、真 Kotlin SDK、真 Express 后端、真 Postgres/Redis。
 
-## 结论
+## 结论（2026-08-24 更新）
 
-**Android 主链路在明文 http 落地页下通过；但存在一个会在生产 https 落地页下必然触发的
-匹配缺陷（D1），未修复前不建议按现状发版。** iOS 未跑（本机无真机，模拟器不适用，见覆盖缺口）。
+**Android 主链路已在真机上通过，且走的是最优的 exact 通道（confidence 1.0），连续两轮稳定。**
+测试过程中发现的两个缺陷 D1、D3 均已修复并回归验证。iOS 仍未验证（见覆盖缺口）。
+
+| 缺陷 | 状态 |
+|---|---|
+| D1 osVersion 硬否决 | ✅ 已修（`normalizeOsVersion` 归一到 `major.minor`） |
+| D3 Android 屏幕尺寸少了系统栏 | ✅ 已修（改用整块屏幕尺寸） |
+| D2 示例写死他人 LAN IP | ✅ 已修 |
+
+真机验证的通道演进，每一步都是一个缺陷被摘掉：
+
+```
+clipboard（兜底救场）→ fuzzy 0.7596（贴着阈值）→ exact 1.0（修完 D1+D3）
+```
 
 ## 环境
 
@@ -52,16 +64,31 @@
 **涉及文件**：`backend/src/utils/fingerprint.ts`（`normalizeOsVersion`）、
 `sdk/js/src/FingerprintCollector.ts`（`collectAndroidOsVersion`）。
 
-**建议修法**（未实施，属存量代码，待决策）：在 `normalizeOsVersion()` 里把零 minor 归一，
-使 `"17.0"` 与 `"17"` 归一化到同一个值：
+**修复**（2026-08-24 已实施）：`normalizeOsVersion()` 统一归一到 `<major>.<minor>`，
+缺失的 minor 补 0，使 `"13"` 与 `"13.0"` 相等。选补齐而非剥离尾零，是因为规范形式对称、
+不必给 `match[2]` 加特例。回归测试见 `backend/tests/unit/fingerprint.test.ts`
+（用真机实测数值锁定）。
 
-```ts
-const match = version.match(/(\d+)[._](\d+)/);
-if (match) return match[2] === '0' ? match[1] : `${match[1]}.${match[2]}`;
-```
+**上线注意**：该改动同时改变 `computeFingerprint` 的哈希，发布窗口期内的存量 click
+会失去 exact 命中，但仍可退到 fuzzy，属可接受。
 
-修完 A/B/C 三组应全部匹配。因为它同时改变 `computeFingerprint` 的哈希，
-上线时窗口期内的存量 click 会失去 exact 命中，但仍可走 fuzzy，属可接受。
+### D3（严重）Android 上报的屏幕尺寸少了系统栏，屏幕信号恒不匹配
+
+**现象**：修完 D1 后真机仍不走 exact，fuzzy 只有 **0.7596**，贴着 0.75 阈值。
+
+**根因**：同一台设备，浏览器 `screen.height` = **825**，原生上报 **754**，差 71dp
+（= 状态栏 + 导航栏）。`FingerprintCollector.kt` 用 `context.resources.displayMetrics`，
+它给的是**应用窗口**尺寸，API 30+ 上不含系统栏；而浏览器的 `screen.height` 是整块屏幕。
+原注释称此举是为了规避 "currentWindowMetrics 的系统栏包含 bug"，判断刚好反了。
+
+屏幕是跨端信号里权重最高的一项（25 分）：它恒不匹配 → exact 哈希永远打不中，
+fuzzy 掉到 79/104 = 0.7596。**只要再有任何一个信号漂移（换 WiFi、语言不同），
+就会跌破阈值、归因彻底失败** —— 这正是"同一台设备却匹配不上"投诉的来源。
+
+**修复**：改用整块屏幕尺寸 —— API 30+ 走 `WindowManager.maximumWindowMetrics.bounds`，
+更低版本回退 `Display.getRealMetrics()`。修复后原生上报 360×825，与浏览器完全一致。
+
+**验证**：真机连续两轮 `exact` / confidence 1.0。
 
 ### D2（低）示例项目写死了他人的局域网 IP
 
@@ -95,7 +122,7 @@ languages=["en-US","en","zh-CN"]  hardware_concurrency=8  touch_points=5
 —— 与生产 https 落地页行为一致。模拟器走 `10.0.2.2` 属非安全上下文，UA-CH 不可用，
 才恰好绕开这个坑。**这解释了为什么模拟器全绿而真机会坏。**
 
-### ✅ 原生 SDK 侧已在真机上跑通 —— 但只靠剪贴板兜底
+### ✅ 原生 SDK 侧已在真机上跑通（修复前：只靠剪贴板兜底）
 
 `bash .smoke/run_device_adb.sh b88b74e7` 连续两轮通过，App 确实拿回了本轮邀请码。
 **但每一轮的 `match_channel` 都是 `clipboard`：**

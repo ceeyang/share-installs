@@ -90,15 +90,48 @@ reset_clicks () {
   docker exec share-installs-redis-1 redis-cli del 'si:clicks:recent:global' >/dev/null
 }
 
+APP=com.shareinstalls.demo_app
+
+# 冷启动走 adb：MIUI 会拦截 Maestro 驱动进程发起的应用启动（进程根本起不来）。
+# 本 App 与 SDK 均无持久化，force-stop 后再启动即等价于冷启动。
+cold_start_app () {
+  ${ADB} shell am force-stop "$APP" >/dev/null 2>&1 || true
+  ${ADB} shell am start -n "$APP/.MainActivity" >/dev/null 2>&1
+  # 光看进程存在不够：共享模拟器上可能有别的 App 抢占前台。轮询到本 App 真的在前台。
+  for _ in $(seq 1 25); do
+    sleep 1
+    ${ADB} shell dumpsys activity activities 2>/dev/null | grep -q "topResumedActivity.*$APP" && return 0
+  done
+  echo "❌ App 未能进入前台"
+  exit 1
+}
+
+# 在设备自己的浏览器里点邀请链接：真实采集浏览器指纹并上报。
+open_landing_page () {
+  local code="$1"
+  # URL 必须在**设备侧**加引号：& 会被设备 shell 当成后台运算符截断，
+  # code/auto 参数丢失后页面会静默用默认邀请码，症状极具误导性。
+  # 不要 force-stop Chrome：MIUI 之后不再允许 intent 把它拉起。
+  local url="$PAGE_URL?api=$API_BASE&code=$code&auto=1"
+  ${ADB} shell "am start -a android.intent.action.VIEW -n com.android.chrome/com.google.android.apps.chrome.Main --ez create_new_tab true -d '$url'" >/dev/null 2>&1
+  sleep 12
+}
+
 run_c1 () {
   ensure_maestro_driver
   reset_clicks
-  # Chrome 会把已有标签页拉到前台而不重新导航，导致 auto=1 不触发。强制冷启。
-  $ADB shell am force-stop com.android.chrome >/dev/null 2>&1 || true
   local code="SMOKE$(date +%H%M%S)"
   echo "== C1 同设备点击后可解析 (code=$code) =="
-  maestro test $DEVICE "$FLOWS/c1_deferred_link_resolves.yaml" \
-    --env PAGE_URL="$PAGE_URL" --env API_BASE="$API_BASE" --env CODE="$code"
+
+  open_landing_page "$code"
+  # 服务端确认点击真的落库了，否则后面的失败会指向错误的方向
+  local clicks
+  clicks=$(curl -s "$BACKEND/api/v1/debug/clicks/$code" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+  [[ "$clicks" -ge 1 ]] || { echo "❌ 落地页未能上报点击（设备访问不到 $API_BASE？）"; exit 1; }
+  echo "浏览器侧已上报 $clicks 条 click"
+
+  cold_start_app
+  maestro test $DEVICE "$FLOWS/c1_deferred_link_resolves.yaml" --env CODE="$code"
 
   # 服务端复核：UI 绿了还要确认后端真的落了一条归因记录
   local row
@@ -112,7 +145,8 @@ run_c2 () {
   ensure_maestro_driver
   reset_clicks
   echo "== C2 无点击不得凭空匹配 =="
-  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml" --env API_BASE="$API_BASE"
+  cold_start_app
+  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml"
   echo "✅ C2 通过"
 }
 

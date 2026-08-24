@@ -14,7 +14,7 @@ fuzzy 的权重与阈值（`FINGERPRINT_MATCH_THRESHOLD`，默认 0.75）：
 
 | 信号 | 权重 | web 来源 | Android 来源 | iOS 来源 |
 |---|---|---|---|---|
-| 屏幕宽高（±2 容差） | 25 | CSS `screen.width/height` | `dp = px / density` | `UIScreen.bounds` |
+| 屏幕宽高（±2 容差） | 25 | CSS `screen.width/height`（**整块屏幕**） | 整块屏幕 px / density | `UIScreen.bounds` |
 | IP（/24 网段） | 20 | 请求来源 IP | 同 | 同 |
 | **osVersion** | 20 | UA-CH / Safari UA | `Build.VERSION.RELEASE` | `UIDevice.systemVersion` |
 | 时区 | 15 | `Intl` | `TimeZone.getDefault` | `TimeZone.current` |
@@ -24,8 +24,14 @@ fuzzy 的权重与阈值（`FINGERPRINT_MATCH_THRESHOLD`，默认 0.75）：
 **只有两侧都有的信号才计入分母**，所以某一侧缺失不会拉低得分。
 
 > ⚠️ **osVersion 是硬否决**：两侧都有且归一化后不相等，直接判 0 分，其余信号再吻合也没用。
-> 这是排查「同一台设备却匹配不上」时的第一嫌疑人。参见
-> `examples/demo_app/.smoke/report.md` 缺陷 D1。
+> 排查「同一台设备却匹配不上」时，先看它，再看屏幕宽高 —— 这两项各踩过一次真实缺陷
+> （D1 / D3，均已修复，见 `examples/demo_app/.smoke/report.md`）。
+>
+> 两个跨端口径必须一致，改采集逻辑时留意：
+> - **osVersion** 归一到 `<major>.<minor>`，缺失的 minor 补 0
+>   （Android `RELEASE="13"` 与 UA-CH `"13.0"` 是同一个版本）。
+> - **屏幕尺寸**取**整块屏幕**，不是应用窗口。Android 上 `resources.displayMetrics`
+>   在 API 30+ 不含系统栏，会比浏览器矮几十 dp。
 
 **前提**：点链接的浏览器和装 App 的设备必须是同一台。用电脑浏览器点、手机上装 App，
 屏幕尺寸和 IP 都对不上，本来就不该匹配。
