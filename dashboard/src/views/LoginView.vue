@@ -64,6 +64,15 @@
         GitHub
       </button>
     </div>
+
+    <!-- Legal links (required for Paddle domain approval: reviewers must find ToS / privacy / refund policy) -->
+    <p class="mt-4 text-center text-xs text-muted">
+      <a href="https://share-installs.com/terms.html" target="_blank" rel="noopener" class="hover:underline">Terms of Service</a>
+      <span class="mx-1.5">·</span>
+      <a href="https://share-installs.com/privacy.html" target="_blank" rel="noopener" class="hover:underline">Privacy Policy</a>
+      <span class="mx-1.5">·</span>
+      <a href="https://share-installs.com/refund.html" target="_blank" rel="noopener" class="hover:underline">Refund Policy</a>
+    </p>
   </AuthLayout>
 </template>
 
