@@ -1,7 +1,7 @@
 # C2 — 无点击时不得凭空匹配（见 .smoke/plan.md）
 # 前置由 run_core_smoke.sh 完成（**必须通过它运行**）：清空本设备近期未解析的 click，
 # 并用 adb 冷启动 App —— 原因见 c1 用例头部说明。
-appId: com.shareinstalls.demo_app
+appId: ${APP_ID}
 tags:
   - mutates-conversions
   - core
@@ -14,7 +14,7 @@ tags:
 # 这里只是把已存在的任务拉回前台 —— Maestro 起会话时会把自己的驱动顶到前台，
 # 模拟器上本 App 首绘要 5s+，不拉回来就会被挤到后台甚至回收。
 - launchApp:
-    appId: com.shareinstalls.demo_app
+    appId: ${APP_ID}
 - extendedWaitUntil:
     visible: ".*ShareInstalls Demo.*"
     timeout: 25000

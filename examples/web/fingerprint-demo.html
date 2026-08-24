@@ -136,13 +136,23 @@
       document.getElementById('inviteCodeCtx').value = q.get('code') || 'ABC12345';
 
       // auto=1 fires the click without a tap so the flow can be driven from adb/CI.
-      // Only on a real navigation: a restored or reloaded tab would otherwise
-      // re-fire with its old invite code, and since matching prefers the most
-      // recent click, that stale code wins over the one being tested.
+      //
+      // Track each invite code at most once per tab. A restored tab re-runs this
+      // script with its old code, and since matching prefers the most recent
+      // click, that stale code would win over the one under test. sessionStorage
+      // is per-tab, so a restored tab remembers it already reported and stays
+      // quiet, while a tab navigated to a new code still fires. Keying on the
+      // code rather than on the navigation type avoids depending on how each
+      // browser labels a restore — Safari and Chrome do not agree.
       if (q.get('auto') === '1') {
-        const nav = performance.getEntriesByType('navigation')[0];
-        if (!nav || nav.type === 'navigate') {
-          window.addEventListener('load', () => onDownloadApp());
+        const code = document.getElementById('inviteCodeCtx').value;
+        let alreadyTracked = null;
+        try { alreadyTracked = sessionStorage.getItem('si-auto-tracked'); } catch { /* private mode */ }
+        if (alreadyTracked !== code) {
+          window.addEventListener('load', () => {
+            try { sessionStorage.setItem('si-auto-tracked', code); } catch { /* private mode */ }
+            onDownloadApp();
+          });
         }
       }
     })();

@@ -1,6 +1,6 @@
 import Flutter
 import UIKit
-import ShareInstalls
+import InviteSDK
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {

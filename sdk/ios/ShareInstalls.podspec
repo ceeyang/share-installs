@@ -32,8 +32,16 @@ Pod::Spec.new do |s|
   # CocoaPods and SPM without changing their import statements.
   s.module_name           = 'InviteSDK'
 
-  # Paths are relative to the git repo root (monorepo layout: sdk/ios/ subdir)
-  s.source_files = 'sdk/ios/Sources/InviteSDK/**/*.swift'
+  # The root that these globs resolve against depends on how the pod is consumed:
+  # published from trunk CocoaPods checks out the whole monorepo, so paths start
+  # at the repo root; a local `:path => '.../sdk/ios'` makes that directory the
+  # root instead. List both — a glob that matches nothing is simply ignored, and
+  # a static list survives being serialised to JSON on `pod trunk push`, which a
+  # computed path would not.
+  s.source_files = [
+    'Sources/InviteSDK/**/*.swift',
+    'sdk/ios/Sources/InviteSDK/**/*.swift',
+  ]
 
   # No external dependencies – uses only system frameworks
   s.frameworks = 'Foundation', 'UIKit'
@@ -43,6 +51,9 @@ Pod::Spec.new do |s|
 
   # Exclude test targets from pod installation
   s.test_spec 'Tests' do |ts|
-    ts.source_files = 'sdk/ios/Tests/InviteSDKTests/**/*.swift'
+    ts.source_files = [
+      'Tests/InviteSDKTests/**/*.swift',
+      'sdk/ios/Tests/InviteSDKTests/**/*.swift',
+    ]
   end
 end

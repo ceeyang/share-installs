@@ -6,13 +6,14 @@
 ## 结论（2026-08-24 更新）
 
 **Android 主链路已在真机上通过，且走的是最优的 exact 通道（confidence 1.0），连续两轮稳定。**
-测试过程中发现的两个缺陷 D1、D3 均已修复并回归验证。iOS 仍未验证（见覆盖缺口）。
+测试过程中发现的两个缺陷 D1、D3 均已修复并回归验证。iOS 已在模拟器上验证通过，同样是 exact 1.0。
 
 | 缺陷 | 状态 |
 |---|---|
 | D1 osVersion 硬否决 | ✅ 已修（`normalizeOsVersion` 归一到 `major.minor`） |
 | D3 Android 屏幕尺寸少了系统栏 | ✅ 已修（改用整块屏幕尺寸） |
 | D2 示例写死他人 LAN IP | ✅ 已修 |
+| D4 iOS 示例无法编译（podspec 路径 + import 名） | ✅ 已修 |
 
 真机验证的通道演进，每一步都是一个缺陷被摘掉：
 
@@ -209,12 +210,41 @@ App 起不来（改由 adb `am start` 冷启并轮询前台）；`am start -d` �
 
 业务断言自始至终未变：C1 断言「拿回的邀请码等于本轮点击的那个」，C2 断言「明确返回未匹配」。
 
+## iOS 模拟器验证（2026-08-24，iPhone 17 / iOS 26.5）
+
+`bash .smoke/run_core_smoke.sh --case all --platform ios --device <UDID>` → **C1/C2 全绿，
+`exact` / confidence 1.0 / platform `IOS`**。两侧信号逐项一致：
+
+| 信号 | 浏览器（Safari） | 原生（InviteSDK） |
+|---|---|---|
+| screen | 402×874 | 402×874 |
+| pixelRatio | 3 | 3 |
+| osVersion | 26.5 | 26.5 |
+| timezone | Asia/Phnom_Penh | Asia/Phnom_Penh |
+| languages | `["en-GB"]` | `["en-KH","zh-Hans-KH"]`（主子标签均为 `en`） |
+
+**更正此前的判断**：先前报告称"iOS 模拟器不适用，因为 Safari UA 的 `iPhone OS` 段是内核版本"。
+实测 UA 为 `iPhone OS 18_7 ... Version/26.5`，而后端的 `resolveController` 本来就会
+在两个主版本不一致时取较大者，得到 `26.5`，与 `UIDevice.systemVersion` 一致。
+**模拟器可用于 iOS 核心链路验证**；真机验证仍有价值（网络路径、真实 IP 段），但非必需。
+
+### D4（严重）iOS 示例从来无法编译
+
+排查 iOS 时发现两处独立问题，任一都会让 `flutter build ios` 失败：
+
+1. **podspec 的 `source_files` 路径基准错**。`ShareInstalls.podspec` 位于 `sdk/ios/`，
+   而 glob 写作 `sdk/ios/Sources/InviteSDK/**/*.swift`。该写法只对**从 trunk 安装**成立
+   （CocoaPods 检出整个 monorepo，根是仓库根）；本地 `:path => '../../../sdk/ios'` 时
+   根就是 `sdk/ios/`，解析成 `sdk/ios/sdk/ios/Sources/...`，匹配到 0 个文件。
+   证据：修复前 Pods 工程引用的 swift 文件数为 0，且未生成 modulemap。
+   **修法**：列出两个 glob 同时兼容两种消费方式 —— 不匹配的 glob 会被忽略，且静态列表
+   能在 `pod trunk push` 序列化成 JSON 后存活（动态计算路径不行）。
+2. **`AppDelegate.swift` 的 import 名错**：podspec 声明 `s.module_name = 'InviteSDK'`
+   （与 SPM target 对齐），代码却写 `import ShareInstalls`。**修法**：改为 `import InviteSDK`。
+
 ## 覆盖缺口
 
-- **iOS 未跑**：本机未连真机。iOS 模拟器不适用 —— 后端从 Safari UA 取 iOS 版本，
-  模拟器的 `iPhone OS` 段是内核版本、`Version/` 段才是公开版本，与原生
-  `UIDevice.systemVersion` 常有 minor 差异，会踩到同一个 osVersion 硬否决。
-  iOS 必须真机验证。
+- **iOS 真机未跑**（模拟器已通过）：真机能额外覆盖真实 IP 段与蜂窝网络路径。
 - **真机未跑**：`adb devices` 与 `xcrun devicectl list devices` 均无实体设备。
   接上设备后执行：`bash .smoke/run_core_smoke.sh --case all --host <本机LAN IP>`。
 - **clipboard 通道**（Android 第三通道）未纳入，需落地页配合写剪贴板。

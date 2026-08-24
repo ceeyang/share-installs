@@ -6,7 +6,7 @@
 #   2. force-stop + am start 冷启动本 App
 # 为什么不写在 flow 里：MIUI 会拦截 Maestro 驱动进程发起的应用启动（launchApp 返回成功
 # 但进程起不来），而 adb 直接 am start 是通的。
-appId: com.shareinstalls.demo_app
+appId: ${APP_ID}
 tags:
   - mutates-conversions
   - core
@@ -19,7 +19,7 @@ tags:
 # 这里只是把已存在的任务拉回前台 —— Maestro 起会话时会把自己的驱动顶到前台，
 # 模拟器上本 App 首绘要 5s+，不拉回来就会被挤到后台甚至回收。
 - launchApp:
-    appId: com.shareinstalls.demo_app
+    appId: ${APP_ID}
 - extendedWaitUntil:
     visible: ".*ShareInstalls Demo.*"
     timeout: 25000

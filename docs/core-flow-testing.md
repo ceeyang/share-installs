@@ -81,10 +81,25 @@ curl http://localhost:6066/api/health
 
 ```bash
 cd examples/demo_app
-bash .smoke/run_core_smoke.sh --case all                        # 模拟器
-bash .smoke/run_core_smoke.sh --case all --host 192.168.1.20    # 真机，填本机 LAN IP
-bash .smoke/contract_probe.sh                                   # 只验跨端指纹契约，不碰 UI
+
+# Android 模拟器（Maestro）
+bash .smoke/run_core_smoke.sh --case all --device emulator-5554
+
+# iOS 模拟器（Maestro）—— 模拟器与宿主共用网络栈，无需隧道
+bash .smoke/run_core_smoke.sh --case all --platform ios --device <UDID>
+
+# Android 真机（纯 adb，不依赖 Maestro 驱动包）
+bash .smoke/run_device_adb.sh <device-serial>
+
+# 只验跨端指纹契约，不碰 UI
+bash .smoke/contract_probe.sh
 ```
+
+三端共用 `.smoke/flows/` 里的同一份用例（`appId` 由 `--env APP_ID` 注入），
+选择器统一走 `Semantics(identifier:)` —— 它在 Android 上映射成 `resource-id`、
+在 iOS 上映射成 `accessibilityIdentifier`，埋一次三端通用。
+
+**iOS 首次构建**需要 CocoaPods（`brew install cocoapods`），且要先 `pod install`。
 
 用例定义在 `.smoke/plan.md`，选择器契约在 `.smoke/registry.json`
 （定位一律走 `Semantics(identifier:)`，不用文案匹配）。

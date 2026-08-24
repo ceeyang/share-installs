@@ -8,14 +8,16 @@
 set -euo pipefail
 
 CASE=all
-HOST=10.0.2.2          # Android 模拟器看到的宿主 loopback
+PLATFORM=android
+HOST=""                # 留空则按平台取默认值
 BACKEND=http://localhost:6066   # 本脚本自己访问后端用的地址
 DEVICE=""
 SKIP_BUILD=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --case)    CASE="$2"; shift 2;;
+    --case)     CASE="$2"; shift 2;;
+    --platform) PLATFORM="$2"; shift 2;;
     --host)    HOST="$2"; shift 2;;
     --backend) BACKEND="$2"; shift 2;;
     --device)  DEVICE="--device $2"; shift 2;;
@@ -27,26 +29,39 @@ done
 : "${JAVA_HOME:=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
 export JAVA_HOME PATH="$JAVA_HOME/bin:$PATH"
 
+# 设备视角下的宿主地址：Android 模拟器走 10.0.2.2 这个 loopback 别名；
+# iOS 模拟器与宿主共用网络栈，localhost 直通。
+if [[ -z "$HOST" ]]; then
+  [[ "$PLATFORM" == "ios" ]] && HOST=localhost || HOST=10.0.2.2
+fi
+if [[ "$PLATFORM" == "ios" ]]; then
+  APP_ID=com.shareinstalls.demoApp
+else
+  APP_ID=com.shareinstalls.demo_app
+fi
+export APP_ID
+
 API_BASE="http://$HOST:6066/api"
 PAGE_URL="http://$HOST:6066/examples/web/fingerprint-demo.html"
 FLOWS="$(cd "$(dirname "$0")" && pwd)/flows"
 
 ADB="adb"
 [[ -n "$DEVICE" ]] && ADB="adb -s ${DEVICE#--device }"
+SIM="${DEVICE#--device }"
 
 echo "== 前置检查 =="
 curl -sf "$BACKEND/api/health" >/dev/null || { echo "后端未运行：$BACKEND"; exit 1; }
 
 # 真机常见情况：路由器开了 AP 客户端隔离，手机和开发机同网段也互相不可达。
 # --host localhost 时用 USB 反向隧道绕开，不依赖局域网。
-if [[ "$HOST" == "localhost" || "$HOST" == "127.0.0.1" ]]; then
+if [[ "$PLATFORM" == "android" && ( "$HOST" == "localhost" || "$HOST" == "127.0.0.1" ) ]]; then
   $ADB reverse tcp:6066 tcp:6066 >/dev/null || { echo "adb reverse 失败"; exit 1; }
   echo "已建立 USB 反向隧道 tcp:6066"
 fi
 
 # 设备必须解锁且保持唤醒，否则页面不会真正运行、Maestro 也点不到东西
-$ADB shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
-if $ADB shell dumpsys window 2>/dev/null | grep -q "mDreamingLockscreen=true"; then
+[[ "$PLATFORM" == "android" ]] && $ADB shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+if [[ "$PLATFORM" == "android" ]] && $ADB shell dumpsys window 2>/dev/null | grep -q "mDreamingLockscreen=true"; then
   echo "❌ 设备处于锁屏状态，请先解锁（建议同时开启开发者选项里的「不锁定屏幕」）"; exit 1
 fi
 
@@ -55,11 +70,18 @@ echo "backend ok, 设备侧地址 = $API_BASE"
 # 后端地址在构建期烧进 App —— 用例不去点输入框（Maestro 输入 "://" 会吞字符）。
 if [[ "$SKIP_BUILD" == "0" ]]; then
   echo "== 构建并安装（SI_API_BASE_URL=${API_BASE}）=="
-  ( cd "$(dirname "$0")/.." && flutter build apk --debug --dart-define=SI_API_BASE_URL="$API_BASE" >/dev/null ) \
-    || { echo "构建失败"; exit 1; }
-  APK="$(cd "$(dirname "$0")/.." && pwd)/build/app/outputs/flutter-apk/app-debug.apk"
-  $ADB install -r -d "$APK" >/dev/null 2>&1 || {
-    echo "❌ 安装失败。小米/红米需在 开发者选项 里打开「USB 安装」；设备也必须处于解锁状态。"; exit 1; }
+  local root; root="$(cd "$(dirname "$0")/.." && pwd)"
+  if [[ "$PLATFORM" == "ios" ]]; then
+    ( cd "$root" && flutter build ios --simulator --debug --dart-define=SI_API_BASE_URL="$API_BASE" >/dev/null ) \
+      || { echo "构建失败"; exit 1; }
+    xcrun simctl install "$SIM" "$root/build/ios/iphonesimulator/Runner.app" >/dev/null 2>&1 \
+      || { echo "❌ 安装失败"; exit 1; }
+  else
+    ( cd "$root" && flutter build apk --debug --dart-define=SI_API_BASE_URL="$API_BASE" >/dev/null ) \
+      || { echo "构建失败"; exit 1; }
+    $ADB install -r -d "$root/build/app/outputs/flutter-apk/app-debug.apk" >/dev/null 2>&1 || {
+      echo "❌ 安装失败。小米/红米需在 开发者选项 里打开「USB 安装」；设备也必须处于解锁状态。"; exit 1; }
+  fi
   echo "installed"
 fi
 
@@ -70,6 +92,7 @@ fi
 MAESTRO_JAR="$HOME/.maestro/lib/maestro-client.jar"
 DRIVER_DIR="$HOME/.maestro/driver-apks"
 ensure_maestro_driver () {
+  [[ "$PLATFORM" == "android" ]] || return 0   # iOS 用 XCTest 驱动，不装 APK
   [[ -f "$MAESTRO_JAR" ]] || return 0
   if [[ ! -f "$DRIVER_DIR/maestro-app.apk" ]]; then
     mkdir -p "$DRIVER_DIR"
@@ -95,6 +118,12 @@ APP=com.shareinstalls.demo_app
 # 冷启动走 adb：MIUI 会拦截 Maestro 驱动进程发起的应用启动（进程根本起不来）。
 # 本 App 与 SDK 均无持久化，force-stop 后再启动即等价于冷启动。
 cold_start_app () {
+  if [[ "$PLATFORM" == "ios" ]]; then
+    xcrun simctl terminate "$SIM" "$APP_ID" >/dev/null 2>&1 || true
+    xcrun simctl launch "$SIM" "$APP_ID" >/dev/null 2>&1 || { echo "❌ App 未能启动"; exit 1; }
+    sleep 5
+    return 0
+  fi
   ${ADB} shell am force-stop "$APP" >/dev/null 2>&1 || true
   ${ADB} shell am start -n "$APP/.MainActivity" >/dev/null 2>&1
   # 光看进程存在不够：共享模拟器上可能有别的 App 抢占前台。轮询到本 App 真的在前台。
@@ -109,6 +138,12 @@ cold_start_app () {
 # 在设备自己的浏览器里点邀请链接：真实采集浏览器指纹并上报。
 open_landing_page () {
   local code="$1"
+  if [[ "$PLATFORM" == "ios" ]]; then
+    # simctl 是宿主命令，URL 由本机 shell 引用即可，不存在设备侧 & 被截断的问题
+    xcrun simctl openurl "$SIM" "$PAGE_URL?api=$API_BASE&code=$code&auto=1" >/dev/null 2>&1
+    sleep 12
+    return 0
+  fi
   # URL 必须在**设备侧**加引号：& 会被设备 shell 当成后台运算符截断，
   # code/auto 参数丢失后页面会静默用默认邀请码，症状极具误导性。
   # 不要 force-stop Chrome：MIUI 之后不再允许 intent 把它拉起。
@@ -131,7 +166,7 @@ run_c1 () {
   echo "浏览器侧已上报 $clicks 条 click"
 
   cold_start_app
-  maestro test $DEVICE "$FLOWS/c1_deferred_link_resolves.yaml" --env CODE="$code"
+  maestro test $DEVICE "$FLOWS/c1_deferred_link_resolves.yaml" --env APP_ID="$APP_ID" --env CODE="$code"
 
   # 服务端复核：UI 绿了还要确认后端真的落了一条归因记录
   local row
@@ -146,7 +181,7 @@ run_c2 () {
   reset_clicks
   echo "== C2 无点击不得凭空匹配 =="
   cold_start_app
-  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml"
+  maestro test $DEVICE "$FLOWS/c2_no_click_no_match.yaml" --env APP_ID="$APP_ID"
   echo "✅ C2 通过"
 }
 
