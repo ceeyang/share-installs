@@ -643,3 +643,5 @@ graphify-out/
 .playwright-mcp/
 **/.gradle/
 sdk/android/local.properties
+
+tmp/
