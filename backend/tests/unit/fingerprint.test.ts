@@ -138,3 +138,50 @@ describe('computeSimilarityScore', () => {
     expect(score).toBe(1.0);
   });
 });
+
+/**
+ * Regression tests for the osVersion hard veto.
+ *
+ * Values below are the ones actually observed on a physical Redmi 220333QAG
+ * (Android 13, 720x1650 @320dpi → 360x825 dp): the browser reports "13.0" via
+ * UA-CH while Build.VERSION.RELEASE reports "13". Treating those as different
+ * OS versions vetoed every Android match, so attribution fell through to the
+ * Android-only clipboard fallback and iOS failed outright.
+ */
+describe('osVersion normalisation across web and native sources', () => {
+  // Same physical device, signals as each side actually collects them.
+  const webClick = {
+    ipAddress: '192.168.1.20',
+    timezone: 'Asia/Phnom_Penh',
+    screenWidth: 360,
+    screenHeight: 825,
+    pixelRatio: 2,
+    languages: ['en-US', 'en'],
+    osVersion: '13.0', // UA-CH platformVersion "13.0.0", truncated by the JS SDK
+  };
+  const nativeResolve = {
+    ...webClick,
+    languages: ['en-US'],
+    osVersion: '13', // Build.VERSION.RELEASE
+  };
+
+  it('treats a bare major version as equal to an explicit zero minor', () => {
+    expect(computeSimilarityScore(webClick, nativeResolve)).toBeGreaterThanOrEqual(0.75);
+  });
+
+  it('lets the exact-match hash survive the same disagreement', () => {
+    expect(computeFingerprint(webClick)).toBe(computeFingerprint(nativeResolve));
+  });
+
+  it('still vetoes a genuine OS version difference', () => {
+    expect(computeSimilarityScore(webClick, {...nativeResolve, osVersion: '14'})).toBe(0);
+    expect(computeSimilarityScore(webClick, {...nativeResolve, osVersion: '13.1'})).toBe(0);
+  });
+
+  it('normalises the iOS sources that report the same version differently', () => {
+    // Safari UA gives "iPhone OS 17_0"; UIDevice.systemVersion gives "17.0".
+    expect(computeSimilarityScore({osVersion: 'iPhone OS 17_0'}, {osVersion: '17.0'})).not.toBe(0);
+    expect(computeFingerprint({osVersion: 'iPhone OS 17_0'}))
+      .toBe(computeFingerprint({osVersion: '17.0'}));
+  });
+});

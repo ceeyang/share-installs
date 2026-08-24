@@ -263,10 +263,21 @@ function firstLanguage(langs?: string[]): string {
 
 function normalizeOsVersion(version?: string): string {
   if (!version) return '';
-  // Extract a simple numeric version suffix for cross-UA comparison.
-  // e.g. "iPhone OS 17_2_1" → "17.2", "Android 14" → "14", "iOS 18.2" → "18.2"
-  const match = version.match(/(\d+)[._](\d+)/);
-  if (match) return `${match[1]}.${match[2]}`;
+  // Always canonicalise to "<major>.<minor>", treating a missing minor as zero,
+  // so that a source reporting only a major version compares equal to one that
+  // spells out an explicit zero minor.
+  //
+  // Android is the case that makes this mandatory: Build.VERSION.RELEASE is "13"
+  // while the same device's UA-CH platformVersion is "13.0.0". Comparing "13"
+  // against "13.0" made every Android device look like an OS mismatch, which the
+  // hard veto in computeSimilarityScore turns into a guaranteed non-match — and
+  // the same disagreement changed the computeFingerprint hash, so the exact
+  // channel missed too. Attribution then survived only on the Android-only
+  // clipboard fallback, and iOS had nothing to fall back to.
+  //
+  // e.g. "iPhone OS 17_2_1" → "17.2", "Android 14" → "14.0", "iOS 18.2" → "18.2"
+  const majorMinor = version.match(/(\d+)[._](\d+)/);
+  if (majorMinor) return `${majorMinor[1]}.${Number(majorMinor[2])}`;
   const major = version.match(/(\d+)/);
-  return major ? major[1] : version.toLowerCase().trim();
+  return major ? `${major[1]}.0` : version.toLowerCase().trim();
 }

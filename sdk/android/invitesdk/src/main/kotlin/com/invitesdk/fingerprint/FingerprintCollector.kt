@@ -54,9 +54,9 @@ internal class FingerprintCollector(private val context: Context) {
 
     @Serializable
     data class ScreenInfo(
-        /** Logical dp width — matches CSS window.screen.width (widthPixels / density). */
+        /** Logical dp width — matches CSS window.screen.width (full display px / density). */
         val w: Int,
-        /** Logical dp height — matches CSS window.screen.height (heightPixels / density). */
+        /** Logical dp height — matches CSS window.screen.height (full display px / density). */
         val h: Int,
         /** Screen density (dpi/160), e.g. 3.0 for xxhdpi. Equivalent to devicePixelRatio. */
         val density: Float,
@@ -64,7 +64,7 @@ internal class FingerprintCollector(private val context: Context) {
 
     /** Synchronously collects all available device signals. */
     fun collect(): Signals {
-        val metrics = getDisplayMetrics()
+        val display = getDisplaySize()
         return Signals(
             androidId = getAndroidId(),
             osVersion = Build.VERSION.RELEASE ?: "unknown",
@@ -73,9 +73,9 @@ internal class FingerprintCollector(private val context: Context) {
                 // Convert physical pixels → logical dp to match web CSS px (window.screen.width/height).
                 // Use roundToInt() to match Chrome's Math.round() behavior; .toInt() truncates and
                 // produces values that are 1px off, causing the exact-match fingerprint hash to miss.
-                w = metrics?.let { if (it.density > 0) (it.widthPixels / it.density).roundToInt() else it.widthPixels } ?: 0,
-                h = metrics?.let { if (it.density > 0) (it.heightPixels / it.density).roundToInt() else it.heightPixels } ?: 0,
-                density = metrics?.density ?: 0f,
+                w = display?.let { if (it.density > 0) (it.widthPx / it.density).roundToInt() else it.widthPx } ?: 0,
+                h = display?.let { if (it.density > 0) (it.heightPx / it.density).roundToInt() else it.heightPx } ?: 0,
+                density = display?.density ?: 0f,
             ),
             languages = getLanguages(),
             timezone = try { TimeZone.getDefault().id } catch (_: Exception) { "UTC" },
@@ -154,13 +154,49 @@ internal class FingerprintCollector(private val context: Context) {
         }
     }
 
-    private fun getDisplayMetrics(): DisplayMetrics? {
+    private data class DisplaySize(val widthPx: Int, val heightPx: Int, val density: Float)
+
+    /**
+     * Returns the size of the whole display in physical pixels — what
+     * window.screen.width/height report in the browser, which counts the areas
+     * behind the status and navigation bars.
+     *
+     * resources.displayMetrics must not be used here: it reports the app's own
+     * window, which on API 30+ excludes the system bars. On a 720x1650 device
+     * that comes out 71dp short in height, and screen size carries the highest
+     * weight of any cross-platform signal — the exact-match hash can then never
+     * hit, and the fuzzy score drops to just above the match threshold, so any
+     * further signal drift loses the attribution entirely.
+     */
+    private fun getDisplaySize(): DisplaySize? {
+        val density = try {
+            context.resources.displayMetrics.density
+        } catch (_: Exception) {
+            return null
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                val wm = context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager
+                // The largest window the app could ever occupy is the display itself,
+                // system bar areas included.
+                val bounds = wm?.maximumWindowMetrics?.bounds
+                if (bounds != null && bounds.width() > 0 && bounds.height() > 0) {
+                    return DisplaySize(bounds.width(), bounds.height(), density)
+                }
+            } catch (_: Exception) {
+                // Non-visual contexts can refuse this on some OEM builds; fall through.
+            }
+        }
+
         return try {
-            // Use resources.displayMetrics directly across all API levels.
-            // This reports the same logical pixel space as Chrome's screen.width/height
-            // (physical pixels / density), avoiding the system-bar inclusion bug
-            // that currentWindowMetrics.bounds introduced on API 30+.
-            context.resources.displayMetrics
+            @Suppress("DEPRECATION")
+            val display = (context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)
+                ?.defaultDisplay ?: return null
+            val real = DisplayMetrics()
+            @Suppress("DEPRECATION")
+            display.getRealMetrics(real)
+            DisplaySize(real.widthPixels, real.heightPixels, density)
         } catch (_: Exception) {
             null
         }
