@@ -25,9 +25,13 @@ tags:
     timeout: 20000
 - tapOn:
     id: "config_submit_btn"
-- extendedWaitUntil:
-    visible: ".*SDK configured successfully.*"
-    timeout: 15000
+# 用滚动查找而非原地等待：三键导航比手势导航少一条导航栏高度的可见区，
+# 控制台会被挤出首屏，原地断言就会假失败。
+- scrollUntilVisible:
+    element:
+      text: ".*SDK configured successfully.*"
+    direction: DOWN
+    timeout: 20000
 
 - tapOn:
     id: "actions_resolve_btn"

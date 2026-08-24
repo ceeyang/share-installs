@@ -136,8 +136,14 @@
       document.getElementById('inviteCodeCtx').value = q.get('code') || 'ABC12345';
 
       // auto=1 fires the click without a tap so the flow can be driven from adb/CI.
+      // Only on a real navigation: a restored or reloaded tab would otherwise
+      // re-fire with its old invite code, and since matching prefers the most
+      // recent click, that stale code wins over the one being tested.
       if (q.get('auto') === '1') {
-        window.addEventListener('load', () => onDownloadApp());
+        const nav = performance.getEntriesByType('navigation')[0];
+        if (!nav || nav.type === 'navigate') {
+          window.addEventListener('load', () => onDownloadApp());
+        }
       }
     })();
 
