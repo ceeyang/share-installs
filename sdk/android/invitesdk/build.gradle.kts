@@ -111,7 +111,14 @@ mavenPublishing {
     }
 
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
-    signAllPublications()
+
+    // Sign only when a key is actually available. CI passes one in through
+    // ORG_GRADLE_PROJECT_signingInMemoryKey, so releases stay signed; locally
+    // this lets `publishToMavenLocal` verify the artifact without a GPG setup.
+    // An unsigned artifact still cannot reach Maven Central — it rejects them.
+    if (project.findProperty("signingInMemoryKey") != null) {
+        signAllPublications()
+    }
 }
 
 // GitHub Packages — secondary mirror (used by sdk-android.yml)

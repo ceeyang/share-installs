@@ -44,8 +44,11 @@ flutter {
 }
 
 dependencies {
-    // share-installs Android SDK (resolved via composite build in settings.gradle.kts)
-    implementation("com.invitesystem:invite-sdk-android:1.0.0")
+    // share-installs Android SDK — the real published coordinates, so this file
+    // doubles as the integration snippet users copy. Built from source locally
+    // via the substitution rule in the root build.gradle.kts; pass
+    // -PusePublishedSdk (and -PsdkVersion=x.y.z) to resolve the artifact instead.
+    implementation("io.github.share-installs:sdk-android:${rootProject.findProperty("sdkVersion") ?: "0.0.4"}")
     // Kotlin serialization (required for parsing JsonElement from customData)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }

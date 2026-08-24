@@ -14,7 +14,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "unpkg": "dist/umd/share-installs-sdk.min.js",
   "jsdelivr": "dist/umd/share-installs-sdk.min.js",

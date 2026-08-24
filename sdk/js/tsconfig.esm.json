@@ -4,6 +4,10 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "outDir": "./dist/esm",
+    // Base config uses rootDir "." so that jest and the type check can span
+    // src and tests together. Emitting with that would nest the output under
+    // dist/*/src/, which package.json's entry points do not point at.
+    "rootDir": "src",
     "declaration": false,
     "declarationMap": false
   },
