@@ -421,7 +421,7 @@
       <div id="billing-toggle" class="toggle-switch" role="switch" aria-checked="false" tabindex="0" onclick="toggleBilling()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleBilling()" aria-label="切换年付">
         <div class="knob"></div>
       </div>
-      <span id="label-yearly">按年付费 <span class="save-badge">省约 17%</span></span>
+      <span id="label-yearly">按年付费 <span class="save-badge">最高省 30%</span></span>
     </div>
 
     <div id="pricing-grid" class="pricing-grid">
@@ -461,8 +461,8 @@
       <div class="price-card popular">
         <div class="popular-badge">最受欢迎</div>
         <div class="price-tier">基础版 Pro</div>
-        <div class="price-amount"><span id="pro-price">$4.99</span><span class="price-monthly-label"> / 月</span><span id="pro-yearly-label" style="display:none"> / 年</span></div>
-        <p class="price-yearly" id="pro-yearly-note">约 $4.17/月，按年一次性付清</p>
+        <div class="price-amount"><span id="pro-price">$9</span><span class="price-monthly-label"> / 月</span><span id="pro-yearly-label" style="display:none"> / 年</span></div>
+        <p class="price-yearly" id="pro-yearly-note">约 $6.58/月，按年一次性付清</p>
         <p class="price-desc">适合成长中的产品团队，更高配额与优先支持。</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>每分钟 60 次归因解析</li>
@@ -478,8 +478,8 @@
       <!-- 无限版 Unlimited -->
       <div class="price-card">
         <div class="price-tier">无限版 Unlimited</div>
-        <div class="price-amount"><span id="unl-price">$9.99</span><span class="price-monthly-label"> / 月</span><span id="unl-yearly-label" style="display:none"> / 年</span></div>
-        <p class="price-yearly" id="unl-yearly-note">约 $8.33/月，按年一次性付清</p>
+        <div class="price-amount"><span id="unl-price">$19</span><span class="price-monthly-label"> / 月</span><span id="unl-yearly-label" style="display:none"> / 年</span></div>
+        <p class="price-yearly" id="unl-yearly-note">约 $13.25/月，按年一次性付清</p>
         <p class="price-desc">适合高流量应用和企业级团队，无限扩展，专属支持。</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>每分钟 600 次归因解析</li>
@@ -510,12 +510,12 @@ function toggleBilling() {
   document.getElementById('label-monthly').classList.toggle('active', !isYearly);
   document.getElementById('label-yearly').classList.toggle('active', isYearly);
   // Pro
-  document.getElementById('pro-price').textContent = isYearly ? '$50' : '$4.99';
+  document.getElementById('pro-price').textContent = isYearly ? '$79' : '$9';
   document.getElementById('pro-yearly-label').style.display = isYearly ? '' : 'none';
   document.getElementById('pro-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
   document.querySelectorAll('.price-monthly-label').forEach(function(el){ el.style.display = isYearly ? 'none' : ''; });
   // Unlimited
-  document.getElementById('unl-price').textContent = isYearly ? '$100' : '$9.99';
+  document.getElementById('unl-price').textContent = isYearly ? '$159' : '$19';
   document.getElementById('unl-yearly-label').style.display = isYearly ? '' : 'none';
   document.getElementById('unl-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
 }

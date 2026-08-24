@@ -92,7 +92,7 @@
         <span class="text-sm font-medium" :class="isYearly ? 'text-brand-text' : 'text-muted'">
           Yearly
           <span class="ml-1.5 text-[10px] font-bold bg-brand-cta/15 text-brand-cta px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-            Save ~17%
+            Save up to 30%
           </span>
         </span>
       </div>
@@ -294,8 +294,8 @@ const plans = [
   {
     id: 'PRO' as const,
     name: 'Pro',
-    monthlyPrice: 4.99,
-    yearlyPrice: 50,
+    monthlyPrice: 9,
+    yearlyPrice: 79,
     description: 'For growing product teams that need higher throughput and longer data history.',
     color: 'text-purple-500',
     popular: true,
@@ -312,8 +312,8 @@ const plans = [
   {
     id: 'UNLIMITED' as const,
     name: 'Unlimited',
-    monthlyPrice: 9.99,
-    yearlyPrice: 100,
+    monthlyPrice: 19,
+    yearlyPrice: 159,
     description: 'For high-traffic apps and enterprise teams that need unlimited scale and data history.',
     color: 'text-amber-500',
     popular: false,

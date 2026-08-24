@@ -640,5 +640,6 @@ docs/superpowers
 !.env.example
 graphify-out/
 .playwright-cli/
+.playwright-mcp/
 **/.gradle/
 sdk/android/local.properties

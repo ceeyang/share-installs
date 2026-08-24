@@ -28,12 +28,12 @@ export const PRICE_TO_PLAN: Record<string, {plan: Plan; billing: 'monthly' | 'ye
 
 export const PRICING = {
   PRO: {
-    monthly: {priceId: config.PADDLE_PRICE_PRO_MONTHLY, amount: 4.99},
-    yearly: {priceId: config.PADDLE_PRICE_PRO_YEARLY, amount: 50},
+    monthly: {priceId: config.PADDLE_PRICE_PRO_MONTHLY, amount: 9},
+    yearly: {priceId: config.PADDLE_PRICE_PRO_YEARLY, amount: 79},
   },
   UNLIMITED: {
-    monthly: {priceId: config.PADDLE_PRICE_UNLIMITED_MONTHLY, amount: 9.99},
-    yearly: {priceId: config.PADDLE_PRICE_UNLIMITED_YEARLY, amount: 100},
+    monthly: {priceId: config.PADDLE_PRICE_UNLIMITED_MONTHLY, amount: 19},
+    yearly: {priceId: config.PADDLE_PRICE_UNLIMITED_YEARLY, amount: 159},
   },
 } as const;
 

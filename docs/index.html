@@ -421,7 +421,7 @@
       <div id="billing-toggle" class="toggle-switch" role="switch" aria-checked="false" tabindex="0" onclick="toggleBilling()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleBilling()" aria-label="Toggle yearly billing">
         <div class="knob"></div>
       </div>
-      <span id="label-yearly">Yearly <span class="save-badge">Save ~17%</span></span>
+      <span id="label-yearly">Yearly <span class="save-badge">Save up to 30%</span></span>
     </div>
 
     <div id="pricing-grid" class="pricing-grid">
@@ -461,8 +461,8 @@
       <div class="price-card popular">
         <div class="popular-badge">Most Popular</div>
         <div class="price-tier">Pro</div>
-        <div class="price-amount"><span id="pro-price">$4.99</span><span class="price-monthly-label"> / month</span><span id="pro-yearly-label" style="display:none"> / year</span></div>
-        <p class="price-yearly" id="pro-yearly-note">~$4.17/mo billed annually</p>
+        <div class="price-amount"><span id="pro-price">$9</span><span class="price-monthly-label"> / month</span><span id="pro-yearly-label" style="display:none"> / year</span></div>
+        <p class="price-yearly" id="pro-yearly-note">~$6.58/mo billed annually</p>
         <p class="price-desc">For growing product teams that need higher throughput and priority support.</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>60 resolutions / minute</li>
@@ -478,8 +478,8 @@
       <!-- Unlimited -->
       <div class="price-card">
         <div class="price-tier">Unlimited</div>
-        <div class="price-amount"><span id="unl-price">$9.99</span><span class="price-monthly-label"> / month</span><span id="unl-yearly-label" style="display:none"> / year</span></div>
-        <p class="price-yearly" id="unl-yearly-note">~$8.33/mo billed annually</p>
+        <div class="price-amount"><span id="unl-price">$19</span><span class="price-monthly-label"> / month</span><span id="unl-yearly-label" style="display:none"> / year</span></div>
+        <p class="price-yearly" id="unl-yearly-note">~$13.25/mo billed annually</p>
         <p class="price-desc">For high-traffic apps and enterprise teams that need unlimited scale.</p>
         <ul class="price-list">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>600 resolutions / minute</li>
@@ -512,12 +512,12 @@ function toggleBilling() {
   document.getElementById('label-yearly').classList.toggle('active', isYearly);
   grid.classList.toggle('yearly-mode', isYearly);
   // Pro
-  document.getElementById('pro-price').textContent = isYearly ? '$50' : '$4.99';
+  document.getElementById('pro-price').textContent = isYearly ? '$79' : '$9';
   document.getElementById('pro-yearly-label').style.display = isYearly ? '' : 'none';
   document.getElementById('pro-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
   document.querySelectorAll('.price-monthly-label') && document.querySelectorAll('.price-monthly-label').forEach(function(el){ el.style.display = isYearly ? 'none' : ''; });
   // Unlimited
-  document.getElementById('unl-price').textContent = isYearly ? '$100' : '$9.99';
+  document.getElementById('unl-price').textContent = isYearly ? '$159' : '$19';
   document.getElementById('unl-yearly-label').style.display = isYearly ? '' : 'none';
   document.getElementById('unl-yearly-note').style.visibility = isYearly ? 'visible' : 'hidden';
 }
