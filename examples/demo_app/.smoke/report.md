@@ -242,9 +242,56 @@ App 起不来（改由 adb `am start` 冷启并轮询前台）；`am start -d` �
 2. **`AppDelegate.swift` 的 import 名错**：podspec 声明 `s.module_name = 'InviteSDK'`
    （与 SPM target 对齐），代码却写 `import ShareInstalls`。**修法**：改为 `import InviteSDK`。
 
+## 第二台真机验证（2026-08-24，OPPO CPH2641 / Android 14 / 手势导航）
+
+换一台**不同厂商、不同 Android 版本、不同导航模式**的设备复验，两种网络场景各跑多轮：
+
+| 模式 | 设备侧地址 | web osVersion | 通道 | 轮次 |
+|---|---|---|---|---|
+| 局域网直连 | `http://192.168.0.145:6066` | 无（非安全上下文） | `fuzzy` 1.0 | 3/3 通过 |
+| USB 隧道 | `http://localhost:6066` | `14.0`（UA-CH 生效） | **`exact` 1.0** | 4/4 通过 |
+
+localhost 那组正是 **D1 的触发条件**（web `14.0` vs 原生 `RELEASE="14"`），在这台设备上
+独立复现并通过，确认修复不是只对红米那台生效。信号逐项一致：
+
+```
+web:    screen 360x802  dpr 2  osVersion 14.0  tz Asia/Phnom_Penh
+native: screen 360x802  dpr 2  osVersion 14    tz Asia/Phnom_Penh
+```
+
+局域网那组还额外覆盖了**真实 IP 段匹配**（手机 `192.168.0.141` 与本机 `.145` 同 /23），
+此前几轮都是 USB 隧道下的 `127.0.0.1`，IP 信号形同虚设。
+
+**D3 在手势导航下同样正确**：原生上报 360×802 与浏览器一致。这台是手势导航，红米是三键，
+两种模式各有一台真机覆盖。
+
+### D5（严重，未修）clipboard 通道会重复归因已消费的 click
+
+exact 通道命中后删 Redis key、fuzzy 通道过滤 `resolved: false`，而 **clipboard 通道没有
+任何"已消费"保护** —— `findFirst({where:{inviteCode}})` 不看 `resolved` 字段。
+
+实测（API 层，确定性复现）：拿一条已 `resolved=true`、已有归因记录的 click，用一台
+**完全不同的设备**（不同 androidId / 屏幕 1440×2960 / 时区 Europe/Moscow / 语言 ru-RU /
+Android 9）发起解析，指纹毫无相似度，仅剪贴板带 `SHAREINSTALLS:<code>`：
+
+```
+matched:true, channel:"clipboard", confidence:1.0
+归因记录数 1 → 2
+```
+
+**影响**：同一次点击可被重复计入 → 奖励重复发放、配额重复扣减；且**指纹校验被完全绕过**，
+剪贴板内容成了唯一凭证。`recordConversion` 的注释写明了意图（"Mark the click consumed so
+the same click cannot be attributed to a second install (double-crediting rewards /
+double-counting quota)"），但 clipboard 路径没有执行它。
+
+**建议修法**：clipboard 查询加上 `resolved: false`，与 fuzzy 通道对齐 —— 属行为变更
+（重装是否应重新归因需产品决策），故未擅自修改。
+`backend/src/services/fingerprintService.ts` 的 `resolveInvite` clipboard 分支。
+
 ## 覆盖缺口
 
-- **iOS 真机未跑**（模拟器已通过）：真机能额外覆盖真实 IP 段与蜂窝网络路径。
+- **iOS 真机未跑**（模拟器已通过）：Android 侧已由 OPPO 那轮覆盖真实 IP 段，iOS 仍缺。
+- **D5 待决策**：clipboard 通道的重复归因保护。
 - **真机未跑**：`adb devices` 与 `xcrun devicectl list devices` 均无实体设备。
   接上设备后执行：`bash .smoke/run_core_smoke.sh --case all --host <本机LAN IP>`。
 - **clipboard 通道**（Android 第三通道）未纳入，需落地页配合写剪贴板。
