@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ShareInstalls'
-  s.version          = '0.0.3'
+  s.version          = '0.1.0'
   s.summary          = 'iOS SDK for share-installs – deferred deep link invite attribution.'
 
   s.description      = <<~DESC

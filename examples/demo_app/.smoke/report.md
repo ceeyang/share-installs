@@ -265,7 +265,7 @@ native: screen 360x802  dpr 2  osVersion 14    tz Asia/Phnom_Penh
 **D3 在手势导航下同样正确**：原生上报 360×802 与浏览器一致。这台是手势导航，红米是三键，
 两种模式各有一台真机覆盖。
 
-### D5（严重，未修）clipboard 通道会重复归因已消费的 click
+### D5（已定性为设计取舍，不修）clipboard 通道不做去重
 
 exact 通道命中后删 Redis key、fuzzy 通道过滤 `resolved: false`，而 **clipboard 通道没有
 任何"已消费"保护** —— `findFirst({where:{inviteCode}})` 不看 `resolved` 字段。
@@ -284,9 +284,12 @@ matched:true, channel:"clipboard", confidence:1.0
 the same click cannot be attributed to a second install (double-crediting rewards /
 double-counting quota)"），但 clipboard 路径没有执行它。
 
-**建议修法**：clipboard 查询加上 `resolved: false`，与 fuzzy 通道对齐 —— 属行为变更
-（重装是否应重新归因需产品决策），故未擅自修改。
-`backend/src/services/fingerprintService.ts` 的 `resolveInvite` clipboard 分支。
+**决定（2026-08-25）：保持现状，不加去重。** SDK 只负责「把邀请码归因出来」这一件事，
+同一个码是否允许被重复消费，由接入方在自己的业务层判断（发奖前查自己的发放记录）。
+
+**因此接入方必须知道**：`channel: "clipboard"` 的结果**不保证唯一**，同一 `inviteCode`
+可能被返回多次，且该通道不校验设备指纹。要做一次性奖励的，请以自己侧的幂等键为准，
+不要拿 SDK 的返回值当去重依据。exact / fuzzy 两条通道则自带一次性语义。
 
 ## 覆盖缺口
 

@@ -48,7 +48,7 @@ dependencies {
     // doubles as the integration snippet users copy. Built from source locally
     // via the substitution rule in the root build.gradle.kts; pass
     // -PusePublishedSdk (and -PsdkVersion=x.y.z) to resolve the artifact instead.
-    implementation("io.github.share-installs:sdk-android:${rootProject.findProperty("sdkVersion") ?: "0.0.4"}")
+    implementation("io.github.share-installs:sdk-android:${rootProject.findProperty("sdkVersion") ?: "0.1.0"}")
     // Kotlin serialization (required for parsing JsonElement from customData)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 }
