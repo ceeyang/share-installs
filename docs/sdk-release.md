@@ -88,6 +88,28 @@ bash .smoke/run_core_smoke.sh --case all --platform ios --device <UDID>  # iOS
 bash .smoke/run_device_adb.sh <serial>                                   # Android 真机
 ```
 
+## npm 走 Trusted Publishing（无凭据）
+
+`sdk-js.yml` 不再读任何 token：工作流出示短期 OIDC 身份令牌，npm 拿它与包上登记的
+publisher 比对。**没有密钥可泄露、不会过期、且只有这一个工作流能用。**
+
+npmjs.com 上的一次性配置（包页面 → Settings → Trusted Publisher）：
+
+| 字段 | 值 |
+|---|---|
+| Publisher | GitHub Actions |
+| Organization or user | `ceeyang` |
+| Repository | `share-installs` |
+| Workflow filename | `sdk-js.yml`（只填文件名，无路径前缀） |
+| Environment | 留空 |
+
+**坑**：Node 20 自带的 npm 版本太老，不支持 trusted publishing（需 ≥ 11.5.1），
+所以工作流里显式 `npm install -g npm@11`。钉大版本而非 `@latest`，
+免得将来 npm 改了发布行为却无人察觉。
+
+改工作流文件名或仓库归属后，**必须同步改 npm 后台那条登记**，否则发布会直接失败
+（不会退回 token，是硬失败 —— 这正是想要的行为）。
+
 ## CI 里已知的脆弱点
 
 - `sdk-ios.yml` 固定 `xcode-select -s /Applications/Xcode_15.4.app`，且模拟器机型写死
