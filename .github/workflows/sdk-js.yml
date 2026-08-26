@@ -54,7 +54,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/sdk-js-v')
     permissions:
       contents: write
-      id-token: write  # for npm provenance
+      id-token: write  # OIDC identity for npm trusted publishing + provenance
 
     defaults:
       run:
@@ -70,6 +70,13 @@ jobs:
           cache: 'npm'
           cache-dependency-path: sdk/js/package-lock.json
 
+      # Trusted publishing needs a much newer npm than Node 20 ships with.
+      # Pinned rather than @latest so a future npm release cannot silently
+      # change how publishing behaves.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@11
+        working-directory: .
+
       - name: Install dependencies
         run: npm ci
 
@@ -84,10 +91,13 @@ jobs:
         run: npm run build:all
 
       # Publish to npm — jsDelivr and unpkg serve from npm automatically
+      # Trusted publishing: npm verifies this workflow's short-lived OIDC token
+      # against the publisher registered on the package, so there is no token to
+      # store, leak or renew. Requires "Trusted Publisher" to be configured on
+      # npmjs.com for this repository and workflow file. Provenance is produced
+      # from the same OIDC identity.
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # Attach UMD bundle to GitHub Release for direct download / self-hosting
       - name: Create GitHub Release
